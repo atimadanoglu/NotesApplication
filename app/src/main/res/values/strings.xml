@@ -7,4 +7,7 @@
     <string name="search_notes">Search notes</string>
     <string name="vertical_line">" | "</string>
     <string name="total_notes_count">%d notes</string>
+    <string name="title">Title</string>
+    <string name="back_button">Back button</string>
+    <string name="done_button">Done button</string>
 </resources>

@@ -7,18 +7,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.atakanmadanoglu.notesapplication.ui.theme.NotesApplicationTheme
-import com.atakanmadanoglu.notesapplication.view.MainScreen
+import com.atakanmadanoglu.notesapplication.view.AddNoteScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             NotesApplicationTheme(
-                darkTheme = false,
+                darkTheme = true,
                 dynamicColor = false
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    MainScreen()
+                    AddNoteScreen()
                 }
             }
         }
