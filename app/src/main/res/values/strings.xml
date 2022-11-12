@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">NotesApplication</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="add_note">Add note button</string>
+    <string name="search_icon">Searching notes icon</string>
+    <string name="all_notes">All notes</string>
+    <string name="search_notes">Search notes</string>
+    <string name="vertical_line">" | "</string>
+    <string name="total_notes_count">%d notes</string>
 </resources>
