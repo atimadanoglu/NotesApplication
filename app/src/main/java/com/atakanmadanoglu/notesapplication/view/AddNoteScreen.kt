@@ -9,9 +9,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.atakanmadanoglu.notesapplication.R
 import com.atakanmadanoglu.notesapplication.ui.theme.spacing
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,11 +30,12 @@ fun AddNoteScreen(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .padding(it)
         ) {
             TitleInput()
-            Divider()
+            ShowDate()
+            NoteContentView()
         }
     }
 }
@@ -81,9 +86,42 @@ fun TitleInput(
             )
         },
         textStyle = TextStyle(
-            fontSize = MaterialTheme.typography.headlineMedium.fontSize
+            fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+            fontWeight = FontWeight.SemiBold
         ),
         singleLine = true,
+        colors = TextFieldDefaults.textFieldColors(
+            focusedIndicatorColor = Color.Transparent,
+            containerColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
+        ),
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NoteContentView(
+    modifier: Modifier = Modifier
+) {
+    var titleValue by remember {
+        mutableStateOf("")
+    }
+    OutlinedTextField(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.Transparent),
+        value = titleValue,
+        onValueChange = { titleValue = it },
+        placeholder = {
+            Text(
+                text = stringResource(id = R.string.content),
+                fontSize = MaterialTheme.typography.bodyMedium.fontSize
+            )
+        },
+        textStyle = TextStyle(
+            fontSize = MaterialTheme.typography.bodyLarge.fontSize
+        ),
+        singleLine = false,
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Transparent,
             containerColor = Color.Transparent,
@@ -93,12 +131,18 @@ fun TitleInput(
 }
 
 @Composable
-fun Divider(
+fun ShowDate(
     modifier: Modifier = Modifier
 ) {
-    Divider(
+    val calendar = Calendar.getInstance().time
+    val formatter = SimpleDateFormat("MMM d, HH:mm", Locale.ENGLISH)
+    val current = formatter.format(calendar)
+    Text(
         modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.secondary
+        text = current,
+        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+        color = Color.Gray,
+        textAlign = TextAlign.End
     )
 }
 
