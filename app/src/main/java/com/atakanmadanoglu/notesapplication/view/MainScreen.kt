@@ -21,9 +21,7 @@ import com.atakanmadanoglu.notesapplication.ui.theme.spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(
-    modifier: Modifier = Modifier
-) {
+fun MainScreen() {
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -34,22 +32,14 @@ fun MainScreen(
             .fillMaxSize()
             .padding(it)
         ) {
-            AllNotesText(modifier)
+            AllNotesText()
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
             TotalNotesCount()
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
             SearchBar()
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
             val list = listOf(
-                Note("abc","Hello", "there" ,"April 12, 12.58"),
-                Note("abc","Hello", "there" ,"April 12, 12.58"),
-                Note("abc","Hello", "there" ,"April 12, 12.58"),
-                Note("abc","Hello", "there" ,"April 12, 12.58"),
-                Note("abc","Hello", "there" ,"April 12, 12.58"),
-                Note("abc","Hello", "there" ,"April 12, 12.58"),
-                Note("abc","Hello", "there" ,"April 12, 12.58"),
-                Note("abc","Hello", "there" ,"April 12, 12.58"),
-                Note("abc","Hello", "there" ,"April 12, 12.58"),
+                Note("abc","Hello", "there" , 1L)
             )
             NotesListView(notes = list)
         }
@@ -57,7 +47,7 @@ fun MainScreen(
 }
 
 @Composable
-fun AllNotesText(
+private fun AllNotesText(
     modifier: Modifier = Modifier
 ) {
     Text(
@@ -69,7 +59,7 @@ fun AllNotesText(
 }
 
 @Composable
-fun TotalNotesCount(
+private fun TotalNotesCount(
     notesCount: Int = 0
 ) {
     val totalNotesCount by remember {
@@ -118,7 +108,7 @@ fun SearchBar(
 @Preview
 @Composable
 fun PreviewSearchBar() {
-    SearchBar(modifier = Modifier)
+    SearchBar()
 }
 
 @Composable
@@ -133,7 +123,7 @@ fun NotesListView(notes: List<Note>) {
 }
 
 @Composable
-fun NoteRow(
+private fun NoteRow(
     note: Note,
     modifier: Modifier = Modifier
 ) {
@@ -158,7 +148,7 @@ fun NoteRow(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = note.createdAt,
+                    text = "Todo", /*TODO("Implement a function that converts the long value to a date string format")*/
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                     fontStyle = FontStyle.Italic,
                     maxLines = 1
@@ -178,9 +168,9 @@ fun NoteRow(
 }
 
 @Composable
-fun Fab() {
+fun Fab(onClick: () -> Unit = {}) {
     FloatingActionButton(
-        onClick = {},
+        onClick = onClick,
         shape = CircleShape
     ) {
         Icon(
@@ -195,5 +185,5 @@ fun Fab() {
 @Preview
 @Composable
 fun Preview() {
-    NoteRow(note = Note("abc","Hello", "There", "April 12, 12.34"))
+    NoteRow(note = Note("abc","Hello", "There", 1))
 }
