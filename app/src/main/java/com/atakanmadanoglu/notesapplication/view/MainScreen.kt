@@ -164,7 +164,7 @@ private fun NoteRow(
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize
                 )
                 Text(
-                    text = note.content,
+                    text = note.description,
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                     maxLines = 1
                 )

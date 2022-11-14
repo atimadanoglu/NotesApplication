@@ -42,7 +42,7 @@ fun AddNoteScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NavigationTopAppBar() {
+private fun NavigationTopAppBar() {
     TopAppBar(
         title = { Text(text = "") },
         navigationIcon = {
@@ -100,14 +100,12 @@ fun TitleInput(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NoteContentView(
-    modifier: Modifier = Modifier
-) {
+fun NoteContentView() {
     var titleValue by remember {
         mutableStateOf("")
     }
     OutlinedTextField(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .background(Color.Transparent),
         value = titleValue,
@@ -131,14 +129,12 @@ fun NoteContentView(
 }
 
 @Composable
-fun ShowDate(
-    modifier: Modifier = Modifier
-) {
+fun ShowDate() {
     val calendar = Calendar.getInstance().time
     val formatter = SimpleDateFormat("MMM d, HH:mm", Locale.ENGLISH)
     val current = formatter.format(calendar)
     Text(
-        modifier = modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         text = current,
         fontSize = MaterialTheme.typography.bodyMedium.fontSize,
         color = Color.Gray,

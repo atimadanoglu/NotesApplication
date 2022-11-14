@@ -1,4 +1,4 @@
-package com.atakanmadanoglu.notesapplication
+package com.atakanmadanoglu.notesapplication.view
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
