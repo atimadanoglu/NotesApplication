@@ -1,11 +1,26 @@
 package com.atakanmadanoglu.notesapplication
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import com.atakanmadanoglu.notesapplication.ui.theme.NotesApplicationTheme
+import com.atakanmadanoglu.notesapplication.view.MainScreen
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContent {
+            NotesApplicationTheme(
+                darkTheme = false,
+                dynamicColor = false
+            ) {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    MainScreen()
+                }
+            }
+        }
     }
 }
