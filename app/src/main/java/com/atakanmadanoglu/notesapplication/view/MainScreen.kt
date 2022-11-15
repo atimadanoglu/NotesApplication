@@ -42,7 +42,7 @@ fun MainScreen() {
             SearchBar()
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
             val list = listOf(
-                Note("abc","Hello", "there" , 1L)
+                Note(1,"Hello", "there" , 1L)
             )
             NotesListView(notes = list)
         }
@@ -190,5 +190,5 @@ fun Fab(onClick: () -> Unit = {}) {
 @Preview
 @Composable
 fun Preview() {
-    NoteRow(note = Note("abc","Hello", "There", 1))
+    NoteRow(note = Note(1,"Hello", "There", 1))
 }
