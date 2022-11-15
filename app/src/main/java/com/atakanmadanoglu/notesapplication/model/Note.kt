@@ -1,7 +1,12 @@
 package com.atakanmadanoglu.notesapplication.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "notes")
 data class Note(
-    val id: String,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int,
     val title: String,
     val description: String,
     val createdAt: Long
