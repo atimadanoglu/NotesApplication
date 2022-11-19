@@ -4,10 +4,10 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.atakanmadanoglu.notesapplication.data.NotesDatabase.Companion.VERSION
 import com.atakanmadanoglu.notesapplication.data.local.NotesDao
-import com.atakanmadanoglu.notesapplication.model.Note
+import com.atakanmadanoglu.notesapplication.data.model.NoteEntity
 
 @Database(
-    entities = [Note::class],
+    entities = [NoteEntity::class],
     version = VERSION,
     exportSchema = false
 )
