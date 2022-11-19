@@ -2,7 +2,6 @@ package com.atakanmadanoglu.notesapplication.di
 
 import com.atakanmadanoglu.notesapplication.data.NotesDatabase
 import com.atakanmadanoglu.notesapplication.data.local.NotesDao
-import com.atakanmadanoglu.notesapplication.data.local.NotesLocalDataSource
 import com.atakanmadanoglu.notesapplication.data.repository.NotesRepository
 import com.atakanmadanoglu.notesapplication.data.repository.NotesRepositoryImp
 import dagger.Binds
@@ -19,11 +18,6 @@ abstract class NotesModule {
         fun provideNotesDao(
             database: NotesDatabase
         ): NotesDao = database.getNotesDao()
-
-        @Provides
-        fun provideNotesLocalDataSource(
-            dao: NotesDao
-        ) = NotesLocalDataSource(dao)
     }
 
     @Binds
