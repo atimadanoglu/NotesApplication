@@ -2,7 +2,6 @@ package com.atakanmadanoglu.notesapplication.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.atakanmadanoglu.notesapplication.model.Note
 
 @Entity(tableName = "notes")
 data class NoteEntity(
@@ -11,11 +10,4 @@ data class NoteEntity(
     val title: String,
     val description: String,
     val createdAt: Long
-)
-
-fun NoteEntity.asExternalModel() = Note(
-    id = id,
-    title = title,
-    description = description,
-    createdAt = createdAt
 )

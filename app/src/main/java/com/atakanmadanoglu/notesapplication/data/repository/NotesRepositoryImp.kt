@@ -1,22 +1,30 @@
 package com.atakanmadanoglu.notesapplication.data.repository
 
-import com.atakanmadanoglu.notesapplication.data.local.NotesLocalDataSource
+import com.atakanmadanoglu.notesapplication.data.local.NotesDao
+import com.atakanmadanoglu.notesapplication.data.mapper.NoteMapper
 import com.atakanmadanoglu.notesapplication.model.Note
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class NotesRepositoryImp @Inject constructor(
-    private val notesLocalDataSource: NotesLocalDataSource
+    private val notesDao: NotesDao,
+    private val noteMapper: NoteMapper
 ) : NotesRepository {
-    override fun getNotes(): Flow<List<Note>> {
-        return notesLocalDataSource.getNotes()
-    }
+    override fun getNotes(): Flow<List<Note>> =
+        notesDao.getNotes().map { notesList ->
+            notesList.map {
+                noteMapper.mapToNote(it)
+            }
+        }
 
-    override suspend fun getNoteById(id: Int): Note {
-        return notesLocalDataSource.getNoteById(id)
-    }
+    override fun getNoteById(id: Int): Flow<Note> =
+        notesDao.getNoteById(id).map {
+            noteMapper.mapToNote(it)
+        }
 
     override suspend fun addNote(note: Note) {
-        notesLocalDataSource.addNote(note)
+        val noteEntity = noteMapper.mapToEntity(note)
+        notesDao.addNote(noteEntity)
     }
 }
