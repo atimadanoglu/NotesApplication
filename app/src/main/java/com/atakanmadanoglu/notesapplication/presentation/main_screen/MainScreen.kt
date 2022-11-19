@@ -1,4 +1,4 @@
-package com.atakanmadanoglu.notesapplication.view
+package com.atakanmadanoglu.notesapplication.presentation.main_screen
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,7 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.atakanmadanoglu.notesapplication.R
-import com.atakanmadanoglu.notesapplication.model.Note
+import com.atakanmadanoglu.notesapplication.data.model.NoteEntity
 import com.atakanmadanoglu.notesapplication.ui.theme.spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,7 +42,7 @@ fun MainScreen() {
             SearchBar()
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
             val list = listOf(
-                Note(1,"Hello", "there" , 1L)
+                NoteEntity(1,"Hello", "there" , 1L)
             )
             NotesListView(notes = list)
         }
@@ -118,7 +118,7 @@ fun PreviewSearchBar() {
 }
 
 @Composable
-fun NotesListView(notes: List<Note>) {
+fun NotesListView(notes: List<NoteEntity>) {
     LazyColumn(
         contentPadding = PaddingValues(MaterialTheme.spacing.extraSmall)
     ) {
@@ -130,7 +130,7 @@ fun NotesListView(notes: List<Note>) {
 
 @Composable
 private fun NoteRow(
-    note: Note,
+    note: NoteEntity,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -190,5 +190,5 @@ fun Fab(onClick: () -> Unit = {}) {
 @Preview
 @Composable
 fun Preview() {
-    NoteRow(note = Note(1,"Hello", "There", 1))
+    NoteRow(note = NoteEntity(1,"Hello", "There", 1))
 }

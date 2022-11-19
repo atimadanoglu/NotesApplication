@@ -1,4 +1,4 @@
-package com.atakanmadanoglu.notesapplication.view
+package com.atakanmadanoglu.notesapplication.presentation.add_note
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
