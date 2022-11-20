@@ -1,4 +1,4 @@
-package com.atakanmadanoglu.notesapplication
+package com.atakanmadanoglu.notesapplication.view
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -18,6 +18,7 @@ class MainActivity : ComponentActivity() {
                 dynamicColor = false
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
+                    //AddNoteScreen()
                     MainScreen()
                 }
             }

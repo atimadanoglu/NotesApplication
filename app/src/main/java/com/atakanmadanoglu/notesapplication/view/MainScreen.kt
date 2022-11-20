@@ -4,17 +4,20 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.atakanmadanoglu.notesapplication.R
 import com.atakanmadanoglu.notesapplication.model.Note
 import com.atakanmadanoglu.notesapplication.ui.theme.spacing
@@ -78,31 +81,34 @@ fun SearchBar(
     modifier: Modifier = Modifier,
     searchValue: String = ""
 ) {
-    Box(
+    var searchBarText by remember { mutableStateOf(searchValue) }
+    OutlinedTextField(
         modifier = modifier
             .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(vertical = MaterialTheme.spacing.small)
-    ) {
-        var searchBarText by remember { mutableStateOf(searchValue) }
-        TextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .shadow(5.dp, CircleShape),
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_baseline_search_24),
-                    contentDescription = stringResource(id = R.string.search_icon)
-                ) },
-            value = searchBarText,
-            onValueChange = { changedValue ->
-                searchBarText = changedValue
-            },
-            singleLine = true,
-            placeholder = { Text(text = stringResource(id = R.string.search_notes)) }
+            .height(50.dp)
+            .clip(RoundedCornerShape(48.dp)),
+        leadingIcon = {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_baseline_search_24),
+                contentDescription = stringResource(id = R.string.search_icon)
+            ) },
+        value = searchBarText,
+        onValueChange = { changedValue ->
+            searchBarText = changedValue
+        },
+        textStyle = TextStyle(
+            fontSize = 16.sp
+        ),
+        singleLine = true,
+        placeholder = { Text(
+            text = stringResource(id = R.string.search_notes),
+            fontSize = 16.sp
+        ) },
+        colors = TextFieldDefaults.textFieldColors(
+            unfocusedIndicatorColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent
         )
-    }
+    )
 }
 
 @Preview
@@ -158,7 +164,7 @@ private fun NoteRow(
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize
                 )
                 Text(
-                    text = note.content,
+                    text = note.description,
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                     maxLines = 1
                 )
@@ -180,7 +186,6 @@ fun Fab(onClick: () -> Unit = {}) {
         )
     }
 }
-
 
 @Preview
 @Composable
