@@ -9,7 +9,7 @@ import com.atakanmadanoglu.notesapplication.data.model.NoteEntity
 @Database(
     entities = [NoteEntity::class],
     version = VERSION,
-    exportSchema = false
+    exportSchema = true
 )
 abstract class NotesDatabase: RoomDatabase() {
 
@@ -17,6 +17,6 @@ abstract class NotesDatabase: RoomDatabase() {
 
     companion object {
         const val VERSION = 1
-        const val DB_NAME = "NotesDatabase.db"
+        const val DB_NAME = "notes-database"
     }
 }

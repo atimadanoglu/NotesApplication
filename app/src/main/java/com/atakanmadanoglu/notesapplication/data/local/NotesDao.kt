@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface NotesDao {
 
-    @Query("SELECT * FROM notes")
+    @Query("SELECT * FROM note")
     fun getNotes(): Flow<List<NoteEntity>>
 
-    @Query("SELECT * FROM notes WHERE id = :id")
+    @Query("SELECT * FROM note WHERE id = :id")
     fun getNoteById(id: Int): Flow<NoteEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
