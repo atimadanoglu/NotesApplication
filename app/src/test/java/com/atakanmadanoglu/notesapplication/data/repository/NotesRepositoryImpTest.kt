@@ -3,13 +3,14 @@ package com.atakanmadanoglu.notesapplication.data.repository
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.atakanmadanoglu.notesapplication.data.local.NotesDao
 import com.atakanmadanoglu.notesapplication.data.mapper.NoteMapper
+import com.atakanmadanoglu.notesapplication.data.model.NoteEntity
 import com.atakanmadanoglu.notesapplication.data.model.NoteFactory
+import com.atakanmadanoglu.notesapplication.model.Note
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -22,8 +23,10 @@ class NotesRepositoryImpTest {
     var instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private lateinit var repository: NotesRepository
-    private val notesDao = mockk<NotesDao>()
     private lateinit var mapper: NoteMapper
+    private lateinit var note: Note
+    private lateinit var noteEntity: NoteEntity
+    private val notesDao = mockk<NotesDao>()
 
     @Before
     fun setup() {
@@ -31,23 +34,20 @@ class NotesRepositoryImpTest {
         repository = NotesRepositoryImp(
             notesDao, mapper
         )
+        note = NoteFactory.getMockNote()
+        noteEntity = NoteFactory.getMockNoteEntity()
     }
 
     @Test
     fun `call getNotes() and get a list of notes`() = runTest {
         // Given
-        val noteEntity = NoteFactory.getMockNoteEntity()
+        val noteList = listOf(note)
         val flowOfNoteEntitiesList = flowOf(listOf(noteEntity))
-
         every { notesDao.getNotes() } returns flowOfNoteEntitiesList
-        val noteList = flowOfNoteEntitiesList.map {
-            it.map { entity ->
-                mapper.mapToNote(entity)
-            }
-        }.first()
 
         // When
         val result = repository.getNotes().first()
+
         // Then
         assertThat(result).isEqualTo(noteList)
         verify(exactly = 1) { notesDao.getNotes() }
@@ -57,16 +57,12 @@ class NotesRepositoryImpTest {
     fun `call getNoteById() and get a note by id`() = runTest {
         // Given
         val id = 1
-        val noteEntity = NoteFactory.getMockNoteEntity()
         val flowOfNoteEntity = flowOf(noteEntity)
-
         every { notesDao.getNoteById(id) } returns flowOfNoteEntity
-        val note = flowOfNoteEntity.map {
-            mapper.mapToNote(it)
-        }.first()
 
         // When
         val result = repository.getNoteById(id).first()
+
         // Then
         assertThat(result).isEqualTo(note)
         verify(exactly = 1) { notesDao.getNoteById(id) }
@@ -75,12 +71,13 @@ class NotesRepositoryImpTest {
     @Test
     fun `call addNote() and check the addNote function of notesDao called`() = runTest {
         // Given
-        val note = NoteFactory.getMockNote()
-        val noteEntity = mapper.mapToEntity(note)
         coJustRun { notesDao.addNote(noteEntity) }
+
         // When
-        repository.addNote(mapper.mapToNote(noteEntity))
+        repository.addNote(note)
+
         // Then
+        assertThat(note).isEqualTo(mapper.mapToNote(noteEntity))
         coVerify(exactly = 1) { notesDao.addNote(noteEntity) }
     }
 }
