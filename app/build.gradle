@@ -19,6 +19,12 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+
+        kapt {
+            arguments {
+                arg("room.schemaLocation", "$projectDir/schemas")
+            }
+        }
     }
 
     buildTypes {
@@ -59,8 +65,8 @@ dependencies {
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
     implementation 'androidx.compose.material3:material3:1.1.0-alpha02'
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
+    androidTestImplementation "androidx.test.ext:junit:$ext_junit_version"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_core_version"
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
@@ -79,10 +85,25 @@ dependencies {
 
     // For Unit Tests
     testImplementation "com.google.truth:truth:1.1.3"
-    testImplementation "io.mockk:mockk:1.13.2"
-
+    testImplementation "io.mockk:mockk:$mockk_version"
     // Room
+    implementation "androidx.room:room-ktx:$room_version"
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
+
+    // Kotlin extensions for androidx.test.core
+    androidTestImplementation "androidx.test:core-ktx:$test_core_ktx_version"
+
+    // Kotlin extensions for androidx.test.ext.junit
+    androidTestImplementation "androidx.test.ext:junit-ktx:$ext_junit_version"
+
+    // To use the androidx.test.runner APIs
+    androidTestImplementation "androidx.test:runner:$test_runner_version"
+
+    testImplementation "androidx.arch.core:core-testing:$arc_core_testing_version"
+    androidTestImplementation "androidx.arch.core:core-testing:$arc_core_testing_version"
+
+    // Coroutine Test
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
 }

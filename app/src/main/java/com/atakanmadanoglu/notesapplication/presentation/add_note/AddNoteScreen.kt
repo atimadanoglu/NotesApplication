@@ -1,4 +1,4 @@
-package com.atakanmadanoglu.notesapplication.view
+package com.atakanmadanoglu.notesapplication.presentation.add_note
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -66,7 +66,7 @@ private fun NavigationTopAppBar() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TitleInput(
+private fun TitleInput(
     modifier: Modifier = Modifier
 ) {
     var titleValue by remember {
@@ -100,7 +100,7 @@ fun TitleInput(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NoteContentView() {
+private fun NoteContentView() {
     var titleValue by remember {
         mutableStateOf("")
     }
@@ -129,7 +129,7 @@ fun NoteContentView() {
 }
 
 @Composable
-fun ShowDate() {
+private fun ShowDate() {
     val calendar = Calendar.getInstance().time
     val formatter = SimpleDateFormat("MMM d, HH:mm", Locale.ENGLISH)
     val current = formatter.format(calendar)
@@ -144,6 +144,6 @@ fun ShowDate() {
 
 @Preview
 @Composable
-fun PreviewAddNoteScreenComponents() {
+private fun PreviewAddNoteScreenComponents() {
     NavigationTopAppBar()
 }
