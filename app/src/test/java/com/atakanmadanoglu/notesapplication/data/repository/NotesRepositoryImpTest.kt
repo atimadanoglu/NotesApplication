@@ -2,7 +2,7 @@ package com.atakanmadanoglu.notesapplication.data.repository
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.atakanmadanoglu.notesapplication.data.local.NotesDao
-import com.atakanmadanoglu.notesapplication.data.mapper.NoteMapper
+import com.atakanmadanoglu.notesapplication.data.mapper.NoteEntityMapper
 import com.atakanmadanoglu.notesapplication.data.model.NoteEntity
 import com.atakanmadanoglu.notesapplication.data.model.NoteFactory
 import com.atakanmadanoglu.notesapplication.model.Note
@@ -23,14 +23,14 @@ class NotesRepositoryImpTest {
     var instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private lateinit var repository: NotesRepository
-    private lateinit var mapper: NoteMapper
+    private lateinit var mapper: NoteEntityMapper
     private lateinit var note: Note
     private lateinit var noteEntity: NoteEntity
     private val notesDao = mockk<NotesDao>()
 
     @Before
     fun setup() {
-        mapper = NoteMapper()
+        mapper = NoteEntityMapper()
         repository = NotesRepositoryImp(
             notesDao, mapper
         )

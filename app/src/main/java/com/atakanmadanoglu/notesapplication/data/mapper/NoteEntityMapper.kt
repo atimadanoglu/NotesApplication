@@ -4,7 +4,7 @@ import com.atakanmadanoglu.notesapplication.data.model.NoteEntity
 import com.atakanmadanoglu.notesapplication.model.Note
 import javax.inject.Inject
 
-class NoteMapper @Inject constructor() {
+class NoteEntityMapper @Inject constructor() {
 
     fun mapToEntity(
         note: Note
