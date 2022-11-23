@@ -1,4 +1,4 @@
-package com.atakanmadanoglu.notesapplication.model
+package com.atakanmadanoglu.notesapplication.data.model
 
 data class Note(
     val id: Int,

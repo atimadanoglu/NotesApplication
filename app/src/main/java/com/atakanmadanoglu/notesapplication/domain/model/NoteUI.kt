@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 data class NoteUI(
-    val id: Int,
+    val id: Int? = null,
     val title: String,
     val description: String,
     val createdAt: Long

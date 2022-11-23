@@ -19,7 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.atakanmadanoglu.notesapplication.R
-import com.atakanmadanoglu.notesapplication.model.Note
+import com.atakanmadanoglu.notesapplication.data.model.Note
 import com.atakanmadanoglu.notesapplication.ui.theme.spacing
 
 @OptIn(ExperimentalMaterial3Api::class)

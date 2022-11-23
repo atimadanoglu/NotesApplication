@@ -3,9 +3,10 @@ package com.atakanmadanoglu.notesapplication.data.repository
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.atakanmadanoglu.notesapplication.data.local.NotesDao
 import com.atakanmadanoglu.notesapplication.data.mapper.NoteEntityMapper
+import com.atakanmadanoglu.notesapplication.data.model.Note
 import com.atakanmadanoglu.notesapplication.data.model.NoteEntity
 import com.atakanmadanoglu.notesapplication.data.model.NoteFactory
-import com.atakanmadanoglu.notesapplication.model.Note
+import com.atakanmadanoglu.notesapplication.presentation.model.AddNoteRequest
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,6 +27,7 @@ class NotesRepositoryImpTest {
     private lateinit var mapper: NoteEntityMapper
     private lateinit var note: Note
     private lateinit var noteEntity: NoteEntity
+    private lateinit var addNoteRequest: AddNoteRequest
     private val notesDao = mockk<NotesDao>()
 
     @Before
@@ -34,6 +36,7 @@ class NotesRepositoryImpTest {
         repository = NotesRepositoryImp(
             notesDao, mapper
         )
+        addNoteRequest = NoteFactory.getMockAddNoteRequest()
         note = NoteFactory.getMockNote()
         noteEntity = NoteFactory.getMockNoteEntity()
     }
@@ -74,7 +77,7 @@ class NotesRepositoryImpTest {
         coJustRun { notesDao.addNote(noteEntity) }
 
         // When
-        repository.addNote(note)
+        repository.addNote(addNoteRequest)
 
         // Then
         assertThat(note).isEqualTo(mapper.mapToNote(noteEntity))
