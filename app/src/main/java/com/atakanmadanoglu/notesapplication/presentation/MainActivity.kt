@@ -8,7 +8,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.atakanmadanoglu.notesapplication.presentation.main_screen.MainScreen
 import com.atakanmadanoglu.notesapplication.ui.theme.NotesApplicationTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

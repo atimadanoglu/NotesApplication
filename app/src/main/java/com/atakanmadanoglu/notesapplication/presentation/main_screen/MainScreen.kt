@@ -18,13 +18,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.atakanmadanoglu.notesapplication.R
-import com.atakanmadanoglu.notesapplication.data.model.Note
+import com.atakanmadanoglu.notesapplication.domain.model.NoteUI
 import com.atakanmadanoglu.notesapplication.ui.theme.spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    viewModel: MainScreenViewModel = hiltViewModel()
+) {
+    val notesState = viewModel.notesState.collectAsState()
+    val notes = notesState.value
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -41,10 +46,7 @@ fun MainScreen() {
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
             SearchBar()
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
-            val list = listOf(
-                Note(1,"Hello", "there" , 1L)
-            )
-            NotesListView(notes = list)
+            NotesListView(notes = notes)
         }
     }
 }
@@ -118,7 +120,7 @@ fun PreviewSearchBar() {
 }
 
 @Composable
-fun NotesListView(notes: List<Note>) {
+fun NotesListView(notes: List<NoteUI>) {
     LazyColumn(
         contentPadding = PaddingValues(MaterialTheme.spacing.extraSmall)
     ) {
@@ -130,7 +132,7 @@ fun NotesListView(notes: List<Note>) {
 
 @Composable
 private fun NoteRow(
-    note: Note,
+    note: NoteUI,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -190,5 +192,5 @@ fun Fab(onClick: () -> Unit = {}) {
 @Preview
 @Composable
 fun Preview() {
-    NoteRow(note = Note(1,"Hello", "There", 1))
+    NoteRow(note = NoteUI(1,"Hello", "There", 1))
 }
