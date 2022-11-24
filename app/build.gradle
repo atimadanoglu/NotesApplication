@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
+    id 'com.google.dagger.hilt.android'
 }
 
 android {
@@ -24,6 +25,7 @@ android {
             arguments {
                 arg("room.schemaLocation", "$projectDir/schemas")
             }
+            correctErrorTypes true
         }
     }
 
@@ -73,15 +75,16 @@ dependencies {
 
     // Hilt
     implementation "com.google.dagger:hilt-android:$hilt_version"
-    annotationProcessor "com.google.dagger:hilt-compiler:$hilt_version"
+    kapt "com.google.dagger:hilt-compiler:$hilt_version"
+    implementation 'androidx.hilt:hilt-navigation-compose:1.0.0'
 
     // For instrumentation tests
     androidTestImplementation "com.google.dagger:hilt-android-testing:$hilt_version"
-    androidTestAnnotationProcessor "com.google.dagger:hilt-compiler:$hilt_version"
+    kaptAndroidTest "com.google.dagger:hilt-compiler:$hilt_version"
 
     // For local unit tests
     testImplementation "com.google.dagger:hilt-android-testing:$hilt_version"
-    testAnnotationProcessor "com.google.dagger:hilt-compiler:$hilt_version"
+    kaptTest "com.google.dagger:hilt-compiler:$hilt_version"
 
     // For Unit Tests
     testImplementation "com.google.truth:truth:1.1.3"
