@@ -20,13 +20,14 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddNoteScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    doneIconOnClick: () -> Unit
 ) {
     Scaffold(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = MaterialTheme.spacing.small),
-        topBar = { NavigationTopAppBar() }
+        topBar = { NavigationTopAppBar(doneIconOnClick) }
     ) {
         Column(
             modifier = Modifier
@@ -43,7 +44,7 @@ fun AddNoteScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NavigationTopAppBar(
-    doneIconOnClick: () -> Unit = {}
+    doneIconOnClick: () -> Unit
 ) {
     TopAppBar(
         title = { Text(text = "") },
@@ -147,5 +148,5 @@ private fun ShowDate() {
 @Preview
 @Composable
 private fun PreviewAddNoteScreenComponents() {
-    NavigationTopAppBar()
+    NavigationTopAppBar(doneIconOnClick = {})
 }

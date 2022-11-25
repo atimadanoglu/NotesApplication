@@ -10,6 +10,7 @@ buildscript {
         mockk_version = '1.13.2'
         arc_core_testing_version = '2.1.0'
         coroutines_version = '1.6.4'
+        nav_compose_version = '2.5.3'
     }
 
     repositories {
