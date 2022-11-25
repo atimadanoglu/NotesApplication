@@ -11,7 +11,7 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -24,15 +24,14 @@ class NotesRepositoryImpTest {
     var instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private lateinit var repository: NotesRepository
-    private lateinit var mapper: NoteEntityMapper
     private lateinit var note: Note
     private lateinit var noteEntity: NoteEntity
     private lateinit var addNoteRequest: AddNoteRequest
+    private val mapper = mockk<NoteEntityMapper>()
     private val notesDao = mockk<NotesDao>()
 
     @Before
     fun setup() {
-        mapper = NoteEntityMapper()
         repository = NotesRepositoryImp(
             notesDao, mapper
         )
@@ -42,11 +41,36 @@ class NotesRepositoryImpTest {
     }
 
     @Test
-    fun `call getNotes() and get a list of notes`() = runTest {
+    fun `call getNotes() and get a flow of list of Note models`() = runTest {
         // Given
         val noteList = listOf(note)
-        val flowOfNoteEntitiesList = flowOf(listOf(noteEntity))
-        every { notesDao.getNotes() } returns flowOfNoteEntitiesList
+        val noteEntitiesList = listOf(noteEntity)
+        every { notesDao.getNotes() } returns flow {
+            emit(noteEntitiesList)
+        }
+        every { mapper.mapToNote(noteEntity) } returns note
+
+        // When
+        val result = repository.getNotes().first()
+
+        // Then
+        assertThat(result).isEqualTo(noteList)
+        assertThat(result[0].id).isEqualTo(noteEntity.id)
+        assertThat(result[0].title).isEqualTo(noteEntity.title)
+        assertThat(result[0].description).isEqualTo(noteEntity.description)
+        assertThat(result[0].createdAt).isEqualTo(noteEntity.createdAt)
+        verify(exactly = 1) { notesDao.getNotes() }
+        verify(exactly = 1) { mapper.mapToNote(noteEntity) }
+    }
+
+    @Test
+    fun `call getNotes() and get a flow of empty list of Note models`() = runTest {
+        // Given
+        val noteList = emptyList<Note>()
+        val noteEntitiesList = emptyList<NoteEntity>()
+        every { notesDao.getNotes() } returns flow {
+            emit(noteEntitiesList)
+        }
 
         // When
         val result = repository.getNotes().first()
@@ -54,33 +78,45 @@ class NotesRepositoryImpTest {
         // Then
         assertThat(result).isEqualTo(noteList)
         verify(exactly = 1) { notesDao.getNotes() }
+        verify(exactly = 0) { mapper.mapToNote(noteEntity) }
     }
 
     @Test
     fun `call getNoteById() and get a note by id`() = runTest {
         // Given
         val id = 1
-        val flowOfNoteEntity = flowOf(noteEntity)
-        every { notesDao.getNoteById(id) } returns flowOfNoteEntity
+        every { notesDao.getNoteById(id) } returns flow {
+            emit(noteEntity)
+        }
+        every { mapper.mapToNote(noteEntity) } returns note
 
         // When
         val result = repository.getNoteById(id).first()
 
         // Then
         assertThat(result).isEqualTo(note)
+        assertThat(result.id).isEqualTo(noteEntity.id)
+        assertThat(result.title).isEqualTo(noteEntity.title)
+        assertThat(result.description).isEqualTo(noteEntity.description)
+        assertThat(result.createdAt).isEqualTo(noteEntity.createdAt)
         verify(exactly = 1) { notesDao.getNoteById(id) }
+        verify(exactly = 1) { mapper.mapToNote(noteEntity) }
     }
 
     @Test
     fun `call addNote() and check the addNote function of notesDao called`() = runTest {
         // Given
+        every { mapper.mapToEntity(addNoteRequest) } returns noteEntity
         coJustRun { notesDao.addNote(noteEntity) }
 
         // When
         repository.addNote(addNoteRequest)
 
         // Then
-        assertThat(note).isEqualTo(mapper.mapToNote(noteEntity))
+        assertThat(addNoteRequest.title).isEqualTo(noteEntity.title)
+        assertThat(addNoteRequest.description).isEqualTo(noteEntity.description)
+        assertThat(addNoteRequest.createdAt).isEqualTo(noteEntity.createdAt)
+        verify(exactly = 1) { mapper.mapToEntity(addNoteRequest) }
         coVerify(exactly = 1) { notesDao.addNote(noteEntity) }
     }
 }
