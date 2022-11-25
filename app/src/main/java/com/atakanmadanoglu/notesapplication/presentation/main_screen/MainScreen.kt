@@ -125,21 +125,26 @@ fun NotesListView(notes: List<NoteUI>) {
         contentPadding = PaddingValues(MaterialTheme.spacing.extraSmall)
     ) {
         items(notes) { note ->
-            NoteRow(note = note)
+            NoteRow(note = note , cardOnClick = {})
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NoteRow(
     note: NoteUI,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    cardOnClick: (NoteUI) -> Unit = {}
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .height(80.dp)
-            .padding(vertical = MaterialTheme.spacing.extraSmall)
+            .padding(vertical = MaterialTheme.spacing.extraSmall),
+        onClick = {
+            cardOnClick(note)
+        }
     ) {
         Column(
             modifier = Modifier

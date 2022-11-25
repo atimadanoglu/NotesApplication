@@ -42,7 +42,9 @@ fun AddNoteScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun NavigationTopAppBar() {
+private fun NavigationTopAppBar(
+    doneIconOnClick: () -> Unit = {}
+) {
     TopAppBar(
         title = { Text(text = "") },
         navigationIcon = {
@@ -53,7 +55,7 @@ private fun NavigationTopAppBar() {
         },
         actions = {
             IconButton(
-                onClick = { /*TODO*/ }
+                onClick = doneIconOnClick
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_baseline_done_24),
