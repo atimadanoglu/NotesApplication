@@ -3,7 +3,7 @@ package com.atakanmadanoglu.notesapplication.domain.usecases
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.atakanmadanoglu.notesapplication.data.repository.NotesRepository
 import com.atakanmadanoglu.notesapplication.domain.GetNoteByIdUseCase
-import com.atakanmadanoglu.notesapplication.domain.mapper.NoteUIAndRequestMapper
+import com.atakanmadanoglu.notesapplication.domain.mapper.NoteUIMapper
 import com.atakanmadanoglu.notesapplication.domain.model.UseCaseVariousNotesFactory
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
@@ -25,7 +25,7 @@ class GetNoteByIdUseCaseTest {
 
     private lateinit var getNoteByIdUseCase: GetNoteByIdUseCase
     private val notesRepository = mockk<NotesRepository>()
-    private val noteUIMapper = mockk<NoteUIAndRequestMapper>()
+    private val noteUIMapper = mockk<NoteUIMapper>()
 
     @Before
     fun setup() {

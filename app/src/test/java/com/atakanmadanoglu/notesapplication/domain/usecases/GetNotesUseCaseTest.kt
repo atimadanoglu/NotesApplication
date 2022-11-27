@@ -4,7 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.atakanmadanoglu.notesapplication.data.model.Note
 import com.atakanmadanoglu.notesapplication.data.repository.NotesRepository
 import com.atakanmadanoglu.notesapplication.domain.GetNotesUseCase
-import com.atakanmadanoglu.notesapplication.domain.mapper.NoteUIAndRequestMapper
+import com.atakanmadanoglu.notesapplication.domain.mapper.NoteUIMapper
 import com.atakanmadanoglu.notesapplication.domain.model.UseCaseVariousNotesFactory
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
@@ -25,13 +25,13 @@ class GetNotesUseCaseTest {
     var instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private lateinit var getNotesUseCase: GetNotesUseCase
-    private val noteUIAndRequestMapper = mockk<NoteUIAndRequestMapper>()
+    private val noteUIMapper = mockk<NoteUIMapper>()
     private val notesRepository = mockk<NotesRepository>()
 
     @Before
     fun setup() {
         getNotesUseCase = GetNotesUseCase(
-            notesRepository, noteUIAndRequestMapper
+            notesRepository, noteUIMapper
         )
     }
 
@@ -45,7 +45,7 @@ class GetNotesUseCaseTest {
         every { notesRepository.getNotes() } returns flow {
             emit(listOfNotes)
         }
-        every { noteUIAndRequestMapper.mapToNoteUI(note) } returns noteUI
+        every { noteUIMapper.mapToNoteUI(note) } returns noteUI
         // When
         val result = getNotesUseCase.invoke().first()
         // Then
@@ -56,7 +56,7 @@ class GetNotesUseCaseTest {
         assertThat(result[0].description).isEqualTo(note.description)
         assertThat(result[0].createdAt).isEqualTo(note.createdAt)
         verify(exactly = 1) { notesRepository.getNotes() }
-        verify(exactly = 1) { noteUIAndRequestMapper.mapToNoteUI(note) }
+        verify(exactly = 1) { noteUIMapper.mapToNoteUI(note) }
     }
 
     @Test
@@ -72,7 +72,7 @@ class GetNotesUseCaseTest {
         // Then
         assertThat(result).isEmpty()
         verify(exactly = 1) { notesRepository.getNotes() }
-        verify(exactly = 0) { noteUIAndRequestMapper.mapToNoteUI(note) }
+        verify(exactly = 0) { noteUIMapper.mapToNoteUI(note) }
     }
 
 }

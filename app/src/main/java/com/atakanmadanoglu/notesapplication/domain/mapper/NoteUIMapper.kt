@@ -4,7 +4,7 @@ import com.atakanmadanoglu.notesapplication.data.model.Note
 import com.atakanmadanoglu.notesapplication.domain.model.NoteUI
 import javax.inject.Inject
 
-class NoteUIAndRequestMapper @Inject constructor() {
+class NoteUIMapper @Inject constructor() {
 
     fun mapToNoteUI(
         note: Note
