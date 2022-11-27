@@ -1,4 +1,4 @@
-package com.atakanmadanoglu.notesapplication.presentation.main_screen
+package com.atakanmadanoglu.notesapplication.presentation.notes_list
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,12 +25,14 @@ import com.atakanmadanoglu.notesapplication.ui.theme.spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(
+fun NotesListScreen(
     navigateToAddNoteScreen: () -> Unit,
-    viewModel: MainScreenViewModel = hiltViewModel()
+    viewModel: NotesListScreenViewModel = hiltViewModel()
 ) {
-    val notesState = viewModel.notesState.collectAsState()
-    val notes = notesState.value
+    val notesListScreenState by remember {
+        mutableStateOf(viewModel.notesListState.value)
+    }
+    var searchBarText by remember { mutableStateOf("") }
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -43,11 +45,15 @@ fun MainScreen(
         ) {
             AllNotesText()
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
-            TotalNotesCount()
+            TotalNotesCount(notesCount = notesListScreenState.totalNotesCount)
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
-            SearchBar()
+            SearchBar(searchValue = searchBarText) { newValue ->
+                searchBarText = newValue
+                notesListScreenState.searchValue = newValue
+                viewModel.searchAndGetNotes(searchBarText)
+            }
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
-            NotesListView(notes = notes)
+            NotesListView(notes = viewModel.decideWhichListWillBeUsed())
         }
     }
 }
@@ -66,12 +72,9 @@ private fun AllNotesText(
 
 @Composable
 private fun TotalNotesCount(
-    notesCount: Int = 0
+    notesCount: Int
 ) {
-    val totalNotesCount by remember {
-        mutableStateOf(notesCount)
-    }
-    val totalNotes = stringResource(id = R.string.total_notes_count, totalNotesCount)
+    val totalNotes = stringResource(id = R.string.total_notes_count, notesCount)
     Text(
         text = totalNotes,
         fontSize = MaterialTheme.typography.headlineSmall.fontSize
@@ -82,9 +85,9 @@ private fun TotalNotesCount(
 @Composable
 fun SearchBar(
     modifier: Modifier = Modifier,
-    searchValue: String = ""
+    searchValue: String,
+    onSearchValueChange: (newValue: String) -> Unit
 ) {
-    var searchBarText by remember { mutableStateOf(searchValue) }
     OutlinedTextField(
         modifier = modifier
             .fillMaxWidth()
@@ -95,10 +98,8 @@ fun SearchBar(
                 painter = painterResource(id = R.drawable.ic_baseline_search_24),
                 contentDescription = stringResource(id = R.string.search_icon)
             ) },
-        value = searchBarText,
-        onValueChange = { changedValue ->
-            searchBarText = changedValue
-        },
+        value = searchValue,
+        onValueChange = onSearchValueChange,
         textStyle = TextStyle(
             fontSize = 16.sp
         ),
@@ -112,12 +113,6 @@ fun SearchBar(
             focusedIndicatorColor = Color.Transparent
         )
     )
-}
-
-@Preview
-@Composable
-fun PreviewSearchBar() {
-    SearchBar()
 }
 
 @Composable
@@ -134,9 +129,9 @@ fun NotesListView(notes: List<NoteUI>) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NoteRow(
-    note: NoteUI,
     modifier: Modifier = Modifier,
-    cardOnClick: (NoteUI) -> Unit = {}
+    cardOnClick: (NoteUI) -> Unit = {},
+    note: NoteUI
 ) {
     Card(
         modifier = modifier
@@ -156,13 +151,14 @@ private fun NoteRow(
             Text(
                 text = note.title,
                 fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                fontWeight = FontWeight.W400,
                 maxLines = 1
             )
             Row(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Todo", /*TODO("Implement a function that converts the long value to a date string format")*/
+                    text = note.date,
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                     fontStyle = FontStyle.Italic,
                     maxLines = 1
