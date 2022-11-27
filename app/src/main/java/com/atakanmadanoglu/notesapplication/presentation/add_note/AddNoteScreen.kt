@@ -12,6 +12,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.atakanmadanoglu.notesapplication.R
 import com.atakanmadanoglu.notesapplication.ui.theme.spacing
 import java.text.SimpleDateFormat
@@ -21,22 +23,47 @@ import java.util.*
 @Composable
 fun AddNoteScreen(
     modifier: Modifier = Modifier,
-    doneIconOnClick: () -> Unit
+    navController: NavController,
+    addNoteViewModel: AddNoteViewModel = hiltViewModel()
 ) {
+    val addNoteState by remember {
+        mutableStateOf(addNoteViewModel.addNoteState.value)
+    }
     Scaffold(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = MaterialTheme.spacing.small),
-        topBar = { NavigationTopAppBar(doneIconOnClick) }
+        topBar = {
+            NavigationTopAppBar(
+                isDoneIconEnabled = addNoteState.isDoneIconEnabled(),
+                doneIconOnClick = {
+                    addNoteViewModel.addNote(
+                        inputTitle = addNoteState.title,
+                        inputDescription = addNoteState.description
+                    )
+                    navController.popBackStack() },
+                navigationIconOnClick = { navController.popBackStack() }
+            )
+        }
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
         ) {
-            TitleInput()
+            TitleInput(
+                title = addNoteState.title,
+                titleOnChange = { newTitleValue ->
+                    addNoteState.title = newTitleValue
+                }
+            )
             ShowDate()
-            NoteContentView()
+            NoteContentView(
+                description = addNoteState.description,
+                onDescriptionChange = { newDescriptionValue ->
+                    addNoteState.description = newDescriptionValue
+                }
+            )
         }
     }
 }
@@ -44,19 +71,26 @@ fun AddNoteScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NavigationTopAppBar(
-    doneIconOnClick: () -> Unit
+    isDoneIconEnabled: Boolean,
+    doneIconOnClick: () -> Unit,
+    navigationIconOnClick: () -> Unit
 ) {
     TopAppBar(
         title = { Text(text = "") },
         navigationIcon = {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_baseline_arrow_back_24),
-                contentDescription = stringResource(id = R.string.back_button)
-            )
+            IconButton(
+                onClick = navigationIconOnClick
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_baseline_arrow_back_24),
+                    contentDescription = stringResource(id = R.string.back_button)
+                )
+            }
         },
         actions = {
             IconButton(
-                onClick = doneIconOnClick
+                onClick = doneIconOnClick,
+                enabled = isDoneIconEnabled
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_baseline_done_24),
@@ -70,18 +104,17 @@ private fun NavigationTopAppBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TitleInput(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    title: String,
+    titleOnChange: (String) -> Unit
 ) {
-    var titleValue by remember {
-        mutableStateOf("")
-    }
     OutlinedTextField(
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
             .background(Color.Transparent),
-        value = titleValue,
-        onValueChange = { titleValue = it },
+        value = title,
+        onValueChange = titleOnChange,
         placeholder = {
             Text(
                 text = stringResource(id = R.string.title),
@@ -103,16 +136,17 @@ private fun TitleInput(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun NoteContentView() {
-    var titleValue by remember {
-        mutableStateOf("")
-    }
+private fun NoteContentView(
+    modifier: Modifier = Modifier,
+    description: String,
+    onDescriptionChange: (String) -> Unit
+) {
     OutlinedTextField(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(Color.Transparent),
-        value = titleValue,
-        onValueChange = { titleValue = it },
+        value = description,
+        onValueChange = onDescriptionChange,
         placeholder = {
             Text(
                 text = stringResource(id = R.string.content),
@@ -148,5 +182,5 @@ private fun ShowDate() {
 @Preview
 @Composable
 private fun PreviewAddNoteScreenComponents() {
-    NavigationTopAppBar(doneIconOnClick = {})
+    //NavigationTopAppBar(doneIconOnClick = {}, navigationIconOnClick = {})
 }

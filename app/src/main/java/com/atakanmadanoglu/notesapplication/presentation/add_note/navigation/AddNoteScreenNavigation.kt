@@ -11,11 +11,11 @@ fun NavController.navigateToAddNote() {
 }
 
 fun NavGraphBuilder.addNoteScreen(
-    doneIconOnClick: () -> Unit
+    navController: NavController
 ) {
     composable(route = Screen.AddNoteScreen.route) {
         AddNoteScreen(
-            doneIconOnClick = doneIconOnClick
+            navController = navController
         )
     }
 }

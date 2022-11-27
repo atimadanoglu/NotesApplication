@@ -10,9 +10,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.atakanmadanoglu.notesapplication.presentation.add_note.navigation.addNoteScreen
 import com.atakanmadanoglu.notesapplication.presentation.add_note.navigation.navigateToAddNote
-import com.atakanmadanoglu.notesapplication.presentation.main_screen.navigation.mainScreen
-import com.atakanmadanoglu.notesapplication.presentation.main_screen.navigation.navigateToMainScreen
 import com.atakanmadanoglu.notesapplication.presentation.navigation.Screen
+import com.atakanmadanoglu.notesapplication.presentation.notes_list.navigation.notesList
 import com.atakanmadanoglu.notesapplication.ui.theme.NotesApplicationTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -29,18 +28,14 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     NavHost(
                         navController = navController,
-                        startDestination = Screen.MainScreen.route
+                        startDestination = Screen.NotesListScreen.route
                     ) {
-                        mainScreen(
+                        notesList(
                             navigateToAddNoteScreen = {
                                 navController.navigateToAddNote()
                             }
                         )
-                        addNoteScreen(
-                            doneIconOnClick = {
-                                navController.navigateToMainScreen()
-                            }
-                        )
+                        addNoteScreen(navController)
                     }
                 }
             }
