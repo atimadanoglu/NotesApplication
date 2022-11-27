@@ -1,31 +1,45 @@
 package com.atakanmadanoglu.notesapplication.presentation.notes_list
 
+import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.atakanmadanoglu.notesapplication.di.DefaultDispatcher
 import com.atakanmadanoglu.notesapplication.domain.GetNotesUseCase
 import com.atakanmadanoglu.notesapplication.domain.model.NoteUI
-import com.atakanmadanoglu.notesapplication.presentation.state.NotesListScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+@Stable
+interface NotesListUiState {
+    val allNotesList: SnapshotStateList<NoteUI>
+    val searchedNotesList: SnapshotStateList<NoteUI>
+    val totalNotesCount: Int
+    val searchValue: String
+}
+
+private class MutableNotesListUiState: NotesListUiState {
+    override var allNotesList = mutableStateListOf<NoteUI>()
+    override var searchedNotesList = mutableStateListOf<NoteUI>()
+    override var totalNotesCount by mutableStateOf(allNotesList.size)
+    override var searchValue by mutableStateOf("")
+}
 
 @HiltViewModel
 class NotesListScreenViewModel @Inject constructor(
     getNotesUseCase: GetNotesUseCase,
     @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ): ViewModel() {
-    private val _notesListScreenState = MutableStateFlow(NotesListScreenState())
-    val notesListState = _notesListScreenState.asStateFlow()
+    private val _notesListUiState = MutableStateFlow(MutableNotesListUiState())
+    val notesListUiState: StateFlow<NotesListUiState> = _notesListUiState.asStateFlow()
 
     init {
         viewModelScope.launch {
             getNotesUseCase.invoke().collectLatest {
-                with(_notesListScreenState.value) {
+                with(_notesListUiState.value) {
                     allNotesList.clear()
                     allNotesList.addAll(it)
                     totalNotesCount = it.size
@@ -37,9 +51,9 @@ class NotesListScreenViewModel @Inject constructor(
     fun searchAndGetNotes(
         searchText: String
     ) = viewModelScope.launch(defaultDispatcher) {
-        with(_notesListScreenState.value) {
-            listOfSearchedNotes = allNotesList
-            listOfSearchedNotes.filter { noteUI ->
+        with(_notesListUiState.value) {
+            searchedNotesList = allNotesList
+            searchedNotesList.filter { noteUI ->
                 noteUI.title.contains(searchText, ignoreCase = true) ||
                         noteUI.description.contains(searchText, ignoreCase = true)
             }
@@ -47,13 +61,20 @@ class NotesListScreenViewModel @Inject constructor(
         }
     }
 
-    private val isSearchValueEmpty = MutableStateFlow(_notesListScreenState.value.searchValue.isEmpty())
+    private val isSearchValueEmpty = MutableStateFlow(_notesListUiState.value.searchValue.isEmpty())
 
-    fun decideWhichListWillBeUsed(): List<NoteUI> = with(_notesListScreenState.value) {
+    fun decideWhichListWillBeUsed(): List<NoteUI> = with(_notesListUiState.value) {
         return if (isSearchValueEmpty.value) {
             allNotesList
         } else {
-            listOfSearchedNotes
+            searchedNotesList
+        }
+    }
+
+    fun updateSearchStateValue(newValue: String) {
+        _notesListUiState.update { currentState ->
+            currentState.searchValue = newValue
+            currentState
         }
     }
 }

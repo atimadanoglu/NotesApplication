@@ -27,7 +27,7 @@ fun AddNoteScreen(
     addNoteViewModel: AddNoteViewModel = hiltViewModel()
 ) {
     val addNoteState by remember {
-        mutableStateOf(addNoteViewModel.addNoteState.value)
+        mutableStateOf(addNoteViewModel.addNoteUiState.value)
     }
     Scaffold(
         modifier = modifier
@@ -35,7 +35,7 @@ fun AddNoteScreen(
             .padding(horizontal = MaterialTheme.spacing.small),
         topBar = {
             NavigationTopAppBar(
-                isDoneIconEnabled = addNoteState.isDoneIconEnabled(),
+                isDoneIconEnabled = addNoteState.isBothTitleAndDescriptionEntered(),
                 doneIconOnClick = {
                     addNoteViewModel.addNote(
                         inputTitle = addNoteState.title,
@@ -54,14 +54,14 @@ fun AddNoteScreen(
             TitleInput(
                 title = addNoteState.title,
                 titleOnChange = { newTitleValue ->
-                    addNoteState.title = newTitleValue
+                    addNoteViewModel.updateTitleStateValue(newTitleValue)
                 }
             )
             ShowDate()
             NoteContentView(
                 description = addNoteState.description,
                 onDescriptionChange = { newDescriptionValue ->
-                    addNoteState.description = newDescriptionValue
+                    addNoteViewModel.updateDescriptionStateValue(newDescriptionValue)
                 }
             )
         }

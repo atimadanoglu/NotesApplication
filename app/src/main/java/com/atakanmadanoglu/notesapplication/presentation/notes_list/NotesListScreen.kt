@@ -30,7 +30,7 @@ fun NotesListScreen(
     viewModel: NotesListScreenViewModel = hiltViewModel()
 ) {
     val notesListScreenState by remember {
-        mutableStateOf(viewModel.notesListState.value)
+        mutableStateOf(viewModel.notesListUiState.value)
     }
     var searchBarText by remember { mutableStateOf("") }
     Scaffold(
@@ -49,7 +49,7 @@ fun NotesListScreen(
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
             SearchBar(searchValue = searchBarText) { newValue ->
                 searchBarText = newValue
-                notesListScreenState.searchValue = newValue
+                viewModel.updateSearchStateValue(newValue)
                 viewModel.searchAndGetNotes(searchBarText)
             }
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
