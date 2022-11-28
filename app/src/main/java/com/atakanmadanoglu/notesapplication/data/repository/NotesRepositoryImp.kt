@@ -11,8 +11,8 @@ class NotesRepositoryImp @Inject constructor(
     private val notesDao: NotesDao,
     private val noteMapper: NoteEntityMapper
 ) : NotesRepository {
-    override fun getNotes(): Flow<List<NoteDomain>> =
-        notesDao.getNotes().map { notesList ->
+    override fun getNotesByCreatedAt(): Flow<List<NoteDomain>> =
+        notesDao.getNotesByCreatedAt().map { notesList ->
             notesList.map {
                 noteMapper.mapToNoteDomain(it)
             }

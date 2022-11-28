@@ -5,7 +5,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.atakanmadanoglu.notesapplication.di.DefaultDispatcher
-import com.atakanmadanoglu.notesapplication.domain.GetNotesUseCase
+import com.atakanmadanoglu.notesapplication.domain.GetNotesByCreatedAtUseCase
 import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -34,7 +34,7 @@ private class MutableNotesListUiState: NotesListUiState {
 
 @HiltViewModel
 class NotesListScreenViewModel @Inject constructor(
-    getNotesUseCase: GetNotesUseCase,
+    getNotesByCreatedAtUseCase: GetNotesByCreatedAtUseCase,
     @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ): ViewModel() {
     private val _notesListUiState = MutableNotesListUiState()
@@ -42,7 +42,7 @@ class NotesListScreenViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            getNotesUseCase.invoke().collectLatest {
+            getNotesByCreatedAtUseCase.invoke().collectLatest {
                 with(_notesListUiState) {
                     allNotesList.clear()
                     allNotesList.addAll(it)

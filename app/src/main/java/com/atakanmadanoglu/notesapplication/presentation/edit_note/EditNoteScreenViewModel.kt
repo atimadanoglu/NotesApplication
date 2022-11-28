@@ -1,4 +1,4 @@
-package com.atakanmadanoglu.notesapplication.presentation.get_or_update_note
+package com.atakanmadanoglu.notesapplication.presentation.edit_note
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class GetOrUpdateNoteViewModel @Inject constructor(
+class EditNoteScreenViewModel @Inject constructor(
     private val getNoteByIdUseCase: GetNoteByIdUseCase
 ): ViewModel() {
 

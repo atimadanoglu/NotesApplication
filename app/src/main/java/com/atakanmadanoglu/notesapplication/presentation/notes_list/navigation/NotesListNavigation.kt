@@ -16,7 +16,7 @@ fun NavGraphBuilder.notesList(
 ) {
     composable(route = Screen.NotesListScreen.route) {
         NotesListScreen(
-            navigateToAddNoteScreen = navigateToAddNoteScreen
+            addNoteButtonClicked = navigateToAddNoteScreen
         )
     }
 }

@@ -42,13 +42,13 @@ class NotesRepositoryImpTest {
         // Given
         val noteList = listOf(noteDomain)
         val noteEntitiesList = listOf(noteEntity)
-        every { notesDao.getNotes() } returns flow {
+        every { notesDao.getNotesByCreatedAt() } returns flow {
             emit(noteEntitiesList)
         }
         every { mapper.mapToNoteDomain(noteEntity) } returns noteDomain
 
         // When
-        val result = repository.getNotes().first()
+        val result = repository.getNotesByCreatedAt().first()
 
         // Then
         assertThat(result).isEqualTo(noteList)
@@ -56,7 +56,7 @@ class NotesRepositoryImpTest {
         assertThat(result[0].title).isEqualTo(noteEntity.title)
         assertThat(result[0].description).isEqualTo(noteEntity.description)
         assertThat(result[0].createdAt).isEqualTo(noteEntity.createdAt)
-        verify(exactly = 1) { notesDao.getNotes() }
+        verify(exactly = 1) { notesDao.getNotesByCreatedAt() }
         verify(exactly = 1) { mapper.mapToNoteDomain(noteEntity) }
     }
 
@@ -65,16 +65,16 @@ class NotesRepositoryImpTest {
         // Given
         val noteDomainList = emptyList<NoteDomain>()
         val noteEntitiesList = emptyList<NoteEntity>()
-        every { notesDao.getNotes() } returns flow {
+        every { notesDao.getNotesByCreatedAt() } returns flow {
             emit(noteEntitiesList)
         }
 
         // When
-        val result = repository.getNotes().first()
+        val result = repository.getNotesByCreatedAt().first()
 
         // Then
         assertThat(result).isEqualTo(noteDomainList)
-        verify(exactly = 1) { notesDao.getNotes() }
+        verify(exactly = 1) { notesDao.getNotesByCreatedAt() }
         verify(exactly = 0) { mapper.mapToNoteDomain(noteEntity) }
     }
 

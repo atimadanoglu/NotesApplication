@@ -24,7 +24,7 @@ import com.atakanmadanoglu.notesapplication.ui.theme.spacing
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotesListScreen(
-    navigateToAddNoteScreen: () -> Unit,
+    addNoteButtonClicked: () -> Unit,
     viewModel: NotesListScreenViewModel = hiltViewModel()
 ) {
     val notesListScreenState by remember {
@@ -34,7 +34,7 @@ fun NotesListScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = MaterialTheme.spacing.medium),
-        floatingActionButton = { Fab(navigateToAddNoteScreen) }
+        floatingActionButton = { Fab(addNoteButtonClicked) }
     ) {
         Column(modifier = Modifier
             .fillMaxSize()
@@ -171,10 +171,10 @@ private fun NoteRow(
 
 @Composable
 fun Fab(
-    navigateToAddNoteScreen: () -> Unit
+    fabClicked: () -> Unit
 ) {
     FloatingActionButton(
-        onClick = navigateToAddNoteScreen,
+        onClick = fabClicked,
         shape = CircleShape
     ) {
         Icon(
