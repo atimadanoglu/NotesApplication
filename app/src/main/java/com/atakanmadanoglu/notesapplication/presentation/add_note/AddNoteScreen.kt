@@ -27,7 +27,7 @@ fun AddNoteScreen(
     addNoteViewModel: AddNoteViewModel = hiltViewModel()
 ) {
     val addNoteState by remember {
-        mutableStateOf(addNoteViewModel.addNoteUiState.value)
+        mutableStateOf(addNoteViewModel.addNoteUiState)
     }
     Scaffold(
         modifier = modifier

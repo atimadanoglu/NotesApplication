@@ -150,7 +150,7 @@ private fun NoteRow(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = note.date,
+                    text = note.createdAt,
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                     fontStyle = FontStyle.Italic,
                     maxLines = 1
@@ -188,5 +188,5 @@ fun Fab(
 @Preview
 @Composable
 fun Preview() {
-    NoteRow(note = NoteUI(1,"Hello", "There", 1), cardOnClick = {})
+    NoteRow(note = NoteUI(1,"Hello", "There", "26 Oct"), cardOnClick = {})
 }
