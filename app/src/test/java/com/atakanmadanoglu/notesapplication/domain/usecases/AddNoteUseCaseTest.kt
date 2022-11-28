@@ -3,7 +3,6 @@ package com.atakanmadanoglu.notesapplication.domain.usecases
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.atakanmadanoglu.notesapplication.data.mapper.NoteEntityMapper
 import com.atakanmadanoglu.notesapplication.data.repository.NotesRepository
-import com.atakanmadanoglu.notesapplication.domain.AddNoteUseCase
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before

@@ -5,7 +5,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.atakanmadanoglu.notesapplication.di.DefaultDispatcher
-import com.atakanmadanoglu.notesapplication.domain.GetNotesByCreatedAtUseCase
+import com.atakanmadanoglu.notesapplication.domain.usecases.GetNotesByCreatedAtUseCase
 import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher

@@ -2,7 +2,6 @@ package com.atakanmadanoglu.notesapplication.domain.usecases
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.atakanmadanoglu.notesapplication.data.repository.NotesRepository
-import com.atakanmadanoglu.notesapplication.domain.GetNoteByIdUseCase
 import com.atakanmadanoglu.notesapplication.domain.mapper.NoteUIMapper
 import com.atakanmadanoglu.notesapplication.domain.model.UseCaseVariousNotesFactory
 import com.google.common.truth.Truth.assertThat
