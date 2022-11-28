@@ -3,10 +3,9 @@ package com.atakanmadanoglu.notesapplication.data.repository
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.atakanmadanoglu.notesapplication.data.local.NotesDao
 import com.atakanmadanoglu.notesapplication.data.mapper.NoteEntityMapper
-import com.atakanmadanoglu.notesapplication.data.model.Note
 import com.atakanmadanoglu.notesapplication.data.model.NoteEntity
 import com.atakanmadanoglu.notesapplication.data.model.NoteFactory
-import com.atakanmadanoglu.notesapplication.presentation.model.AddNoteRequest
+import com.atakanmadanoglu.notesapplication.domain.model.NoteDomain
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -24,9 +23,8 @@ class NotesRepositoryImpTest {
     var instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private lateinit var repository: NotesRepository
-    private lateinit var note: Note
+    private lateinit var noteDomain: NoteDomain
     private lateinit var noteEntity: NoteEntity
-    private lateinit var addNoteRequest: AddNoteRequest
     private val mapper = mockk<NoteEntityMapper>()
     private val notesDao = mockk<NotesDao>()
 
@@ -35,20 +33,19 @@ class NotesRepositoryImpTest {
         repository = NotesRepositoryImp(
             notesDao, mapper
         )
-        addNoteRequest = NoteFactory.getMockAddNoteRequest()
-        note = NoteFactory.getMockNote()
+        noteDomain = NoteFactory.getMockNoteDomain()
         noteEntity = NoteFactory.getMockNoteEntity()
     }
 
     @Test
     fun `call getNotes() and get a flow of list of Note models`() = runTest {
         // Given
-        val noteList = listOf(note)
+        val noteList = listOf(noteDomain)
         val noteEntitiesList = listOf(noteEntity)
         every { notesDao.getNotes() } returns flow {
             emit(noteEntitiesList)
         }
-        every { mapper.mapToNote(noteEntity) } returns note
+        every { mapper.mapToNoteDomain(noteEntity) } returns noteDomain
 
         // When
         val result = repository.getNotes().first()
@@ -60,13 +57,13 @@ class NotesRepositoryImpTest {
         assertThat(result[0].description).isEqualTo(noteEntity.description)
         assertThat(result[0].createdAt).isEqualTo(noteEntity.createdAt)
         verify(exactly = 1) { notesDao.getNotes() }
-        verify(exactly = 1) { mapper.mapToNote(noteEntity) }
+        verify(exactly = 1) { mapper.mapToNoteDomain(noteEntity) }
     }
 
     @Test
     fun `call getNotes() and get a flow of empty list of Note models`() = runTest {
         // Given
-        val noteList = emptyList<Note>()
+        val noteDomainList = emptyList<NoteDomain>()
         val noteEntitiesList = emptyList<NoteEntity>()
         every { notesDao.getNotes() } returns flow {
             emit(noteEntitiesList)
@@ -76,9 +73,9 @@ class NotesRepositoryImpTest {
         val result = repository.getNotes().first()
 
         // Then
-        assertThat(result).isEqualTo(noteList)
+        assertThat(result).isEqualTo(noteDomainList)
         verify(exactly = 1) { notesDao.getNotes() }
-        verify(exactly = 0) { mapper.mapToNote(noteEntity) }
+        verify(exactly = 0) { mapper.mapToNoteDomain(noteEntity) }
     }
 
     @Test
@@ -88,35 +85,35 @@ class NotesRepositoryImpTest {
         every { notesDao.getNoteById(id) } returns flow {
             emit(noteEntity)
         }
-        every { mapper.mapToNote(noteEntity) } returns note
+        every { mapper.mapToNoteDomain(noteEntity) } returns noteDomain
 
         // When
         val result = repository.getNoteById(id).first()
 
         // Then
-        assertThat(result).isEqualTo(note)
+        assertThat(result).isEqualTo(noteDomain)
         assertThat(result.id).isEqualTo(noteEntity.id)
         assertThat(result.title).isEqualTo(noteEntity.title)
         assertThat(result.description).isEqualTo(noteEntity.description)
         assertThat(result.createdAt).isEqualTo(noteEntity.createdAt)
         verify(exactly = 1) { notesDao.getNoteById(id) }
-        verify(exactly = 1) { mapper.mapToNote(noteEntity) }
+        verify(exactly = 1) { mapper.mapToNoteDomain(noteEntity) }
     }
 
     @Test
     fun `call addNote() and check the addNote function of notesDao called`() = runTest {
         // Given
-        every { mapper.mapToEntity(addNoteRequest) } returns noteEntity
+        every { mapper.mapToNoteEntity(noteDomain) } returns noteEntity
         coJustRun { notesDao.addNote(noteEntity) }
 
         // When
-        repository.addNote(addNoteRequest)
+        repository.addNote(noteDomain)
 
         // Then
-        assertThat(addNoteRequest.title).isEqualTo(noteEntity.title)
-        assertThat(addNoteRequest.description).isEqualTo(noteEntity.description)
-        assertThat(addNoteRequest.createdAt).isEqualTo(noteEntity.createdAt)
-        verify(exactly = 1) { mapper.mapToEntity(addNoteRequest) }
+        assertThat(noteDomain.title).isEqualTo(noteEntity.title)
+        assertThat(noteDomain.description).isEqualTo(noteEntity.description)
+        assertThat(noteDomain.createdAt).isEqualTo(noteEntity.createdAt)
+        verify(exactly = 1) { mapper.mapToNoteEntity(noteDomain) }
         coVerify(exactly = 1) { notesDao.addNote(noteEntity) }
     }
 }

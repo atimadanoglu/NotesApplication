@@ -1,10 +1,10 @@
 package com.atakanmadanoglu.notesapplication.domain.usecases
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.atakanmadanoglu.notesapplication.data.model.Note
 import com.atakanmadanoglu.notesapplication.data.repository.NotesRepository
 import com.atakanmadanoglu.notesapplication.domain.GetNotesUseCase
 import com.atakanmadanoglu.notesapplication.domain.mapper.NoteUIMapper
+import com.atakanmadanoglu.notesapplication.domain.model.NoteDomain
 import com.atakanmadanoglu.notesapplication.domain.model.UseCaseVariousNotesFactory
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
@@ -38,7 +38,7 @@ class GetNotesUseCaseTest {
     @Test
     fun `call invoke() and get a flow of list of noteUIs`() = runTest {
         // Given
-        val note = UseCaseVariousNotesFactory.getMockNote()
+        val note = UseCaseVariousNotesFactory.getMockNoteDomain()
         val noteUI = UseCaseVariousNotesFactory.getMockNoteUI()
         val listOfNotes = listOf(note)
         val listOfNoteUIs = listOf(noteUI)
@@ -62,10 +62,10 @@ class GetNotesUseCaseTest {
     @Test
     fun `call invoke() and get a flow of empty list of noteUIs`() = runTest {
         // Given
-        val note = UseCaseVariousNotesFactory.getMockNote()
-        val listOfNotes = emptyList<Note>()
+        val note = UseCaseVariousNotesFactory.getMockNoteDomain()
+        val noteDomainList = emptyList<NoteDomain>()
         every { notesRepository.getNotes() } returns flow {
-            emit(listOfNotes)
+            emit(noteDomainList)
         }
         // When
         val result = getNotesUseCase.invoke().first()

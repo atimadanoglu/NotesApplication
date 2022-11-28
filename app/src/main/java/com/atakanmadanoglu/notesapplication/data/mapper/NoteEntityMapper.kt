@@ -1,30 +1,31 @@
 package com.atakanmadanoglu.notesapplication.data.mapper
 
-import com.atakanmadanoglu.notesapplication.data.model.Note
 import com.atakanmadanoglu.notesapplication.data.model.NoteEntity
-import com.atakanmadanoglu.notesapplication.presentation.model.AddNoteRequest
+import com.atakanmadanoglu.notesapplication.domain.model.NoteDomain
+import java.util.*
 import javax.inject.Inject
 
 class NoteEntityMapper @Inject constructor() {
 
-    fun mapToEntity(
-        noteRequest: AddNoteRequest
-    ) = with(noteRequest) {
-        NoteEntity(
+    fun mapToNoteDomain(
+        noteEntity: NoteEntity
+    ) = with(noteEntity) {
+        NoteDomain(
+            id = id,
             title = title,
             description = description,
             createdAt = createdAt
         )
     }
 
-    fun mapToNote(
-        noteEntity: NoteEntity
-    ) = with(noteEntity) {
-        Note(
-            id = id ?: -1,
+    fun mapToNoteEntity(
+        noteDomain: NoteDomain
+    )  = with(noteDomain) {
+        NoteEntity(
+            id = id,
             title = title,
             description = description,
-            createdAt = createdAt
+            createdAt = Date().time
         )
     }
 }

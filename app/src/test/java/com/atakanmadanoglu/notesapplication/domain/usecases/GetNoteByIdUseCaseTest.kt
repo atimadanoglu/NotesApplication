@@ -38,7 +38,7 @@ class GetNoteByIdUseCaseTest {
     fun `call invoke and get a flow of noteUI model`() = runTest {
         // Given
         val id = 1
-        val note = UseCaseVariousNotesFactory.getMockNote()
+        val note = UseCaseVariousNotesFactory.getMockNoteDomain()
         val noteUI = UseCaseVariousNotesFactory.getMockNoteUI()
         every { notesRepository.getNoteById(id) } returns flow {
             emit(note)

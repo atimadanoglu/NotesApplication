@@ -1,14 +1,14 @@
 package com.atakanmadanoglu.notesapplication.domain.mapper
 
-import com.atakanmadanoglu.notesapplication.data.model.Note
-import com.atakanmadanoglu.notesapplication.domain.model.NoteUI
+import com.atakanmadanoglu.notesapplication.domain.model.NoteDomain
+import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
 import javax.inject.Inject
 
 class NoteUIMapper @Inject constructor() {
 
     fun mapToNoteUI(
-        note: Note
-    ) = with(note) {
+        noteDomain: NoteDomain
+    ) = with(noteDomain) {
         NoteUI(
             id = id,
             title = title,
