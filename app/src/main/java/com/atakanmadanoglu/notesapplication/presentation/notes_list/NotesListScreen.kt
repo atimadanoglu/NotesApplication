@@ -12,12 +12,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.atakanmadanoglu.notesapplication.R
 import com.atakanmadanoglu.notesapplication.domain.model.NoteUI
@@ -30,9 +28,8 @@ fun NotesListScreen(
     viewModel: NotesListScreenViewModel = hiltViewModel()
 ) {
     val notesListScreenState by remember {
-        mutableStateOf(viewModel.notesListUiState.value)
+        mutableStateOf(viewModel.notesListUiState)
     }
-    var searchBarText by remember { mutableStateOf("") }
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -47,10 +44,9 @@ fun NotesListScreen(
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
             TotalNotesCount(notesCount = notesListScreenState.totalNotesCount)
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
-            SearchBar(searchValue = searchBarText) { newValue ->
-                searchBarText = newValue
+            SearchBar(searchValue = notesListScreenState.searchValue) { newValue ->
                 viewModel.updateSearchStateValue(newValue)
-                viewModel.searchAndGetNotes(searchBarText)
+                viewModel.searchAndGetNotes(newValue)
             }
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
             NotesListView(notes = viewModel.decideWhichListWillBeUsed())
@@ -91,7 +87,7 @@ fun SearchBar(
     OutlinedTextField(
         modifier = modifier
             .fillMaxWidth()
-            .height(50.dp)
+            .wrapContentHeight()
             .clip(RoundedCornerShape(48.dp)),
         leadingIcon = {
             Icon(
@@ -100,13 +96,9 @@ fun SearchBar(
             ) },
         value = searchValue,
         onValueChange = onSearchValueChange,
-        textStyle = TextStyle(
-            fontSize = 16.sp
-        ),
         singleLine = true,
         placeholder = { Text(
-            text = stringResource(id = R.string.search_notes),
-            fontSize = 16.sp
+            text = stringResource(id = R.string.search_notes)
         ) },
         colors = TextFieldDefaults.textFieldColors(
             unfocusedIndicatorColor = Color.Transparent,
@@ -130,7 +122,7 @@ fun NotesListView(notes: List<NoteUI>) {
 @Composable
 private fun NoteRow(
     modifier: Modifier = Modifier,
-    cardOnClick: (NoteUI) -> Unit = {},
+    cardOnClick: (NoteUI) -> Unit,
     note: NoteUI
 ) {
     Card(
@@ -196,5 +188,5 @@ fun Fab(
 @Preview
 @Composable
 fun Preview() {
-    NoteRow(note = NoteUI(1,"Hello", "There", 1))
+    NoteRow(note = NoteUI(1,"Hello", "There", 1), cardOnClick = {})
 }
