@@ -10,6 +10,7 @@ buildscript {
         mockk_version = '1.13.2'
         arc_core_testing_version = '2.1.0'
         coroutines_version = '1.6.4'
+        nav_compose_version = '2.5.3'
     }
 
     repositories {
@@ -26,4 +27,5 @@ plugins {
     id 'com.android.application' version '7.3.1' apply false
     id 'com.android.library' version '7.3.1' apply false
     id 'org.jetbrains.kotlin.android' version '1.7.20' apply false
+    id 'com.google.dagger.hilt.android' version '2.44.2' apply false
 }

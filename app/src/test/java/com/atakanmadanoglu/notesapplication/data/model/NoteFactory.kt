@@ -1,9 +1,9 @@
 package com.atakanmadanoglu.notesapplication.data.model
 
-import com.atakanmadanoglu.notesapplication.model.Note
+import com.atakanmadanoglu.notesapplication.domain.model.NoteDomain
 
 object NoteFactory {
-    fun getMockNote() = Note(
+    fun getMockNoteDomain() = NoteDomain(
         id = 1,
         title = "Hello",
         description = "There",

@@ -1,15 +1,16 @@
 package com.atakanmadanoglu.notesapplication.data.mapper
 
 import com.atakanmadanoglu.notesapplication.data.model.NoteEntity
-import com.atakanmadanoglu.notesapplication.model.Note
+import com.atakanmadanoglu.notesapplication.domain.model.NoteDomain
+import java.util.*
 import javax.inject.Inject
 
-class NoteMapper @Inject constructor() {
+class NoteEntityMapper @Inject constructor() {
 
-    fun mapToEntity(
-        note: Note
-    ) = with(note) {
-        NoteEntity(
+    fun mapToNoteDomain(
+        noteEntity: NoteEntity
+    ) = with(noteEntity) {
+        NoteDomain(
             id = id,
             title = title,
             description = description,
@@ -17,14 +18,14 @@ class NoteMapper @Inject constructor() {
         )
     }
 
-    fun mapToNote(
-        noteEntity: NoteEntity
-    ) = with(noteEntity) {
-        Note(
+    fun mapToNoteEntity(
+        noteDomain: NoteDomain
+    )  = with(noteDomain) {
+        NoteEntity(
             id = id,
             title = title,
             description = description,
-            createdAt = createdAt
+            createdAt = Date().time
         )
     }
 }

@@ -1,4 +1,4 @@
-package com.atakanmadanoglu.notesapplication.presentation.main_screen
+package com.atakanmadanoglu.notesapplication.presentation.notes_list
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,24 +12,29 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.atakanmadanoglu.notesapplication.R
-import com.atakanmadanoglu.notesapplication.model.Note
+import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
 import com.atakanmadanoglu.notesapplication.ui.theme.spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
+fun NotesListScreen(
+    addNoteButtonClicked: () -> Unit,
+    viewModel: NotesListScreenViewModel = hiltViewModel()
+) {
+    val notesListScreenState by remember {
+        mutableStateOf(viewModel.notesListUiState)
+    }
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = MaterialTheme.spacing.medium),
-        floatingActionButton = { Fab() }
+        floatingActionButton = { Fab(addNoteButtonClicked) }
     ) {
         Column(modifier = Modifier
             .fillMaxSize()
@@ -37,14 +42,14 @@ fun MainScreen() {
         ) {
             AllNotesText()
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
-            TotalNotesCount()
+            TotalNotesCount(notesCount = notesListScreenState.totalNotesCount)
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
-            SearchBar()
+            SearchBar(searchValue = notesListScreenState.searchValue) { newValue ->
+                viewModel.updateSearchStateValue(newValue)
+                viewModel.searchAndGetNotes(newValue)
+            }
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
-            val list = listOf(
-                Note(1,"Hello", "there" , 1L)
-            )
-            NotesListView(notes = list)
+            NotesListView(notes = viewModel.decideWhichListWillBeUsed())
         }
     }
 }
@@ -63,12 +68,9 @@ private fun AllNotesText(
 
 @Composable
 private fun TotalNotesCount(
-    notesCount: Int = 0
+    notesCount: Int
 ) {
-    val totalNotesCount by remember {
-        mutableStateOf(notesCount)
-    }
-    val totalNotes = stringResource(id = R.string.total_notes_count, totalNotesCount)
+    val totalNotes = stringResource(id = R.string.total_notes_count, notesCount)
     Text(
         text = totalNotes,
         fontSize = MaterialTheme.typography.headlineSmall.fontSize
@@ -79,30 +81,24 @@ private fun TotalNotesCount(
 @Composable
 fun SearchBar(
     modifier: Modifier = Modifier,
-    searchValue: String = ""
+    searchValue: String,
+    onSearchValueChange: (newValue: String) -> Unit
 ) {
-    var searchBarText by remember { mutableStateOf(searchValue) }
     OutlinedTextField(
         modifier = modifier
             .fillMaxWidth()
-            .height(50.dp)
+            .wrapContentHeight()
             .clip(RoundedCornerShape(48.dp)),
         leadingIcon = {
             Icon(
                 painter = painterResource(id = R.drawable.ic_baseline_search_24),
                 contentDescription = stringResource(id = R.string.search_icon)
             ) },
-        value = searchBarText,
-        onValueChange = { changedValue ->
-            searchBarText = changedValue
-        },
-        textStyle = TextStyle(
-            fontSize = 16.sp
-        ),
+        value = searchValue,
+        onValueChange = onSearchValueChange,
         singleLine = true,
         placeholder = { Text(
-            text = stringResource(id = R.string.search_notes),
-            fontSize = 16.sp
+            text = stringResource(id = R.string.search_notes)
         ) },
         colors = TextFieldDefaults.textFieldColors(
             unfocusedIndicatorColor = Color.Transparent,
@@ -111,33 +107,32 @@ fun SearchBar(
     )
 }
 
-@Preview
 @Composable
-fun PreviewSearchBar() {
-    SearchBar()
-}
-
-@Composable
-fun NotesListView(notes: List<Note>) {
+fun NotesListView(notes: List<NoteUI>) {
     LazyColumn(
         contentPadding = PaddingValues(MaterialTheme.spacing.extraSmall)
     ) {
         items(notes) { note ->
-            NoteRow(note = note)
+            NoteRow(note = note , cardOnClick = {})
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NoteRow(
-    note: Note,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    cardOnClick: (NoteUI) -> Unit,
+    note: NoteUI
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .height(80.dp)
-            .padding(vertical = MaterialTheme.spacing.extraSmall)
+            .padding(vertical = MaterialTheme.spacing.extraSmall),
+        onClick = {
+            cardOnClick(note)
+        }
     ) {
         Column(
             modifier = Modifier
@@ -148,13 +143,14 @@ private fun NoteRow(
             Text(
                 text = note.title,
                 fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                fontWeight = FontWeight.W400,
                 maxLines = 1
             )
             Row(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Todo", /*TODO("Implement a function that converts the long value to a date string format")*/
+                    text = note.createdAt,
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                     fontStyle = FontStyle.Italic,
                     maxLines = 1
@@ -174,9 +170,11 @@ private fun NoteRow(
 }
 
 @Composable
-fun Fab(onClick: () -> Unit = {}) {
+fun Fab(
+    fabClicked: () -> Unit
+) {
     FloatingActionButton(
-        onClick = onClick,
+        onClick = fabClicked,
         shape = CircleShape
     ) {
         Icon(
@@ -190,5 +188,5 @@ fun Fab(onClick: () -> Unit = {}) {
 @Preview
 @Composable
 fun Preview() {
-    NoteRow(note = Note(1,"Hello", "There", 1))
+    NoteRow(note = NoteUI(1,"Hello", "There", "26 Oct"), cardOnClick = {})
 }

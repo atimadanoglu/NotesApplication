@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface NotesDao {
 
-    @Query("SELECT * FROM note")
-    fun getNotes(): Flow<List<NoteEntity>>
+    @Query("SELECT * FROM note ORDER BY created_at DESC")
+    fun getNotesByCreatedAt(): Flow<List<NoteEntity>>
 
     @Query("SELECT * FROM note WHERE id = :id")
     fun getNoteById(id: Int): Flow<NoteEntity>
