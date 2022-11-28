@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.atakanmadanoglu.notesapplication.di.DefaultDispatcher
 import com.atakanmadanoglu.notesapplication.domain.GetNotesUseCase
-import com.atakanmadanoglu.notesapplication.domain.model.NoteUI
+import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.collectLatest

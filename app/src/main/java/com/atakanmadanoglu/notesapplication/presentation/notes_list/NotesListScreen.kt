@@ -18,7 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.atakanmadanoglu.notesapplication.R
-import com.atakanmadanoglu.notesapplication.domain.model.NoteUI
+import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
 import com.atakanmadanoglu.notesapplication.ui.theme.spacing
 
 @OptIn(ExperimentalMaterial3Api::class)

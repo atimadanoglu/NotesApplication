@@ -3,7 +3,7 @@ package com.atakanmadanoglu.notesapplication.presentation.get_or_update_note
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.atakanmadanoglu.notesapplication.domain.GetNoteByIdUseCase
-import com.atakanmadanoglu.notesapplication.domain.model.NoteUI
+import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first

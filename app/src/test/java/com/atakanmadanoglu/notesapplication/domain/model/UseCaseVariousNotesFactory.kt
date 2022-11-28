@@ -1,7 +1,6 @@
 package com.atakanmadanoglu.notesapplication.domain.model
 
-import com.atakanmadanoglu.notesapplication.data.model.Note
-import com.atakanmadanoglu.notesapplication.presentation.model.AddNoteRequest
+import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
 
 object UseCaseVariousNotesFactory {
     fun getMockNoteUI() = NoteUI(
@@ -11,14 +10,8 @@ object UseCaseVariousNotesFactory {
         createdAt = 1000L
     )
 
-    fun getMockNote() = Note(
+    fun getMockNoteDomain() = NoteDomain(
         id = 1,
-        title = "Hello",
-        description = "There",
-        createdAt = 1000L
-    )
-
-    fun getMockAddNoteRequest() = AddNoteRequest(
         title = "Hello",
         description = "There",
         createdAt = 1000L
