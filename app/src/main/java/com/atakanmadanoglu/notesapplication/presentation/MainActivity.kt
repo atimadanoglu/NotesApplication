@@ -10,6 +10,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.atakanmadanoglu.notesapplication.presentation.add_note.navigation.addNoteScreen
 import com.atakanmadanoglu.notesapplication.presentation.add_note.navigation.navigateToAddNote
+import com.atakanmadanoglu.notesapplication.presentation.edit_note.navigation.editNoteScreen
+import com.atakanmadanoglu.notesapplication.presentation.edit_note.navigation.navigateToEditNoteScreen
 import com.atakanmadanoglu.notesapplication.presentation.navigation.Screen
 import com.atakanmadanoglu.notesapplication.presentation.notes_list.navigation.notesList
 import com.atakanmadanoglu.notesapplication.ui.theme.NotesApplicationTheme
@@ -33,8 +35,12 @@ class MainActivity : ComponentActivity() {
                         notesList(
                             navigateToAddNoteScreen = {
                                 navController.navigateToAddNote()
+                            },
+                            navigateToEditNoteScreen = { noteId ->
+                                navController.navigateToEditNoteScreen(noteId)
                             }
                         )
+                        editNoteScreen(navController)
                         addNoteScreen(navController)
                     }
                 }

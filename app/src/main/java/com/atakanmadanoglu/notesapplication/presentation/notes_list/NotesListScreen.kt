@@ -25,11 +25,15 @@ import com.atakanmadanoglu.notesapplication.ui.theme.spacing
 @Composable
 fun NotesListScreen(
     addNoteButtonClicked: () -> Unit,
+    cardOnClick: (Int) -> Unit,
     viewModel: NotesListScreenViewModel = hiltViewModel()
 ) {
     val notesListScreenState by remember {
         mutableStateOf(viewModel.notesListUiState)
     }
+    // To display all list after editing or adding a note
+    viewModel.setSearchValue("")
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -45,11 +49,14 @@ fun NotesListScreen(
             TotalNotesCount(notesCount = notesListScreenState.totalNotesCount)
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
             SearchBar(searchValue = notesListScreenState.searchValue) { newValue ->
-                viewModel.updateSearchStateValue(newValue)
+                viewModel.setSearchValue(newValue)
                 viewModel.searchAndGetNotes(newValue)
             }
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
-            NotesListView(notes = viewModel.decideWhichListWillBeUsed())
+            NotesListView(
+                notes = viewModel.decideWhichListWillBeUsed(),
+                cardOnClick = cardOnClick
+            )
         }
     }
 }
@@ -108,12 +115,18 @@ fun SearchBar(
 }
 
 @Composable
-fun NotesListView(notes: List<NoteUI>) {
+fun NotesListView(
+    notes: List<NoteUI>,
+    cardOnClick: (Int) -> Unit
+) {
     LazyColumn(
         contentPadding = PaddingValues(MaterialTheme.spacing.extraSmall)
     ) {
         items(notes) { note ->
-            NoteRow(note = note , cardOnClick = {})
+            NoteRow(
+                note = note,
+                cardOnClick = cardOnClick
+            )
         }
     }
 }
@@ -122,7 +135,7 @@ fun NotesListView(notes: List<NoteUI>) {
 @Composable
 private fun NoteRow(
     modifier: Modifier = Modifier,
-    cardOnClick: (NoteUI) -> Unit,
+    cardOnClick: (Int) -> Unit,
     note: NoteUI
 ) {
     Card(
@@ -131,7 +144,7 @@ private fun NoteRow(
             .height(80.dp)
             .padding(vertical = MaterialTheme.spacing.extraSmall),
         onClick = {
-            cardOnClick(note)
+            cardOnClick(note.id)
         }
     ) {
         Column(

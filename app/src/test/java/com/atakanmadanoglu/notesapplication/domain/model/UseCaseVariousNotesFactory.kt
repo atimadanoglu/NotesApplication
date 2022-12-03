@@ -7,7 +7,7 @@ object UseCaseVariousNotesFactory {
         id = 1,
         title = "Hello",
         description = "There",
-        createdAt = 1000L
+        createdAt = "26 Dec"
     )
 
     fun getMockNoteDomain() = NoteDomain(
