@@ -7,4 +7,5 @@ interface NotesRepository {
     fun getNotesByCreatedAt(): Flow<List<NoteDomain>>
     fun getNoteById(id: Int): Flow<NoteDomain>
     suspend fun addNote(noteDomain: NoteDomain)
+    suspend fun editNote(noteDomain: NoteDomain)
 }

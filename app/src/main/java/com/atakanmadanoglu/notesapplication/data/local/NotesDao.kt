@@ -1,9 +1,6 @@
 package com.atakanmadanoglu.notesapplication.data.local
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.atakanmadanoglu.notesapplication.data.model.NoteEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -18,4 +15,7 @@ interface NotesDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addNote(note: NoteEntity)
+
+    @Update
+    fun editNote(noteEntity: NoteEntity)
 }
