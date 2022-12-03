@@ -69,13 +69,13 @@ class EditNoteScreenViewModel @Inject constructor(
         viewModelScope.launch(ioDispatcher) {
             getNoteByIdUseCase.invoke(
                 id = editNoteArgs.noteId
-            ).collectLatest {
+            ).collectLatest { noteUI ->
                 withContext(mainDispatcher) {
-                    retrievedData.value = it
+                    retrievedData.value = noteUI
                     with(_editNoteUiState) {
-                        title = it.title
-                        description = it.description
-                        createdAt = it.createdAt
+                        title = noteUI.title
+                        description = noteUI.description
+                        createdAt = noteUI.createdAt
                     }
                 }
             }

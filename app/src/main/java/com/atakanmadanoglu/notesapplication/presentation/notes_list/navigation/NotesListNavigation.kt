@@ -12,12 +12,16 @@ fun NavController.navigateToNotesListScreen() {
 
 fun NavGraphBuilder.notesList(
     navigateToAddNoteScreen: () -> Unit,
-    navigateToEditNoteScreen: (Int) -> Unit
+    navigateToEditNoteScreen: (Int) -> Unit,
+    setDarkTheme: () -> Unit,
+    iconId: Int
 ) {
     composable(route = Screen.NotesListScreen.route) {
         NotesListScreen(
             addNoteButtonClicked = navigateToAddNoteScreen,
-            cardOnClick = navigateToEditNoteScreen
+            cardOnClick = navigateToEditNoteScreen,
+            setDarkTheme = setDarkTheme,
+            iconId = iconId
         )
     }
 }

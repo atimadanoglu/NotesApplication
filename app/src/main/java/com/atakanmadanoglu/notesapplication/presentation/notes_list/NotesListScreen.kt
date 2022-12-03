@@ -1,5 +1,6 @@
 package com.atakanmadanoglu.notesapplication.presentation.notes_list
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,6 +27,8 @@ import com.atakanmadanoglu.notesapplication.ui.theme.spacing
 fun NotesListScreen(
     addNoteButtonClicked: () -> Unit,
     cardOnClick: (Int) -> Unit,
+    setDarkTheme: () -> Unit,
+    iconId: Int,
     viewModel: NotesListScreenViewModel = hiltViewModel()
 ) {
     val notesListScreenState by remember {
@@ -44,7 +47,10 @@ fun NotesListScreen(
             .fillMaxSize()
             .padding(it)
         ) {
-            AllNotesText()
+            AllNotesText(
+                setDarkTheme = setDarkTheme,
+                id = iconId
+            )
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
             TotalNotesCount(notesCount = notesListScreenState.totalNotesCount)
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
@@ -63,14 +69,37 @@ fun NotesListScreen(
 
 @Composable
 private fun AllNotesText(
+    setDarkTheme: () -> Unit,
+    id: Int,
     modifier: Modifier = Modifier
 ) {
-    Text(
-        text = stringResource(id = R.string.all_notes),
-        fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-        fontWeight = FontWeight.Bold,
-        modifier = modifier.padding(top = MaterialTheme.spacing.large)
-    )
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Start
+    ) {
+        Text(
+            text = stringResource(id = R.string.all_notes),
+            fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+            fontWeight = FontWeight.Bold,
+            modifier = modifier.padding(top = MaterialTheme.spacing.large)
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            IconButton(
+                onClick = setDarkTheme,
+                modifier = Modifier.padding(top = MaterialTheme.spacing.large)
+            ) {
+                println("inside compose $id")
+                Image(
+                    painter = painterResource(id = id),
+                    contentDescription = ""
+                )
+            }
+        }
+    }
+
 }
 
 @Composable
