@@ -35,7 +35,7 @@ fun AddNoteScreen(
             .padding(horizontal = MaterialTheme.spacing.small),
         topBar = {
             NavigationTopAppBar(
-                isDoneIconEnabled = addNoteState.isBothTitleAndDescriptionEntered(),
+                isDoneIconVisible = addNoteState.isBothTitleAndDescriptionEntered(),
                 doneIconOnClick = {
                     addNoteViewModel.addNote(
                         inputTitle = addNoteState.title,
@@ -70,8 +70,8 @@ fun AddNoteScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun NavigationTopAppBar(
-    isDoneIconEnabled: Boolean,
+fun NavigationTopAppBar(
+    isDoneIconVisible: Boolean = false,
     doneIconOnClick: () -> Unit,
     navigationIconOnClick: () -> Unit
 ) {
@@ -88,14 +88,15 @@ private fun NavigationTopAppBar(
             }
         },
         actions = {
-            IconButton(
-                onClick = doneIconOnClick,
-                enabled = isDoneIconEnabled
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_baseline_done_24),
-                    contentDescription = stringResource(id = R.string.done_button)
-                )
+            if (isDoneIconVisible) {
+                IconButton(
+                    onClick = doneIconOnClick
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_done_24),
+                        contentDescription = stringResource(id = R.string.done_button)
+                    )
+                }
             }
         }
     )
@@ -103,10 +104,11 @@ private fun NavigationTopAppBar(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TitleInput(
+fun TitleInput(
     modifier: Modifier = Modifier,
     title: String,
-    titleOnChange: (String) -> Unit
+    titleOnChange: (String) -> Unit,
+    readOnly: Boolean = false
 ) {
     OutlinedTextField(
         modifier = modifier
@@ -114,6 +116,7 @@ private fun TitleInput(
             .wrapContentHeight()
             .background(Color.Transparent),
         value = title,
+        readOnly = readOnly,
         onValueChange = titleOnChange,
         placeholder = {
             Text(
@@ -136,10 +139,11 @@ private fun TitleInput(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun NoteContentView(
+fun NoteContentView(
     modifier: Modifier = Modifier,
     description: String,
-    onDescriptionChange: (String) -> Unit
+    onDescriptionChange: (String) -> Unit,
+    readOnly: Boolean = false
 ) {
     OutlinedTextField(
         modifier = modifier
@@ -147,6 +151,8 @@ private fun NoteContentView(
             .background(Color.Transparent),
         value = description,
         onValueChange = onDescriptionChange,
+        readOnly = readOnly,
+        enabled = true,
         placeholder = {
             Text(
                 text = stringResource(id = R.string.content),
@@ -166,7 +172,7 @@ private fun NoteContentView(
 }
 
 @Composable
-private fun ShowDate() {
+fun ShowDate() {
     val calendar = Calendar.getInstance().time
     val formatter = SimpleDateFormat("MMM d, HH:mm", Locale.ENGLISH)
     val current = formatter.format(calendar)
