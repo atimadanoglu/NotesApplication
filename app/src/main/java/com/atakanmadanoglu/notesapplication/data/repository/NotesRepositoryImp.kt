@@ -27,4 +27,9 @@ class NotesRepositoryImp @Inject constructor(
         val noteEntity = noteMapper.mapToNoteEntity(noteDomain)
         notesDao.addNote(noteEntity)
     }
+
+    override suspend fun editNote(noteDomain: NoteDomain) {
+        val noteEntity = noteMapper.mapToNoteEntity(noteDomain)
+        notesDao.editNote(noteEntity)
+    }
 }

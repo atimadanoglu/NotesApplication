@@ -6,17 +6,22 @@ import androidx.navigation.compose.composable
 import com.atakanmadanoglu.notesapplication.presentation.navigation.Screen
 import com.atakanmadanoglu.notesapplication.presentation.notes_list.NotesListScreen
 
-
 fun NavController.navigateToNotesListScreen() {
     this.navigate(Screen.NotesListScreen.route)
 }
 
 fun NavGraphBuilder.notesList(
-    navigateToAddNoteScreen: () -> Unit
+    navigateToAddNoteScreen: () -> Unit,
+    navigateToEditNoteScreen: (Int) -> Unit,
+    setDarkTheme: () -> Unit,
+    iconId: Int
 ) {
     composable(route = Screen.NotesListScreen.route) {
         NotesListScreen(
-            addNoteButtonClicked = navigateToAddNoteScreen
+            addNoteButtonClicked = navigateToAddNoteScreen,
+            cardOnClick = navigateToEditNoteScreen,
+            setDarkTheme = setDarkTheme,
+            iconId = iconId
         )
     }
 }

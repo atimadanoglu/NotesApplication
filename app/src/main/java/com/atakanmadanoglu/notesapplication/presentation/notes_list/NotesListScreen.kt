@@ -1,5 +1,6 @@
 package com.atakanmadanoglu.notesapplication.presentation.notes_list
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,11 +26,17 @@ import com.atakanmadanoglu.notesapplication.ui.theme.spacing
 @Composable
 fun NotesListScreen(
     addNoteButtonClicked: () -> Unit,
+    cardOnClick: (Int) -> Unit,
+    setDarkTheme: () -> Unit,
+    iconId: Int,
     viewModel: NotesListScreenViewModel = hiltViewModel()
 ) {
     val notesListScreenState by remember {
         mutableStateOf(viewModel.notesListUiState)
     }
+    // To display all list after editing or adding a note
+    viewModel.setSearchValue("")
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -40,30 +47,59 @@ fun NotesListScreen(
             .fillMaxSize()
             .padding(it)
         ) {
-            AllNotesText()
+            AllNotesText(
+                setDarkTheme = setDarkTheme,
+                id = iconId
+            )
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
             TotalNotesCount(notesCount = notesListScreenState.totalNotesCount)
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
             SearchBar(searchValue = notesListScreenState.searchValue) { newValue ->
-                viewModel.updateSearchStateValue(newValue)
+                viewModel.setSearchValue(newValue)
                 viewModel.searchAndGetNotes(newValue)
             }
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
-            NotesListView(notes = viewModel.decideWhichListWillBeUsed())
+            NotesListView(
+                notes = viewModel.decideWhichListWillBeUsed(),
+                cardOnClick = cardOnClick
+            )
         }
     }
 }
 
 @Composable
 private fun AllNotesText(
+    setDarkTheme: () -> Unit,
+    id: Int,
     modifier: Modifier = Modifier
 ) {
-    Text(
-        text = stringResource(id = R.string.all_notes),
-        fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-        fontWeight = FontWeight.Bold,
-        modifier = modifier.padding(top = MaterialTheme.spacing.large)
-    )
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Start
+    ) {
+        Text(
+            text = stringResource(id = R.string.all_notes),
+            fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+            fontWeight = FontWeight.Bold,
+            modifier = modifier.padding(top = MaterialTheme.spacing.large)
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            IconButton(
+                onClick = setDarkTheme,
+                modifier = Modifier.padding(top = MaterialTheme.spacing.large)
+            ) {
+                println("inside compose $id")
+                Image(
+                    painter = painterResource(id = id),
+                    contentDescription = ""
+                )
+            }
+        }
+    }
+
 }
 
 @Composable
@@ -108,12 +144,18 @@ fun SearchBar(
 }
 
 @Composable
-fun NotesListView(notes: List<NoteUI>) {
+fun NotesListView(
+    notes: List<NoteUI>,
+    cardOnClick: (Int) -> Unit
+) {
     LazyColumn(
         contentPadding = PaddingValues(MaterialTheme.spacing.extraSmall)
     ) {
         items(notes) { note ->
-            NoteRow(note = note , cardOnClick = {})
+            NoteRow(
+                note = note,
+                cardOnClick = cardOnClick
+            )
         }
     }
 }
@@ -122,7 +164,7 @@ fun NotesListView(notes: List<NoteUI>) {
 @Composable
 private fun NoteRow(
     modifier: Modifier = Modifier,
-    cardOnClick: (NoteUI) -> Unit,
+    cardOnClick: (Int) -> Unit,
     note: NoteUI
 ) {
     Card(
@@ -131,7 +173,7 @@ private fun NoteRow(
             .height(80.dp)
             .padding(vertical = MaterialTheme.spacing.extraSmall),
         onClick = {
-            cardOnClick(note)
+            cardOnClick(note.id)
         }
     ) {
         Column(
