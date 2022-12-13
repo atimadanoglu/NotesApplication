@@ -11,4 +11,5 @@
     <string name="content">Content</string>
     <string name="back_button">Back button</string>
     <string name="done_button">Done button</string>
+    <string name="theme_color_icon">Theme color icon</string>
 </resources>

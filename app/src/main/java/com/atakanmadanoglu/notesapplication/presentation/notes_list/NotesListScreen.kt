@@ -34,6 +34,7 @@ fun NotesListScreen(
     val notesListScreenState by remember {
         mutableStateOf(viewModel.notesListUiState)
     }
+    viewModel.getAllNotes()
     // To display all list after editing or adding a note
     viewModel.setSearchValue("")
 
@@ -56,7 +57,7 @@ fun NotesListScreen(
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
             SearchBar(searchValue = notesListScreenState.searchValue) { newValue ->
                 viewModel.setSearchValue(newValue)
-                viewModel.searchAndGetNotes(newValue)
+                viewModel.searchAndGetNotes()
             }
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
             NotesListView(
@@ -91,10 +92,9 @@ private fun AllNotesText(
                 onClick = setDarkTheme,
                 modifier = Modifier.padding(top = MaterialTheme.spacing.large)
             ) {
-                println("inside compose $id")
                 Image(
                     painter = painterResource(id = id),
-                    contentDescription = ""
+                    contentDescription = stringResource(id = R.string.theme_color_icon)
                 )
             }
         }
