@@ -7,18 +7,14 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.atakanmadanoglu.notesapplication.di.IoDispatcher
-import com.atakanmadanoglu.notesapplication.di.MainDispatcher
 import com.atakanmadanoglu.notesapplication.domain.usecases.EditNoteUseCase
 import com.atakanmadanoglu.notesapplication.domain.usecases.GetNoteByIdUseCase
 import com.atakanmadanoglu.notesapplication.presentation.edit_note.navigation.EditNoteArgs
 import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @Stable
@@ -53,30 +49,27 @@ private class MutableEditNoteUiState: EditNoteUiState {
 class EditNoteScreenViewModel @Inject constructor(
     private val getNoteByIdUseCase: GetNoteByIdUseCase,
     private val editNoteUseCase: EditNoteUseCase,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    @MainDispatcher private val mainDispatcher: CoroutineDispatcher,
     savedStateHandle: SavedStateHandle
 ): ViewModel() {
 
     private val editNoteArgs = EditNoteArgs(savedStateHandle)
 
+    // it will be used to compare the first retrieved and edited values
     private val retrievedData = MutableStateFlow<NoteUI?>(null)
 
     private val _editNoteUiState = MutableEditNoteUiState()
     val editNoteUiState: EditNoteUiState get() = _editNoteUiState
 
-    init {
-        viewModelScope.launch(ioDispatcher) {
+    fun getNoteById() {
+        viewModelScope.launch {
             getNoteByIdUseCase.invoke(
                 id = editNoteArgs.noteId
             ).collectLatest { noteUI ->
-                withContext(mainDispatcher) {
-                    retrievedData.value = noteUI
-                    with(_editNoteUiState) {
-                        title = noteUI.title
-                        description = noteUI.description
-                        createdAt = noteUI.createdAt
-                    }
+                retrievedData.value = noteUI
+                with(_editNoteUiState) {
+                    title = noteUI.title
+                    description = noteUI.description
+                    createdAt = noteUI.createdAt
                 }
             }
         }
@@ -85,40 +78,29 @@ class EditNoteScreenViewModel @Inject constructor(
     fun editNote(
         inputTitle: String,
         inputDescription: String
-    ) = viewModelScope.launch(ioDispatcher) {
+    ) = viewModelScope.launch {
         editNoteUseCase.invoke(
             id = retrievedData.value?.id ?: -1,
             title = inputTitle,
             description = inputDescription
         )
+        _editNoteUiState.isDoneIconVisible = false
     }
 
     fun updateTitleValue(newValue: String) {
         _editNoteUiState.title = newValue
-        refreshDoneIconVisibility()
+        updateDoneIconVisibility()
     }
 
     fun updateDescriptionValue(newValue: String) {
         _editNoteUiState.description = newValue
-        refreshDoneIconVisibility()
+        updateDoneIconVisibility()
     }
 
-    private fun refreshDoneIconVisibility() = with(retrievedData.value) {
+    private fun updateDoneIconVisibility() = with(retrievedData.value) {
          _editNoteUiState.isDoneIconVisible = _editNoteUiState.isNewValueEntered(
              retrievedTitle = this?.title ?: "",
              retrievedDescription = this?.description ?: ""
          )
-    }
-
-    fun updateRetrievedData() = viewModelScope.launch(ioDispatcher) {
-        getNoteByIdUseCase.invoke(
-            editNoteArgs.noteId
-        ).collectLatest {
-            retrievedData.value = it
-        }
-    }
-
-    fun makeDoneDoneIconInvisible() {
-        _editNoteUiState.isDoneIconVisible = false
     }
 }

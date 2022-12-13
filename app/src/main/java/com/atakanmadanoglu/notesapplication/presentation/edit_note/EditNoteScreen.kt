@@ -36,6 +36,9 @@ fun EditNoteScreen(
     val editNoteUiState by remember {
         mutableStateOf(editNoteScreenViewModel.editNoteUiState)
     }
+    // To get note by id that is sent from previous page
+    editNoteScreenViewModel.getNoteById()
+
     val focusManager = LocalFocusManager.current
     Scaffold(
         modifier = modifier
@@ -49,9 +52,7 @@ fun EditNoteScreen(
                         inputTitle = editNoteUiState.title,
                         inputDescription = editNoteUiState.description
                     )
-                    editNoteScreenViewModel.updateRetrievedData()
-                    focusManager.clearFocus()
-                    editNoteScreenViewModel.makeDoneDoneIconInvisible() },
+                    focusManager.clearFocus() },
                 navigationIconOnClick = { navController.popBackStack() }
             )
         }
