@@ -4,9 +4,6 @@ import com.atakanmadanoglu.notesapplication.data.NotesDatabase
 import com.atakanmadanoglu.notesapplication.data.local.NotesDao
 import com.atakanmadanoglu.notesapplication.data.repository.NotesRepository
 import com.atakanmadanoglu.notesapplication.data.repository.NotesRepositoryImp
-import com.atakanmadanoglu.notesapplication.domain.mapper.NoteUIMapper
-import com.atakanmadanoglu.notesapplication.domain.usecases.EditNoteUseCase
-import com.atakanmadanoglu.notesapplication.domain.usecases.GetNoteByIdUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -21,17 +18,6 @@ abstract class NotesModule {
         fun provideNotesDao(
             database: NotesDatabase
         ): NotesDao = database.getNotesDao()
-
-        @Provides
-        fun provideEditNotesUseCase(
-            notesRepository: NotesRepository
-        ) = EditNoteUseCase(notesRepository)
-
-        @Provides
-        fun provideGetNoteByIdUseCase(
-            notesRepository: NotesRepository,
-            noteUIMapper: NoteUIMapper
-        ) = GetNoteByIdUseCase(notesRepository, noteUIMapper)
     }
 
     @Binds
