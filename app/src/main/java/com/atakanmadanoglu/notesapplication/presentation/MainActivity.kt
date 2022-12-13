@@ -18,7 +18,7 @@ import com.atakanmadanoglu.notesapplication.presentation.edit_note.navigation.ed
 import com.atakanmadanoglu.notesapplication.presentation.edit_note.navigation.navigateToEditNoteScreen
 import com.atakanmadanoglu.notesapplication.presentation.navigation.Screen
 import com.atakanmadanoglu.notesapplication.presentation.notes_list.navigation.notesList
-import com.atakanmadanoglu.notesapplication.ui.theme.NotesApplicationTheme
+import com.atakanmadanoglu.notesapplication.theme.NotesApplicationTheme
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

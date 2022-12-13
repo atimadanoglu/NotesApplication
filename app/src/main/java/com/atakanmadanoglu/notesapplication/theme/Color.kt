@@ -1,4 +1,4 @@
-package com.atakanmadanoglu.notesapplication.ui.theme
+package com.atakanmadanoglu.notesapplication.theme
 
 import androidx.compose.ui.graphics.Color
 

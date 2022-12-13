@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.atakanmadanoglu.notesapplication.R
 import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
-import com.atakanmadanoglu.notesapplication.ui.theme.spacing
+import com.atakanmadanoglu.notesapplication.theme.spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

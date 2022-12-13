@@ -15,7 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.atakanmadanoglu.notesapplication.R
-import com.atakanmadanoglu.notesapplication.ui.theme.spacing
+import com.atakanmadanoglu.notesapplication.theme.spacing
 import java.text.SimpleDateFormat
 import java.util.*
 

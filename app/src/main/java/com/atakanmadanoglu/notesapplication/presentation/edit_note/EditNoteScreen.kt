@@ -23,7 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import com.atakanmadanoglu.notesapplication.presentation.add_note.NavigationTopAppBar
 import com.atakanmadanoglu.notesapplication.presentation.add_note.NoteContentView
 import com.atakanmadanoglu.notesapplication.presentation.add_note.TitleInput
-import com.atakanmadanoglu.notesapplication.ui.theme.spacing
+import com.atakanmadanoglu.notesapplication.theme.spacing
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
