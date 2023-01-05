@@ -1,6 +1,5 @@
 package com.atakanmadanoglu.notesapplication.presentation.notes_list
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,8 +26,6 @@ import com.atakanmadanoglu.notesapplication.theme.spacing
 fun NotesListScreen(
     addNoteButtonClicked: () -> Unit,
     cardOnClick: (Int) -> Unit,
-    setDarkTheme: () -> Unit,
-    iconId: Int,
     viewModel: NotesListScreenViewModel = hiltViewModel()
 ) {
     val notesListScreenState by remember {
@@ -48,10 +45,7 @@ fun NotesListScreen(
             .fillMaxSize()
             .padding(it)
         ) {
-            AllNotesText(
-                setDarkTheme = setDarkTheme,
-                id = iconId
-            )
+            AllNotesText()
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
             TotalNotesCount(notesCount = notesListScreenState.totalNotesCount)
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
@@ -70,8 +64,6 @@ fun NotesListScreen(
 
 @Composable
 private fun AllNotesText(
-    setDarkTheme: () -> Unit,
-    id: Int,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -84,20 +76,6 @@ private fun AllNotesText(
             fontWeight = FontWeight.Bold,
             modifier = modifier.padding(top = MaterialTheme.spacing.large)
         )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            IconButton(
-                onClick = setDarkTheme,
-                modifier = Modifier.padding(top = MaterialTheme.spacing.large)
-            ) {
-                Image(
-                    painter = painterResource(id = id),
-                    contentDescription = stringResource(id = R.string.theme_color_icon)
-                )
-            }
-        }
     }
 
 }
@@ -149,7 +127,12 @@ fun NotesListView(
     cardOnClick: (Int) -> Unit
 ) {
     LazyColumn(
-        contentPadding = PaddingValues(MaterialTheme.spacing.extraSmall)
+        contentPadding = PaddingValues(
+            start = MaterialTheme.spacing.extraSmall,
+            top = MaterialTheme.spacing.extraSmall,
+            end = MaterialTheme.spacing.extraSmall,
+            bottom = MaterialTheme.spacing.extraExtraLarge
+        )
     ) {
         items(notes) { note ->
             NoteRow(
