@@ -2,8 +2,8 @@ package com.atakanmadanoglu.notesapplication.di
 
 import com.atakanmadanoglu.notesapplication.data.NotesDatabase
 import com.atakanmadanoglu.notesapplication.data.local.NotesDao
-import com.atakanmadanoglu.notesapplication.data.repository.NotesRepository
-import com.atakanmadanoglu.notesapplication.data.repository.NotesRepositoryImp
+import com.atakanmadanoglu.notesapplication.data.repository.notes.NotesRepository
+import com.atakanmadanoglu.notesapplication.data.repository.notes.NotesRepositoryImp
 import dagger.Binds
 import dagger.Module
 import dagger.Provides

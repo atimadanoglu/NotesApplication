@@ -1,7 +1,7 @@
 package com.atakanmadanoglu.notesapplication.domain.usecases
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.atakanmadanoglu.notesapplication.data.repository.NotesRepository
+import com.atakanmadanoglu.notesapplication.data.repository.notes.NotesRepository
 import com.atakanmadanoglu.notesapplication.domain.mapper.NoteUIMapper
 import com.atakanmadanoglu.notesapplication.domain.model.NoteDomain
 import com.atakanmadanoglu.notesapplication.domain.model.UseCaseVariousNotesFactory
