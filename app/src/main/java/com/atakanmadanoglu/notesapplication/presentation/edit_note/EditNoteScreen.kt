@@ -23,6 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import com.atakanmadanoglu.notesapplication.presentation.add_note.NavigationTopAppBar
 import com.atakanmadanoglu.notesapplication.presentation.add_note.NoteContentView
 import com.atakanmadanoglu.notesapplication.presentation.add_note.TitleInput
+import com.atakanmadanoglu.notesapplication.theme.openSansRegular
 import com.atakanmadanoglu.notesapplication.theme.spacing
 import java.util.*
 
@@ -91,6 +92,7 @@ private fun ShowDate(
         modifier = Modifier.fillMaxWidth(),
         text = date,
         fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+        fontFamily = MaterialTheme.typography.openSansRegular.fontFamily,
         color = Color.Gray,
         textAlign = TextAlign.End
     )

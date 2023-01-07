@@ -1,11 +1,11 @@
 buildscript {
     ext {
-        composeVersion = '1.4.0-alpha02'
+        composeVersion = '1.4.0-alpha03'
         hiltVersion = '2.44.2'
         roomVersion = '2.4.3'
-        espressoVersion = '3.5.0'
-        testJunitVersion = '1.1.4'
-        testRunnerVersion = '1.5.1'
+        espressoVersion = '3.5.1'
+        testJunitVersion = '1.1.5'
+        testRunnerVersion = '1.5.2'
         mockkVersion = '1.13.2'
         arcCoreTestingVersion = '2.1.0'
         coroutinesVersion = '1.6.4'
