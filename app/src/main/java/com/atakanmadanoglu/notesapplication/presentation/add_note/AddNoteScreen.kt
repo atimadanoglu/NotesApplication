@@ -1,6 +1,5 @@
 package com.atakanmadanoglu.notesapplication.presentation.add_note
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -9,13 +8,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.atakanmadanoglu.notesapplication.R
-import com.atakanmadanoglu.notesapplication.ui.theme.spacing
+import com.atakanmadanoglu.notesapplication.theme.openSansRegular
+import com.atakanmadanoglu.notesapplication.theme.openSansSemiBold
+import com.atakanmadanoglu.notesapplication.theme.spacing
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -107,26 +107,24 @@ fun NavigationTopAppBar(
 fun TitleInput(
     modifier: Modifier = Modifier,
     title: String,
-    titleOnChange: (String) -> Unit,
-    readOnly: Boolean = false
+    titleOnChange: (String) -> Unit
 ) {
     OutlinedTextField(
         modifier = modifier
             .fillMaxWidth()
-            .wrapContentHeight()
-            .background(Color.Transparent),
+            .wrapContentHeight(),
         value = title,
-        readOnly = readOnly,
         onValueChange = titleOnChange,
         placeholder = {
             Text(
                 text = stringResource(id = R.string.title),
-                fontSize = MaterialTheme.typography.headlineMedium.fontSize
+                fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily
             )
         },
         textStyle = TextStyle(
-            fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-            fontWeight = FontWeight.SemiBold
+            fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+            fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily
         ),
         singleLine = true,
         colors = TextFieldDefaults.textFieldColors(
@@ -142,25 +140,23 @@ fun TitleInput(
 fun NoteContentView(
     modifier: Modifier = Modifier,
     description: String,
-    onDescriptionChange: (String) -> Unit,
-    readOnly: Boolean = false
+    onDescriptionChange: (String) -> Unit
 ) {
     OutlinedTextField(
         modifier = modifier
-            .fillMaxSize()
-            .background(Color.Transparent),
+            .fillMaxSize(),
         value = description,
         onValueChange = onDescriptionChange,
-        readOnly = readOnly,
-        enabled = true,
         placeholder = {
             Text(
                 text = stringResource(id = R.string.content),
-                fontSize = MaterialTheme.typography.bodyMedium.fontSize
+                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                fontFamily = MaterialTheme.typography.openSansRegular.fontFamily
             )
         },
         textStyle = TextStyle(
-            fontSize = MaterialTheme.typography.bodyLarge.fontSize
+            fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+            fontFamily = MaterialTheme.typography.openSansRegular.fontFamily
         ),
         singleLine = false,
         colors = TextFieldDefaults.textFieldColors(
@@ -179,6 +175,7 @@ fun ShowDate() {
     Text(
         modifier = Modifier.fillMaxWidth(),
         text = current,
+        fontFamily = MaterialTheme.typography.openSansRegular.fontFamily,
         fontSize = MaterialTheme.typography.bodyMedium.fontSize,
         color = Color.Gray,
         textAlign = TextAlign.End

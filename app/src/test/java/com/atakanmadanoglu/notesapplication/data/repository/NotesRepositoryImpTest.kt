@@ -5,12 +5,15 @@ import com.atakanmadanoglu.notesapplication.data.local.NotesDao
 import com.atakanmadanoglu.notesapplication.data.mapper.NoteEntityMapper
 import com.atakanmadanoglu.notesapplication.data.model.NoteEntity
 import com.atakanmadanoglu.notesapplication.data.model.NoteFactory
+import com.atakanmadanoglu.notesapplication.data.repository.notes.NotesRepository
+import com.atakanmadanoglu.notesapplication.data.repository.notes.NotesRepositoryImp
 import com.atakanmadanoglu.notesapplication.domain.model.NoteDomain
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -22,6 +25,7 @@ class NotesRepositoryImpTest {
     @get:Rule
     var instantTaskExecutorRule = InstantTaskExecutorRule()
 
+    private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var repository: NotesRepository
     private lateinit var noteDomain: NoteDomain
     private lateinit var noteEntity: NoteEntity
@@ -31,7 +35,7 @@ class NotesRepositoryImpTest {
     @Before
     fun setup() {
         repository = NotesRepositoryImp(
-            notesDao, mapper
+            notesDao, mapper, testDispatcher
         )
         noteDomain = NoteFactory.getMockNoteDomain()
         noteEntity = NoteFactory.getMockNoteEntity()

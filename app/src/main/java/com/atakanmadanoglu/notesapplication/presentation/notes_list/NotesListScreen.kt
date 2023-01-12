@@ -1,6 +1,5 @@
 package com.atakanmadanoglu.notesapplication.presentation.notes_list
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,27 +12,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.atakanmadanoglu.notesapplication.R
 import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
-import com.atakanmadanoglu.notesapplication.ui.theme.spacing
+import com.atakanmadanoglu.notesapplication.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotesListScreen(
     addNoteButtonClicked: () -> Unit,
     cardOnClick: (Int) -> Unit,
-    setDarkTheme: () -> Unit,
-    iconId: Int,
     viewModel: NotesListScreenViewModel = hiltViewModel()
 ) {
     val notesListScreenState by remember {
         mutableStateOf(viewModel.notesListUiState)
     }
+    viewModel.getAllNotes()
     // To display all list after editing or adding a note
     viewModel.setSearchValue("")
 
@@ -47,18 +45,14 @@ fun NotesListScreen(
             .fillMaxSize()
             .padding(it)
         ) {
-            AllNotesText(
-                setDarkTheme = setDarkTheme,
-                id = iconId
-            )
-            Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
+            AllNotesText()
             TotalNotesCount(notesCount = notesListScreenState.totalNotesCount)
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
             SearchBar(searchValue = notesListScreenState.searchValue) { newValue ->
                 viewModel.setSearchValue(newValue)
-                viewModel.searchAndGetNotes(newValue)
+                viewModel.searchAndGetNotes()
             }
-            Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
+            Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
             NotesListView(
                 notes = viewModel.decideWhichListWillBeUsed(),
                 cardOnClick = cardOnClick
@@ -69,47 +63,35 @@ fun NotesListScreen(
 
 @Composable
 private fun AllNotesText(
-    setDarkTheme: () -> Unit,
-    id: Int,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Start
-    ) {
-        Text(
-            text = stringResource(id = R.string.all_notes),
-            fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-            fontWeight = FontWeight.Bold,
-            modifier = modifier.padding(top = MaterialTheme.spacing.large)
+    Text(
+        text = stringResource(id = R.string.all_notes),
+        fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily,
+        fontSize = MaterialTheme.typography.displayMedium.fontSize,
+        fontWeight = FontWeight.Bold,
+        modifier = modifier.padding(
+            top = MaterialTheme.spacing.large,
+            start = MaterialTheme.spacing.small
         )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            IconButton(
-                onClick = setDarkTheme,
-                modifier = Modifier.padding(top = MaterialTheme.spacing.large)
-            ) {
-                println("inside compose $id")
-                Image(
-                    painter = painterResource(id = id),
-                    contentDescription = ""
-                )
-            }
-        }
-    }
-
+    )
 }
 
 @Composable
 private fun TotalNotesCount(
+    modifier: Modifier = Modifier,
     notesCount: Int
 ) {
-    val totalNotes = stringResource(id = R.string.total_notes_count, notesCount)
+    val totalNotes = if (notesCount != 1) {
+        stringResource(id = R.string.plural_note_count, notesCount)
+    } else {
+        stringResource(id = R.string.singular_note_count, notesCount)
+    }
     Text(
+        modifier = modifier.padding(start = MaterialTheme.spacing.small),
         text = totalNotes,
-        fontSize = MaterialTheme.typography.headlineSmall.fontSize
+        fontFamily = MaterialTheme.typography.openSansRegular.fontFamily,
+        fontSize = MaterialTheme.typography.titleMedium.fontSize
     )
 }
 
@@ -131,10 +113,12 @@ fun SearchBar(
                 contentDescription = stringResource(id = R.string.search_icon)
             ) },
         value = searchValue,
+        textStyle = TextStyle(fontFamily = MaterialTheme.typography.openSansRegular.fontFamily),
         onValueChange = onSearchValueChange,
         singleLine = true,
         placeholder = { Text(
-            text = stringResource(id = R.string.search_notes)
+            text = stringResource(id = R.string.search_notes),
+            fontFamily = MaterialTheme.typography.openSansRegular.fontFamily
         ) },
         colors = TextFieldDefaults.textFieldColors(
             unfocusedIndicatorColor = Color.Transparent,
@@ -149,7 +133,12 @@ fun NotesListView(
     cardOnClick: (Int) -> Unit
 ) {
     LazyColumn(
-        contentPadding = PaddingValues(MaterialTheme.spacing.extraSmall)
+        contentPadding = PaddingValues(
+            start = MaterialTheme.spacing.extraSmall,
+            top = MaterialTheme.spacing.extraSmall,
+            end = MaterialTheme.spacing.extraSmall,
+            bottom = MaterialTheme.spacing.extraExtraLarge
+        )
     ) {
         items(notes) { note ->
             NoteRow(
@@ -184,26 +173,29 @@ private fun NoteRow(
         ) {
             Text(
                 text = note.title,
-                fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                fontWeight = FontWeight.W400,
+                fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily,
                 maxLines = 1
             )
+            Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
             Row(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
                     text = note.createdAt,
-                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                    fontStyle = FontStyle.Italic,
+                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                    fontFamily = MaterialTheme.typography.openSansLightItalic.fontFamily,
                     maxLines = 1
                 )
                 Text(
                     text = stringResource(id = R.string.vertical_line),
-                    fontSize = MaterialTheme.typography.bodyMedium.fontSize
+                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                    fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily
                 )
                 Text(
                     text = note.description,
-                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                    fontFamily = MaterialTheme.typography.openSansRegular.fontFamily,
                     maxLines = 1
                 )
             }

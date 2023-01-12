@@ -23,7 +23,8 @@ import androidx.navigation.compose.rememberNavController
 import com.atakanmadanoglu.notesapplication.presentation.add_note.NavigationTopAppBar
 import com.atakanmadanoglu.notesapplication.presentation.add_note.NoteContentView
 import com.atakanmadanoglu.notesapplication.presentation.add_note.TitleInput
-import com.atakanmadanoglu.notesapplication.ui.theme.spacing
+import com.atakanmadanoglu.notesapplication.theme.openSansRegular
+import com.atakanmadanoglu.notesapplication.theme.spacing
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,6 +37,9 @@ fun EditNoteScreen(
     val editNoteUiState by remember {
         mutableStateOf(editNoteScreenViewModel.editNoteUiState)
     }
+    // To get note by id that is sent from previous page
+    editNoteScreenViewModel.getNoteById()
+
     val focusManager = LocalFocusManager.current
     Scaffold(
         modifier = modifier
@@ -49,9 +53,7 @@ fun EditNoteScreen(
                         inputTitle = editNoteUiState.title,
                         inputDescription = editNoteUiState.description
                     )
-                    editNoteScreenViewModel.updateRetrievedData()
-                    focusManager.clearFocus()
-                    editNoteScreenViewModel.makeDoneDoneIconInvisible() },
+                    focusManager.clearFocus() },
                 navigationIconOnClick = { navController.popBackStack() }
             )
         }
@@ -90,6 +92,7 @@ private fun ShowDate(
         modifier = Modifier.fillMaxWidth(),
         text = date,
         fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+        fontFamily = MaterialTheme.typography.openSansRegular.fontFamily,
         color = Color.Gray,
         textAlign = TextAlign.End
     )

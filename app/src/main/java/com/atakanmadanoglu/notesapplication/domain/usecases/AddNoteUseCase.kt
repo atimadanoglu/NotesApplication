@@ -1,6 +1,6 @@
 package com.atakanmadanoglu.notesapplication.domain.usecases
 
-import com.atakanmadanoglu.notesapplication.data.repository.NotesRepository
+import com.atakanmadanoglu.notesapplication.data.repository.notes.NotesRepository
 import com.atakanmadanoglu.notesapplication.domain.model.NoteDomain
 import javax.inject.Inject
 

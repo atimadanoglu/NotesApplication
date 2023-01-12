@@ -6,9 +6,11 @@
     <string name="all_notes">All notes</string>
     <string name="search_notes">Search notes</string>
     <string name="vertical_line">" | "</string>
-    <string name="total_notes_count">%d notes</string>
+    <string name="plural_note_count">%d notes</string>
+    <string name="singular_note_count">%d note</string>
     <string name="title">Title</string>
     <string name="content">Content</string>
     <string name="back_button">Back button</string>
     <string name="done_button">Done button</string>
+    <string name="theme_color_icon">Theme color icon</string>
 </resources>
