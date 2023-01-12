@@ -26,7 +26,7 @@ private class MutableAddNoteUiState: AddNoteUiState {
     override var description by mutableStateOf("")
 
     override fun isBothTitleAndDescriptionEntered(): Boolean {
-        return title.isNotEmpty() && description.isNotEmpty()
+        return title.isNotEmpty() || description.isNotEmpty()
     }
 }
 
