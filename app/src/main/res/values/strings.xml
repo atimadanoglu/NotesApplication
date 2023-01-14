@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">NotesApplication</string>
+    <string name="app_name">My Notes</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="add_note">Add note button</string>
     <string name="search_icon">Searching notes icon</string>
