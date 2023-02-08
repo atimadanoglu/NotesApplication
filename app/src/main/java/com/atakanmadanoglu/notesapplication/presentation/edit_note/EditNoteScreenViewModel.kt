@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.atakanmadanoglu.notesapplication.domain.usecases.DeleteNoteByIdUseCase
 import com.atakanmadanoglu.notesapplication.domain.usecases.EditNoteUseCase
 import com.atakanmadanoglu.notesapplication.domain.usecases.GetNoteByIdUseCase
 import com.atakanmadanoglu.notesapplication.presentation.edit_note.navigation.EditNoteArgs
@@ -49,6 +50,7 @@ private class MutableEditNoteUiState: EditNoteUiState {
 class EditNoteScreenViewModel @Inject constructor(
     private val getNoteByIdUseCase: GetNoteByIdUseCase,
     private val editNoteUseCase: EditNoteUseCase,
+    private val deleteNoteByIdUseCase: DeleteNoteByIdUseCase,
     savedStateHandle: SavedStateHandle
 ): ViewModel() {
 
@@ -102,5 +104,11 @@ class EditNoteScreenViewModel @Inject constructor(
              retrievedTitle = this?.title ?: "",
              retrievedDescription = this?.description ?: ""
          )
+    }
+
+    fun deleteNote() {
+        viewModelScope.launch {
+            deleteNoteByIdUseCase.invoke(editNoteArgs.noteId)
+        }
     }
 }
