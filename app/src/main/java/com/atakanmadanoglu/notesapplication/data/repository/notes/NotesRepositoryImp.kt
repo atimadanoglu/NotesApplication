@@ -16,14 +16,14 @@ class NotesRepositoryImp @Inject constructor(
     private val noteMapper: NoteEntityMapper,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : NotesRepository {
-    override fun getNotesByCreatedAt(): Flow<List<NoteDomain>> =
+    override fun getNotesByCreatedAt(): Flow<List<NoteDomain?>> =
         notesDao.getNotesByCreatedAt().map { notesList ->
             notesList.map {
                 noteMapper.mapToNoteDomain(it)
             }
         }
 
-    override fun getNoteById(id: Int): Flow<NoteDomain> =
+    override fun getNoteById(id: Int): Flow<NoteDomain?> =
         notesDao.getNoteById(id).map {
             noteMapper.mapToNoteDomain(it)
         }.flowOn(ioDispatcher)
@@ -38,7 +38,7 @@ class NotesRepositoryImp @Inject constructor(
         notesDao.editNote(noteEntity)
     }
 
-    override suspend fun deleteNoteById(noteId: Int) {
+    override suspend fun deleteNoteById(noteId: Int) = withContext(ioDispatcher) {
         notesDao.deleteNoteById(noteId)
     }
 

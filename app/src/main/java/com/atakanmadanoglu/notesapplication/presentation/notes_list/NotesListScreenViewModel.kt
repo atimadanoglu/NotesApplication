@@ -4,6 +4,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.atakanmadanoglu.notesapplication.domain.usecases.DeleteNotesByIdsUseCase
 import com.atakanmadanoglu.notesapplication.domain.usecases.GetNotesByCreatedAtUseCase
 import com.atakanmadanoglu.notesapplication.domain.usecases.SearchNotesUseCase
 import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
@@ -34,18 +35,23 @@ private class MutableNotesListUiState: NotesListUiState {
 @HiltViewModel
 class NotesListScreenViewModel @Inject constructor(
     private val getNotesByCreatedAtUseCase: GetNotesByCreatedAtUseCase,
-    private val searchNotesUseCase: SearchNotesUseCase
+    private val searchNotesUseCase: SearchNotesUseCase,
+    private val deleteNotesByIdsUseCase: DeleteNotesByIdsUseCase
 ): ViewModel() {
     private val _notesListUiState = MutableNotesListUiState()
     val notesListUiState: NotesListUiState = _notesListUiState
 
     fun getAllNotes() {
         viewModelScope.launch {
-            getNotesByCreatedAtUseCase.invoke().collectLatest {
+            getNotesByCreatedAtUseCase.invoke().collectLatest { list ->
                 with(_notesListUiState) {
                     allNotesList.clear()
-                    allNotesList.addAll(it)
-                    totalNotesCount = it.size
+                    list.map { noteUI ->
+                        noteUI?.let {
+                            allNotesList.add(it)
+                        }
+                    }
+                    totalNotesCount = list.size
                 }
             }
         }
@@ -69,5 +75,9 @@ class NotesListScreenViewModel @Inject constructor(
 
     fun setSearchValue(newValue: String) {
         _notesListUiState.searchValue = newValue
+    }
+
+    fun deleteNotes() {
+        // TODO: Implement
     }
 }

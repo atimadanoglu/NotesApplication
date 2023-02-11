@@ -1,25 +1,25 @@
 package com.atakanmadanoglu.notesapplication.presentation.edit_note
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.atakanmadanoglu.notesapplication.R
 import com.atakanmadanoglu.notesapplication.presentation.add_note.NavigationTopAppBar
 import com.atakanmadanoglu.notesapplication.presentation.add_note.NoteContentView
 import com.atakanmadanoglu.notesapplication.presentation.add_note.TitleInput
@@ -64,6 +64,19 @@ fun EditNoteScreen(
                 .padding(it)
         ) {
             TitleInput(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .onFocusChanged { focusState ->
+                        when {
+                            focusState.isFocused -> {
+                                editNoteScreenViewModel.updateFocusValue(true)
+                            }
+                            !focusState.hasFocus -> {
+                                editNoteScreenViewModel.updateFocusValue(false)
+                            }
+                        }
+                    },
                 title = editNoteUiState.title,
                 titleOnChange = { newTitleValue ->
                     editNoteScreenViewModel
@@ -74,12 +87,48 @@ fun EditNoteScreen(
                 date = editNoteUiState.createdAt
             )
             NoteContentView(
+                modifier = Modifier
+                    .fillMaxHeight(0.9f)
+                    .fillMaxWidth()
+                    .onFocusChanged { focusState ->
+                        when {
+                            focusState.isFocused -> {
+                                editNoteScreenViewModel.updateFocusValue(true)
+                            }
+                            !focusState.hasFocus -> {
+                                editNoteScreenViewModel.updateFocusValue(false)
+                            }
+                        }
+                    },
                 description = editNoteUiState.description,
                 onDescriptionChange = { newDescriptionValue ->
                     editNoteScreenViewModel
                         .updateDescriptionValue(newDescriptionValue)
                 }
             )
+            if (!editNoteUiState.isFocused) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = MaterialTheme.spacing.small)
+                        .clickable {
+                            editNoteScreenViewModel.deleteNote()
+                            navController.popBackStack()
+                        },
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.outline_delete_24),
+                        contentDescription = stringResource(id = R.string.delete_icon)
+                    )
+                    Text(
+                        text = stringResource(id = R.string.delete),
+                        fontSize = MaterialTheme.typography.labelMedium.fontSize,
+                        fontFamily = MaterialTheme.typography.openSansRegular.fontFamily
+                    )
+                }
+            }
         }
     }
 }

@@ -13,4 +13,6 @@
     <string name="back_button">Back button</string>
     <string name="done_button">Done button</string>
     <string name="theme_color_icon">Theme color icon</string>
+    <string name="delete">Delete</string>
+    <string name="delete_icon">Delete icon</string>
 </resources>

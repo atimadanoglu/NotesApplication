@@ -13,8 +13,10 @@ class GetNoteByIdUseCase @Inject constructor(
 ) {
     operator fun invoke(
         id: Int
-    ): Flow<NoteUI> = notesRepository
-        .getNoteById(id).map {
-            noteUIMapper.mapToNoteUI(it)
+    ): Flow<NoteUI?> = notesRepository
+        .getNoteById(id).map { noteDomain ->
+            noteDomain?.let {
+                noteUIMapper.mapToNoteUI(it)
+            }
         }
 }

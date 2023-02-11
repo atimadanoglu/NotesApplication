@@ -25,6 +25,7 @@ interface EditNoteUiState {
     val createdAt: String
     val isDoneIconClicked: Boolean
     val isDoneIconVisible: Boolean
+    val isFocused: Boolean
     fun isNewValueEntered(
         retrievedTitle: String,
         retrievedDescription: String
@@ -37,6 +38,7 @@ private class MutableEditNoteUiState: EditNoteUiState {
     override var createdAt by mutableStateOf("")
     override var isDoneIconClicked by mutableStateOf(false)
     override var isDoneIconVisible by mutableStateOf(false)
+    override var isFocused by mutableStateOf(false)
     override fun isNewValueEntered(
         retrievedTitle: String,
         retrievedDescription: String
@@ -69,9 +71,9 @@ class EditNoteScreenViewModel @Inject constructor(
             ).collectLatest { noteUI ->
                 retrievedData.value = noteUI
                 with(_editNoteUiState) {
-                    title = noteUI.title
-                    description = noteUI.description
-                    createdAt = noteUI.createdAt
+                    title = noteUI?.title ?: ""
+                    description = noteUI?.description ?: ""
+                    createdAt = noteUI?.createdAt ?: ""
                 }
             }
         }
@@ -99,6 +101,9 @@ class EditNoteScreenViewModel @Inject constructor(
         updateDoneIconVisibility()
     }
 
+    fun updateFocusValue(newValue: Boolean) {
+        _editNoteUiState.isFocused = newValue
+    }
     private fun updateDoneIconVisibility() = with(retrievedData.value) {
          _editNoteUiState.isDoneIconVisible = _editNoteUiState.isNewValueEntered(
              retrievedTitle = this?.title ?: "",
