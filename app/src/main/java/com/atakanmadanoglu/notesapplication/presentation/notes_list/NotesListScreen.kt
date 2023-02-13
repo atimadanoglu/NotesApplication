@@ -1,5 +1,7 @@
 package com.atakanmadanoglu.notesapplication.presentation.notes_list
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -7,7 +9,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -39,26 +43,108 @@ fun NotesListScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = MaterialTheme.spacing.medium),
-        floatingActionButton = { Fab(addNoteButtonClicked) }
-    ) {
+        floatingActionButton = {
+            // To make invisible fab during choosing any notes. This will
+            // prevent users to add any note in that moment.
+            if (!notesListScreenState.startChoosingNoteOperation) {
+                Fab(addNoteButtonClicked)
+            }
+        }
+    ) { paddingValues ->
         Column(modifier = Modifier
             .fillMaxSize()
-            .padding(it)
+            .padding(paddingValues)
         ) {
-            AllNotesText()
-            TotalNotesCount(notesCount = notesListScreenState.totalNotesCount)
-            Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
-            SearchBar(searchValue = notesListScreenState.searchValue) { newValue ->
-                viewModel.setSearchValue(newValue)
-                viewModel.searchAndGetNotes()
+            if (!notesListScreenState.startChoosingNoteOperation) {
+                AllNotesText()
+                TotalNotesCount(notesCount = notesListScreenState.totalNotesCount)
+            } else {
+                CancelChoosingNoteButton(
+                    cancelChoosingNoteOperation = {
+                        viewModel.setStartChoosingNoteOperation(false)
+                        viewModel.setAllNotesCheckboxUnchecked()
+                    }
+                )
+                SelectedNumberOfNotesText(selectedNumberOfNotes = viewModel.getSelectedNotesCount())
             }
+
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
+
+            if (!notesListScreenState.startChoosingNoteOperation) {
+                SearchBar(
+                    searchValue = notesListScreenState.searchValue
+                ) { newValue ->
+                    viewModel.setSearchValue(newValue)
+                    viewModel.searchAndGetNotes()
+                }
+            } else {
+                SearchBar(
+                    modifier = Modifier.alpha(0.2f),
+                    searchValue = notesListScreenState.searchValue,
+                    readOnly = true
+                )
+            }
+
+            Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
+
             NotesListView(
                 notes = viewModel.decideWhichListWillBeUsed(),
-                cardOnClick = cardOnClick
+                cardOnClick = cardOnClick,
+                cardOnLongClick = { noteId, noteIndex ->
+                    viewModel.setStartChoosingNoteOperation(true)
+                    viewModel.setNoteCheckedState(noteIndex)
+                },
+                showCheckbox = notesListScreenState.startChoosingNoteOperation,
+                updateCheckboxState = { noteIndex ->
+                    viewModel.setNoteCheckedState(noteIndex)
+                }
             )
         }
     }
+}
+
+@Composable
+private fun CancelChoosingNoteButton(
+    cancelChoosingNoteOperation: () -> Unit
+) {
+    IconButton(
+        modifier = Modifier.padding(
+            top = MaterialTheme.spacing.medium
+        ),
+        onClick = cancelChoosingNoteOperation
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.round_close_48),
+            contentDescription = stringResource(id = R.string.close_icon)
+        )
+    }
+}
+
+@Composable
+private fun SelectedNumberOfNotesText(
+    modifier: Modifier = Modifier,
+    selectedNumberOfNotes: Int
+) {
+    val text = when {
+        selectedNumberOfNotes == 1 -> {
+            stringResource(id = R.string.singular_selected_number_of_notes, selectedNumberOfNotes)
+        }
+        selectedNumberOfNotes > 1 -> {
+            stringResource(id = R.string.plural_selected_number_of_notes, selectedNumberOfNotes)
+        }
+        else -> stringResource(id = R.string.none_item_selected)
+    }
+
+    Text(
+        text = text,
+        fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily,
+        fontSize = MaterialTheme.typography.titleLarge.fontSize,
+        fontWeight = FontWeight.Bold,
+        modifier = modifier.padding(
+            top = MaterialTheme.spacing.medium,
+            start = MaterialTheme.spacing.small
+        )
+    )
 }
 
 @Composable
@@ -100,7 +186,8 @@ private fun TotalNotesCount(
 fun SearchBar(
     modifier: Modifier = Modifier,
     searchValue: String,
-    onSearchValueChange: (newValue: String) -> Unit
+    readOnly: Boolean = false,
+    onSearchValueChange: (newValue: String) -> Unit = {}
 ) {
     OutlinedTextField(
         modifier = modifier
@@ -113,6 +200,7 @@ fun SearchBar(
                 contentDescription = stringResource(id = R.string.search_icon)
             ) },
         value = searchValue,
+        readOnly = readOnly,
         textStyle = TextStyle(fontFamily = MaterialTheme.typography.openSansRegular.fontFamily),
         onValueChange = onSearchValueChange,
         singleLine = true,
@@ -130,7 +218,10 @@ fun SearchBar(
 @Composable
 fun NotesListView(
     notes: List<NoteUI>,
-    cardOnClick: (Int) -> Unit
+    cardOnClick: (Int) -> Unit,
+    cardOnLongClick: (noteId: Int, noteIndex: Int) -> Unit,
+    showCheckbox: Boolean,
+    updateCheckboxState: (noteIndex: Int) -> Unit
 ) {
     LazyColumn(
         contentPadding = PaddingValues(
@@ -143,60 +234,94 @@ fun NotesListView(
         items(notes) { note ->
             NoteRow(
                 note = note,
-                cardOnClick = cardOnClick
+                cardOnClick = cardOnClick,
+                cardOnLongClick = {
+                    cardOnLongClick(note.id, notes.indexOf(note))
+                },
+                showCheckbox = showCheckbox,
+                updateCheckboxState = {
+                    updateCheckboxState(notes.indexOf(note))
+                }
             )
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun NoteRow(
     modifier: Modifier = Modifier,
     cardOnClick: (Int) -> Unit,
+    cardOnLongClick: () -> Unit,
+    updateCheckboxState: () -> Unit,
+    showCheckbox: Boolean,
     note: NoteUI
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .height(80.dp)
-            .padding(vertical = MaterialTheme.spacing.extraSmall),
-        onClick = {
-            cardOnClick(note.id)
-        }
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = MaterialTheme.spacing.medium),
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = note.title,
-                fontSize = MaterialTheme.typography.titleMedium.fontSize,
-                fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily,
-                maxLines = 1
+            .padding(vertical = MaterialTheme.spacing.extraSmall)
+            .combinedClickable(
+                onClick = {
+                    // If user presses long the note card before, cardOnClick will not be available
+                    if (!showCheckbox) {
+                        cardOnClick(note.id)
+                    } else {
+                        updateCheckboxState()
+                    }
+                },
+                onLongClick = {
+                    cardOnLongClick()
+                }
             )
-            Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
-            Row(
-                modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.85f)
+                    .padding(
+                        start = MaterialTheme.spacing.medium
+                    ),
+                verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = note.createdAt,
-                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                    fontFamily = MaterialTheme.typography.openSansLightItalic.fontFamily,
+                    text = note.title,
+                    fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                    fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily,
                     maxLines = 1
                 )
-                Text(
-                    text = stringResource(id = R.string.vertical_line),
-                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                    fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily
-                )
-                Text(
-                    text = note.description,
-                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                    fontFamily = MaterialTheme.typography.openSansRegular.fontFamily,
-                    maxLines = 1
+                Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
+                Row {
+                    Text(
+                        text = note.createdAt,
+                        fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                        fontFamily = MaterialTheme.typography.openSansLightItalic.fontFamily,
+                        maxLines = 1
+                    )
+                    Text(
+                        text = stringResource(id = R.string.vertical_line),
+                        fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                        fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily
+                    )
+                    Text(
+                        text = note.description,
+                        fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                        fontFamily = MaterialTheme.typography.openSansRegular.fontFamily,
+                        maxLines = 1
+                    )
+
+                }
+            }
+            if (showCheckbox) {
+                Checkbox(
+                    checked = note.isChecked.value,
+                    onCheckedChange = {
+                        note.isChecked.value = it
+                    }
                 )
             }
         }
@@ -222,5 +347,5 @@ fun Fab(
 @Preview
 @Composable
 fun Preview() {
-    NoteRow(note = NoteUI(1,"Hello", "There", "26 Oct"), cardOnClick = {})
+    /*NoteRow(note = NoteUI(1,"Hello", "There", "26 Oct"), cardOnClick = {},)*/
 }

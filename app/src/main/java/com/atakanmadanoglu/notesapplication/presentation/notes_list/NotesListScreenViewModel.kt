@@ -19,6 +19,8 @@ interface NotesListUiState {
     val searchedNotesList: SnapshotStateList<NoteUI>
     val totalNotesCount: Int
     val searchValue: String
+    val startChoosingNoteOperation: Boolean
+    val idsOfChosenNotes: List<Int>
     fun isSearchValueEntered(): Boolean
 }
 
@@ -27,6 +29,9 @@ private class MutableNotesListUiState: NotesListUiState {
     override var searchedNotesList = mutableStateListOf<NoteUI>()
     override var totalNotesCount by mutableStateOf(allNotesList.size)
     override var searchValue by mutableStateOf("")
+    override var startChoosingNoteOperation by mutableStateOf(false)
+    override var idsOfChosenNotes = mutableStateListOf<Int>()
+
     override fun isSearchValueEntered(): Boolean {
         return searchValue.isNotEmpty()
     }
@@ -75,6 +80,32 @@ class NotesListScreenViewModel @Inject constructor(
 
     fun setSearchValue(newValue: String) {
         _notesListUiState.searchValue = newValue
+    }
+
+    fun setStartChoosingNoteOperation(value: Boolean) {
+        _notesListUiState.startChoosingNoteOperation = value
+    }
+
+    fun setAllNotesCheckboxUnchecked() {
+        _notesListUiState.allNotesList.map {
+            it.isChecked.value = false
+        }
+    }
+
+    fun getSelectedNotesCount(): Int {
+        return _notesListUiState.allNotesList.count {
+            it.isChecked.value
+        }
+    }
+
+    fun setIdsOfChosenNotes(id: Int) {
+        _notesListUiState.idsOfChosenNotes.add(id)
+    }
+
+    fun setNoteCheckedState(noteIndex: Int) {
+        with(_notesListUiState.allNotesList[noteIndex]) {
+            isChecked.value = !isChecked.value
+        }
     }
 
     fun deleteNotes() {

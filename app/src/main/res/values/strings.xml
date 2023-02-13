@@ -15,4 +15,8 @@
     <string name="theme_color_icon">Theme color icon</string>
     <string name="delete">Delete</string>
     <string name="delete_icon">Delete icon</string>
+    <string name="close_icon">Close icon</string>
+    <string name="singular_selected_number_of_notes">%d item selected</string>
+    <string name="plural_selected_number_of_notes">%d items selected</string>
+    <string name="none_item_selected">None selected</string>
 </resources>
