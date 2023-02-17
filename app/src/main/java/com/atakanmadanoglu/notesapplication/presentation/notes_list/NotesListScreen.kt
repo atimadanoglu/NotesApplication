@@ -1,7 +1,6 @@
 package com.atakanmadanoglu.notesapplication.presentation.notes_list
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,9 +9,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -20,10 +19,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.atakanmadanoglu.notesapplication.R
 import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
 import com.atakanmadanoglu.notesapplication.theme.*
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,7 +37,9 @@ fun NotesListScreen(
     val notesListScreenState by remember {
         mutableStateOf(viewModel.notesListUiState)
     }
-    viewModel.getAllNotes()
+    LaunchedEffect(key1 = notesListScreenState.allNotesList) {
+        viewModel.getAllNotes()
+    }
     // To display all list after editing or adding a note
     viewModel.setSearchValue("")
 
@@ -61,8 +65,7 @@ fun NotesListScreen(
             } else {
                 CancelChoosingNoteButton(
                     cancelChoosingNoteOperation = {
-                        viewModel.setStartChoosingNoteOperation(false)
-                        viewModel.setAllNotesCheckboxUnchecked()
+                        viewModel.cancelChoosingNoteOperation()
                     }
                 )
                 SelectedNumberOfNotesText(selectedNumberOfNotes = viewModel.getSelectedNotesCount())
@@ -90,15 +93,148 @@ fun NotesListScreen(
             NotesListView(
                 notes = viewModel.decideWhichListWillBeUsed(),
                 cardOnClick = cardOnClick,
-                cardOnLongClick = { noteId, noteIndex ->
-                    viewModel.setStartChoosingNoteOperation(true)
-                    viewModel.setNoteCheckedState(noteIndex)
+                cardOnLongClick = { noteIndex ->
+                    viewModel.setStartChoosingNoteOperation(true, noteIndex)
                 },
                 showCheckbox = notesListScreenState.startChoosingNoteOperation,
                 updateCheckboxState = { noteIndex ->
                     viewModel.setNoteCheckedState(noteIndex)
                 }
             )
+
+            if (notesListScreenState.startChoosingNoteOperation) {
+                OptionsWhenChosenNote(
+                    isDeleteButtonEnabled = viewModel.isDeleteButtonEnabled(),
+                    onDeleteClicked = {
+                        viewModel.setOpenDeleteDialog(true)
+                    },
+                    onSelectAllClicked = {
+                        viewModel.setAllNotesCheckboxChecked()
+                    }
+                )
+            }
+            if (notesListScreenState.openDeleteDialog) {
+                DeleteAlertDialog(
+                    selectedNoteCount = viewModel.getSelectedNotesCount(),
+                    onDismissRequest = {
+                        viewModel.setOpenDeleteDialog(false)
+                    },
+                    onDeleteOperationApproved = {
+                        viewModel.onDeleteOperationApproved()
+                    }
+                )
+            }
+        }
+    }
+}
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun DeleteAlertDialog(
+    selectedNoteCount: Int,
+    onDismissRequest: () -> Unit,
+    onDeleteOperationApproved: () -> Unit
+) {
+    val questionText = if (selectedNoteCount != 1) {
+        stringResource(id = R.string.delete_multiple_notes, selectedNoteCount)
+    } else {
+        stringResource(id = R.string.delete_one_note)
+    }
+
+    val dialogContainerColor = if (isSystemInDarkTheme()) {
+        dark_dialog_color
+    } else  {
+        light_dialog_color
+    }
+
+    val separatorColor = if (isSystemInDarkTheme()) {
+        MaterialTheme.colorScheme.surfaceVariant.copy(0.2f)
+    } else {
+        Color.Black.copy(0.1f)
+    }
+
+    val dialogProperties = DialogProperties(
+        usePlatformDefaultWidth = false,
+        dismissOnBackPress = true,
+        dismissOnClickOutside = true
+    )
+    val maximumWidthFraction = 0.9f
+
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        properties = dialogProperties
+    ) {
+        val cancelText = stringResource(id = R.string.cancel)
+        val separator = stringResource(id = R.string.vertical_line)
+        val deleteText = stringResource(id = R.string.delete)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = MaterialTheme.spacing.large),
+            verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth(maximumWidthFraction)
+                    .wrapContentHeight()
+                    .background(Color.Transparent),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = dialogContainerColor
+                )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            top = MaterialTheme.spacing.medium,
+                            bottom = MaterialTheme.spacing.small,
+                            start = MaterialTheme.spacing.medium,
+                            end = MaterialTheme.spacing.medium
+                        ),
+                    verticalArrangement = Arrangement.SpaceEvenly,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = questionText,
+                        fontFamily = MaterialTheme.typography.openSansRegular.fontFamily
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(maximumWidthFraction)
+                            .padding(top = MaterialTheme.spacing.small),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        TextButton(
+                            onClick = onDismissRequest,
+                        ) {
+                            Text(
+                                text = cancelText.uppercase(),
+                                fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                                fontFamily = MaterialTheme.typography.openSansRegular.fontFamily,
+                                color = dismissColor
+                            )
+                        }
+                        Text(
+                            text = separator,
+                            fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                            fontFamily = MaterialTheme.typography.openSansRegular.fontFamily,
+                            color = separatorColor,
+                            modifier = Modifier.align(Alignment.CenterVertically)
+                        )
+                        TextButton(
+                            onClick = onDeleteOperationApproved
+                        ) {
+                            Text(
+                                text = deleteText.uppercase(),
+                                fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                                fontFamily = MaterialTheme.typography.openSansRegular.fontFamily,
+                                color = warningColor
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -219,7 +355,7 @@ fun SearchBar(
 fun NotesListView(
     notes: List<NoteUI>,
     cardOnClick: (Int) -> Unit,
-    cardOnLongClick: (noteId: Int, noteIndex: Int) -> Unit,
+    cardOnLongClick: (noteIndex: Int) -> Unit,
     showCheckbox: Boolean,
     updateCheckboxState: (noteIndex: Int) -> Unit
 ) {
@@ -236,7 +372,7 @@ fun NotesListView(
                 note = note,
                 cardOnClick = cardOnClick,
                 cardOnLongClick = {
-                    cardOnLongClick(note.id, notes.indexOf(note))
+                    cardOnLongClick(notes.indexOf(note))
                 },
                 showCheckbox = showCheckbox,
                 updateCheckboxState = {
@@ -341,6 +477,59 @@ fun Fab(
             contentDescription = stringResource(id = R.string.add_note),
             tint = Color.White
         )
+    }
+}
+
+@Composable
+private fun OptionsWhenChosenNote(
+    isDeleteButtonEnabled: Boolean,
+    onDeleteClicked: () -> Unit,
+    onSelectAllClicked: () -> Unit
+) {
+    Row() {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = MaterialTheme.spacing.small)
+                .clickable(
+                    enabled = isDeleteButtonEnabled
+                ) {
+                    onDeleteClicked()
+                },
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.outline_delete_24),
+                contentDescription = stringResource(id = R.string.delete_icon)
+            )
+            Text(
+                text = stringResource(id = R.string.delete),
+                fontSize = MaterialTheme.typography.labelMedium.fontSize,
+                fontFamily = MaterialTheme.typography.openSansRegular.fontFamily
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = MaterialTheme.spacing.small)
+                .clickable {
+                    onSelectAllClicked()
+                },
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.select_all_48),
+                contentDescription = stringResource(id = R.string.select_all)
+            )
+            Text(
+                text = stringResource(id = R.string.select_all),
+                fontSize = MaterialTheme.typography.labelMedium.fontSize,
+                fontFamily = MaterialTheme.typography.openSansRegular.fontFamily
+            )
+        }
     }
 }
 

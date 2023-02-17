@@ -19,4 +19,8 @@
     <string name="singular_selected_number_of_notes">%d item selected</string>
     <string name="plural_selected_number_of_notes">%d items selected</string>
     <string name="none_item_selected">None selected</string>
+    <string name="select_all">Select all</string>
+    <string name="delete_one_note">Delete this note?</string>
+    <string name="delete_multiple_notes">Delete %d notes?</string>
+    <string name="cancel">Cancel</string>
 </resources>

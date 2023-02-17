@@ -20,7 +20,7 @@ interface NotesListUiState {
     val totalNotesCount: Int
     val searchValue: String
     val startChoosingNoteOperation: Boolean
-    val idsOfChosenNotes: List<Int>
+    val openDeleteDialog: Boolean
     fun isSearchValueEntered(): Boolean
 }
 
@@ -30,7 +30,7 @@ private class MutableNotesListUiState: NotesListUiState {
     override var totalNotesCount by mutableStateOf(allNotesList.size)
     override var searchValue by mutableStateOf("")
     override var startChoosingNoteOperation by mutableStateOf(false)
-    override var idsOfChosenNotes = mutableStateListOf<Int>()
+    override var openDeleteDialog by mutableStateOf(false)
 
     override fun isSearchValueEntered(): Boolean {
         return searchValue.isNotEmpty()
@@ -82,8 +82,14 @@ class NotesListScreenViewModel @Inject constructor(
         _notesListUiState.searchValue = newValue
     }
 
-    fun setStartChoosingNoteOperation(value: Boolean) {
+    fun setStartChoosingNoteOperation(
+        value: Boolean,
+        noteIndex: Int
+    ) {
         _notesListUiState.startChoosingNoteOperation = value
+        if (value) {
+            setNoteCheckedState(noteIndex)
+        }
     }
 
     fun setAllNotesCheckboxUnchecked() {
@@ -92,14 +98,37 @@ class NotesListScreenViewModel @Inject constructor(
         }
     }
 
-    fun getSelectedNotesCount(): Int {
-        return _notesListUiState.allNotesList.count {
-            it.isChecked.value
+    fun setAllNotesCheckboxChecked() {
+        _notesListUiState.allNotesList.map {
+            it.isChecked.value = true
         }
     }
 
-    fun setIdsOfChosenNotes(id: Int) {
-        _notesListUiState.idsOfChosenNotes.add(id)
+    fun setOpenDeleteDialog(value: Boolean) {
+        _notesListUiState.openDeleteDialog = value
+    }
+
+    fun getSelectedNotesCount(): Int {
+        return _notesListUiState
+            .allNotesList
+            .count {
+                it.isChecked.value
+            }
+    }
+
+    fun isDeleteButtonEnabled(): Boolean {
+        val selectedNotesCount = getSelectedNotesCount()
+        return selectedNotesCount != 0
+    }
+
+    private fun getSelectedNotesIds(): List<Int> {
+        val checkedNotesIds = mutableListOf<Int>()
+        _notesListUiState.allNotesList.map {
+            if (it.isChecked.value) {
+                checkedNotesIds.add(it.id)
+            }
+        }
+        return checkedNotesIds
     }
 
     fun setNoteCheckedState(noteIndex: Int) {
@@ -108,7 +137,21 @@ class NotesListScreenViewModel @Inject constructor(
         }
     }
 
-    fun deleteNotes() {
-        // TODO: Implement
+    private fun deleteNotes() {
+        val selectedNotesIds = getSelectedNotesIds()
+        viewModelScope.launch {
+            deleteNotesByIdsUseCase.invoke(selectedNotesIds)
+        }
+    }
+
+    fun cancelChoosingNoteOperation() {
+        setStartChoosingNoteOperation(false, -1)
+        setAllNotesCheckboxUnchecked()
+    }
+
+    fun onDeleteOperationApproved() {
+        deleteNotes()
+        setOpenDeleteDialog(false)
+        setStartChoosingNoteOperation(false, -1)
     }
 }
