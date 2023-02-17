@@ -101,32 +101,33 @@ fun NotesListScreen(
                     viewModel.setNoteCheckedState(noteIndex)
                 }
             )
-
-            if (notesListScreenState.startChoosingNoteOperation) {
-                OptionsWhenChosenNote(
-                    isDeleteButtonEnabled = viewModel.isDeleteButtonEnabled(),
-                    onDeleteClicked = {
-                        viewModel.setOpenDeleteDialog(true)
-                    },
-                    onSelectAllClicked = {
-                        viewModel.setAllNotesCheckboxChecked()
-                    }
-                )
-            }
-            if (notesListScreenState.openDeleteDialog) {
-                DeleteAlertDialog(
-                    selectedNoteCount = viewModel.getSelectedNotesCount(),
-                    onDismissRequest = {
-                        viewModel.setOpenDeleteDialog(false)
-                    },
-                    onDeleteOperationApproved = {
-                        viewModel.onDeleteOperationApproved()
-                    }
-                )
-            }
+        }
+        if (notesListScreenState.startChoosingNoteOperation) {
+            OptionsWhenChosenNote(
+                isDeleteButtonEnabled = viewModel.isDeleteButtonEnabled(),
+                isSelectAllButtonClicked = notesListScreenState.selectAllClicked,
+                onDeleteClicked = {
+                    viewModel.setOpenDeleteDialog(true)
+                },
+                onSelectAllClicked = {
+                    viewModel.onSelectAllClicked()
+                }
+            )
+        }
+        if (notesListScreenState.openDeleteDialog) {
+            DeleteAlertDialog(
+                selectedNoteCount = viewModel.getSelectedNotesCount(),
+                onDismissRequest = {
+                    viewModel.setOpenDeleteDialog(false)
+                },
+                onDeleteOperationApproved = {
+                    viewModel.onDeleteOperationApproved()
+                }
+            )
         }
     }
 }
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun DeleteAlertDialog(
@@ -140,11 +141,7 @@ private fun DeleteAlertDialog(
         stringResource(id = R.string.delete_one_note)
     }
 
-    val dialogContainerColor = if (isSystemInDarkTheme()) {
-        dark_dialog_color
-    } else  {
-        light_dialog_color
-    }
+    val dialogContainerColor = MaterialTheme.colorScheme.background
 
     val separatorColor = if (isSystemInDarkTheme()) {
         MaterialTheme.colorScheme.surfaceVariant.copy(0.2f)
@@ -483,52 +480,73 @@ fun Fab(
 @Composable
 private fun OptionsWhenChosenNote(
     isDeleteButtonEnabled: Boolean,
+    isSelectAllButtonClicked: Boolean = true,
     onDeleteClicked: () -> Unit,
     onSelectAllClicked: () -> Unit
 ) {
-    Row() {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = MaterialTheme.spacing.small)
-                .clickable(
-                    enabled = isDeleteButtonEnabled
-                ) {
-                    onDeleteClicked()
-                },
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Bottom
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(top = MaterialTheme.spacing.small),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.SpaceAround
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.outline_delete_24),
-                contentDescription = stringResource(id = R.string.delete_icon)
-            )
-            Text(
-                text = stringResource(id = R.string.delete),
-                fontSize = MaterialTheme.typography.labelMedium.fontSize,
-                fontFamily = MaterialTheme.typography.openSansRegular.fontFamily
-            )
-        }
+            Column(
+                modifier = Modifier
+                    .padding(bottom = MaterialTheme.spacing.small)
+                    .clickable(enabled = isDeleteButtonEnabled) {
+                        onDeleteClicked()
+                    },
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.outline_delete_24),
+                    contentDescription = stringResource(id = R.string.delete_icon)
+                )
+                Text(
+                    text = stringResource(id = R.string.delete),
+                    fontSize = MaterialTheme.typography.labelMedium.fontSize,
+                    fontFamily = MaterialTheme.typography.openSansRegular.fontFamily
+                )
+            }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = MaterialTheme.spacing.small)
-                .clickable {
-                    onSelectAllClicked()
-                },
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.select_all_48),
-                contentDescription = stringResource(id = R.string.select_all)
-            )
-            Text(
-                text = stringResource(id = R.string.select_all),
-                fontSize = MaterialTheme.typography.labelMedium.fontSize,
-                fontFamily = MaterialTheme.typography.openSansRegular.fontFamily
-            )
+            Column(
+                modifier = Modifier
+                    .padding(bottom = MaterialTheme.spacing.small)
+                    .clickable {
+                        onSelectAllClicked()
+                    },
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                val iconAndTextColor: Color
+                val text: String
+
+                if (isSelectAllButtonClicked) {
+                    iconAndTextColor = MaterialTheme.colorScheme.primary
+                    text = stringResource(id = R.string.deselect_all)
+                } else {
+                    iconAndTextColor = MaterialTheme.colorScheme.onBackground
+                    text = stringResource(id = R.string.select_all)
+                }
+
+                Icon(
+                    painter = painterResource(id = R.drawable.select_all_56),
+                    contentDescription = stringResource(id = R.string.select_all),
+                    tint = iconAndTextColor
+                )
+                Text(
+                    text = text,
+                    color = iconAndTextColor,
+                    fontSize = MaterialTheme.typography.labelMedium.fontSize,
+                    fontFamily = MaterialTheme.typography.openSansRegular.fontFamily
+                )
+            }
         }
     }
 }

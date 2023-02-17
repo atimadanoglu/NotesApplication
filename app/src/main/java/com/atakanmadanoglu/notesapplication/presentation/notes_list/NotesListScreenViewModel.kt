@@ -21,6 +21,7 @@ interface NotesListUiState {
     val searchValue: String
     val startChoosingNoteOperation: Boolean
     val openDeleteDialog: Boolean
+    val selectAllClicked: Boolean
     fun isSearchValueEntered(): Boolean
 }
 
@@ -31,6 +32,7 @@ private class MutableNotesListUiState: NotesListUiState {
     override var searchValue by mutableStateOf("")
     override var startChoosingNoteOperation by mutableStateOf(false)
     override var openDeleteDialog by mutableStateOf(false)
+    override var selectAllClicked by mutableStateOf(false)
 
     override fun isSearchValueEntered(): Boolean {
         return searchValue.isNotEmpty()
@@ -147,11 +149,21 @@ class NotesListScreenViewModel @Inject constructor(
     fun cancelChoosingNoteOperation() {
         setStartChoosingNoteOperation(false, -1)
         setAllNotesCheckboxUnchecked()
+        _notesListUiState.selectAllClicked = false
     }
 
     fun onDeleteOperationApproved() {
         deleteNotes()
         setOpenDeleteDialog(false)
         setStartChoosingNoteOperation(false, -1)
+    }
+
+    fun onSelectAllClicked() {
+        _notesListUiState.selectAllClicked = !_notesListUiState.selectAllClicked
+        if (_notesListUiState.selectAllClicked) {
+            setAllNotesCheckboxChecked()
+        } else {
+            setAllNotesCheckboxUnchecked()
+        }
     }
 }
