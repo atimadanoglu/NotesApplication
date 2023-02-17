@@ -48,11 +48,11 @@ class AddNoteViewModel @Inject constructor(
         )
     }
 
-    fun updateTitleStateValue(newValue: String) {
+    fun setTitle(newValue: String) {
         _addNoteUiState.title = newValue
     }
 
-    fun updateDescriptionStateValue(newValue: String) {
+    fun setDescription(newValue: String) {
         _addNoteUiState.description = newValue
     }
 }

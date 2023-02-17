@@ -54,14 +54,14 @@ fun AddNoteScreen(
             TitleInput(
                 title = addNoteState.title,
                 titleOnChange = { newTitleValue ->
-                    addNoteViewModel.updateTitleStateValue(newTitleValue)
+                    addNoteViewModel.setTitle(newTitleValue)
                 }
             )
             ShowDate()
             NoteContentView(
                 description = addNoteState.description,
                 onDescriptionChange = { newDescriptionValue ->
-                    addNoteViewModel.updateDescriptionStateValue(newDescriptionValue)
+                    addNoteViewModel.setDescription(newDescriptionValue)
                 }
             )
         }
