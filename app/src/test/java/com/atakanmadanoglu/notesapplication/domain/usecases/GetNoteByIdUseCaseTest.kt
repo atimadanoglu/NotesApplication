@@ -38,7 +38,7 @@ class GetNoteByIdUseCaseTest {
         // Given
         val id = 1
         val note = UseCaseVariousNotesFactory.getMockNoteDomain()
-        val noteUI = UseCaseVariousNotesFactory.getMockNoteUI()
+        val noteUI = UseCaseVariousNotesFactory.getMockNoteUI(note.createdAt)
         every { notesRepository.getNoteById(id) } returns flow {
             emit(note)
         }
@@ -51,7 +51,7 @@ class GetNoteByIdUseCaseTest {
         assertThat(result.id).isEqualTo(note.id)
         assertThat(result.title).isEqualTo(note.title)
         assertThat(result.description).isEqualTo(note.description)
-        assertThat(result.createdAt).isEqualTo(note.createdAt)
+        assertThat(result.createdAt).isEqualTo(noteUI.createdAt)
         verify(exactly = 1) { notesRepository.getNoteById(id) }
         verify(exactly = 1) { noteUIMapper.mapToNoteUI(note) }
     }

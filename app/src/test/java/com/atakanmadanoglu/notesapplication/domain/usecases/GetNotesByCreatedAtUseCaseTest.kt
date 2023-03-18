@@ -38,7 +38,7 @@ class GetNotesByCreatedAtUseCaseTest {
     fun `call invoke() and get a flow of list of noteUIs`() = runTest {
         // Given
         val note = UseCaseVariousNotesFactory.getMockNoteDomain()
-        val noteUI = UseCaseVariousNotesFactory.getMockNoteUI()
+        val noteUI = UseCaseVariousNotesFactory.getMockNoteUI(note.createdAt)
         val listOfNotes = listOf(note)
         val listOfNoteUIs = listOf(noteUI)
         every { notesRepository.getNotesByCreatedAt() } returns flow {
@@ -53,7 +53,7 @@ class GetNotesByCreatedAtUseCaseTest {
         assertThat(result[0].id).isEqualTo(note.id)
         assertThat(result[0].title).isEqualTo(note.title)
         assertThat(result[0].description).isEqualTo(note.description)
-        assertThat(result[0].createdAt).isEqualTo(note.createdAt)
+        assertThat(result[0].createdAt).isEqualTo(noteUI.createdAt)
         verify(exactly = 1) { notesRepository.getNotesByCreatedAt() }
         verify(exactly = 1) { noteUIMapper.mapToNoteUI(note) }
     }
