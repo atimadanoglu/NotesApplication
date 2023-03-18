@@ -11,12 +11,10 @@ class GetNotesByCreatedAtUseCase @Inject constructor(
     private val notesRepository: NotesRepository,
     private val noteUIMapper: NoteUIMapper
 ) {
-    operator fun invoke() : Flow<List<NoteUI?>> {
+    operator fun invoke() : Flow<List<NoteUI>> {
         return notesRepository.getNotesByCreatedAt().map { noteList ->
             noteList.map { note ->
-                note?.let {
-                    noteUIMapper.mapToNoteUI(it)
-                }
+                noteUIMapper.mapToNoteUI(note)
             }
         }
     }

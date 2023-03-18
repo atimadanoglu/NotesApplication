@@ -8,16 +8,14 @@ import javax.inject.Inject
 class NoteEntityMapper @Inject constructor() {
 
     fun mapToNoteDomain(
-        noteEntity: NoteEntity?
-    ) = noteEntity?.let { entity ->
-        with(entity) {
-            NoteDomain(
-                id = id,
-                title = title,
-                description = description,
-                createdAt = createdAt
-            )
-        }
+        noteEntity: NoteEntity
+    ) = with(noteEntity) {
+        NoteDomain(
+            id = id,
+            title = title,
+            description = description,
+            createdAt = createdAt
+        )
     }
 
     fun mapToNoteEntity(
