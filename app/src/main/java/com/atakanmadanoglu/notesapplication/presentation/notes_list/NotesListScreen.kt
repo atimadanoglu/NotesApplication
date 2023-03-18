@@ -11,7 +11,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.Color
@@ -61,7 +60,6 @@ internal fun NotesListRoute(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotesListScreen(
     addNoteButtonClicked: () -> Unit,
@@ -80,10 +78,8 @@ fun NotesListScreen(
     notesListScreenState: NotesListUIState
 ) {
     LaunchedEffect(key1 = notesListScreenState.allNotesList) {
-        // To display all list after editing or adding a note
-        println("before SetSearchValue")
         makeSearchValueEmpty()
-        println("inside launchedEffect ")
+        // To display all list after editing or adding a note
         getAllNotes()
     }
     val listState = rememberLazyListState()
@@ -110,16 +106,10 @@ fun NotesListScreen(
                 SearchBar(
                     searchValue = notesListScreenState.searchValue,
                     onSearchValueChange = onSearchValueChange
-                ) /*{ newValue ->
-                    viewModel.setSearchValue(newValue)
-                    viewModel.searchAndGetNotes()
-                }*/
+                )
             } else {
                 CancelChoosingNoteButton(
                     cancelChoosingNoteOperation = cancelChoosingNoteOperation
-                    /*{
-                        viewModel.cancelChoosingNoteOperation()
-                    }*/
                 )
                 SelectedNumberOfNotesText(selectedNumberOfNotes = notesListScreenState.selectedNotesCount)
                 Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
@@ -160,10 +150,9 @@ fun NotesListScreen(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun DeleteAlertDialog(
-    selectedNoteCount: Int,
+fun DeleteAlertDialog(
+    selectedNoteCount: Int = 0,
     onDismissRequest: () -> Unit,
     onDeleteOperationApproved: () -> Unit
 ) {

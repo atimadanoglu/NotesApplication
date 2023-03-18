@@ -85,6 +85,10 @@ class EditNoteScreenViewModel @Inject constructor(
          }
     }
 
+    fun setOpenDeleteDialog(value: Boolean) {
+        _editNoteUiState.update { it.copy(openDeleteDialog = value) }
+    }
+
     fun deleteNote() {
         viewModelScope.launch {
             deleteNoteByIdUseCase(editNoteArgs.noteId)

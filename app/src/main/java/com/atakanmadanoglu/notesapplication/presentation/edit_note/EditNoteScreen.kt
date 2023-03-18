@@ -25,6 +25,7 @@ import com.atakanmadanoglu.notesapplication.presentation.add_note.NavigationTopA
 import com.atakanmadanoglu.notesapplication.presentation.add_note.NoteContentView
 import com.atakanmadanoglu.notesapplication.presentation.add_note.TitleInput
 import com.atakanmadanoglu.notesapplication.presentation.model.EditNoteUiState
+import com.atakanmadanoglu.notesapplication.presentation.notes_list.DeleteAlertDialog
 import com.atakanmadanoglu.notesapplication.theme.openSansRegular
 import com.atakanmadanoglu.notesapplication.theme.spacing
 
@@ -42,15 +43,17 @@ internal fun EditNoteRoute(
         whenNotHaveFocus = { editNoteScreenViewModel.updateFocusValue(false) },
         titleOnChange = { editNoteScreenViewModel.updateTitleValue(it) },
         descriptionOnChange = { editNoteScreenViewModel.updateDescriptionValue(it) },
-        onDeleteClicked = {
-            editNoteScreenViewModel.deleteNote()
-            navController.popBackStack()
-        },
+        onDeleteClicked = { editNoteScreenViewModel.setOpenDeleteDialog(true) },
         doneIconOnClick = {
             editNoteScreenViewModel.editNote(
                 inputTitle = editNoteUiState.title,
                 inputDescription = editNoteUiState.description
             )
+        },
+        onDismissRequest = { editNoteScreenViewModel.setOpenDeleteDialog(false) },
+        onDeleteOperationApproved = {
+            editNoteScreenViewModel.deleteNote()
+            navController.popBackStack()
         }
     )
 }
@@ -65,7 +68,9 @@ fun EditNoteScreen(
     whenNotHaveFocus: () -> Unit,
     titleOnChange: (String) -> Unit,
     descriptionOnChange: (String) -> Unit,
-    onDeleteClicked: () -> Unit
+    onDeleteClicked: () -> Unit,
+    onDismissRequest: () -> Unit,
+    onDeleteOperationApproved: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     Scaffold(
@@ -137,6 +142,13 @@ fun EditNoteScreen(
                     )
                 }
             }
+        }
+        if (editNoteUiState.openDeleteDialog) {
+            DeleteAlertDialog(
+                selectedNoteCount = 1,
+                onDismissRequest = onDismissRequest,
+                onDeleteOperationApproved = onDeleteOperationApproved
+            )
         }
     }
 }

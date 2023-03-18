@@ -6,7 +6,9 @@ data class EditNoteUiState(
     val createdAt: String = "",
     val isDoneIconClicked: Boolean = false,
     val isDoneIconVisible: Boolean = false,
-    val isFocused: Boolean = false
+    val isFocused: Boolean = false,
+    val isDeleteButtonClicked: Boolean = false,
+    val openDeleteDialog: Boolean = false
 ) {
     fun isNewValueEntered(
         retrievedTitle: String,
