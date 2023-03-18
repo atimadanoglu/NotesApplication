@@ -36,14 +36,16 @@ internal fun EditNoteRoute(
     val editNoteUiState by editNoteScreenViewModel.editNoteUiState.collectAsStateWithLifecycle()
 
     EditNoteScreen(
-        navController = navController,
         editNoteUiState = editNoteUiState,
         navigationIconOnClick = navController::popBackStack,
         whenIsFocused = { editNoteScreenViewModel.updateFocusValue(true) },
         whenNotHaveFocus = { editNoteScreenViewModel.updateFocusValue(false) },
         titleOnChange = { editNoteScreenViewModel.updateTitleValue(it) },
         descriptionOnChange = { editNoteScreenViewModel.updateDescriptionValue(it) },
-        onDeleteClicked = editNoteScreenViewModel::deleteNote,
+        onDeleteClicked = {
+            editNoteScreenViewModel.deleteNote()
+            navController.popBackStack()
+        },
         doneIconOnClick = {
             editNoteScreenViewModel.editNote(
                 inputTitle = editNoteUiState.title,
@@ -56,7 +58,6 @@ internal fun EditNoteRoute(
 @Composable
 fun EditNoteScreen(
     modifier: Modifier = Modifier,
-    navController: NavController,
     editNoteUiState: EditNoteUiState,
     doneIconOnClick: () -> Unit,
     navigationIconOnClick: () -> Unit,
@@ -121,7 +122,6 @@ fun EditNoteScreen(
                         .padding(bottom = MaterialTheme.spacing.small)
                         .clickable {
                             onDeleteClicked()
-                            navController.popBackStack()
                         },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
