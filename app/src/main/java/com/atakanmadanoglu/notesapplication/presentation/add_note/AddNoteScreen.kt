@@ -11,24 +11,46 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.atakanmadanoglu.notesapplication.R
+import com.atakanmadanoglu.notesapplication.presentation.model.AddNoteUIState
 import com.atakanmadanoglu.notesapplication.theme.openSansRegular
 import com.atakanmadanoglu.notesapplication.theme.openSansSemiBold
 import com.atakanmadanoglu.notesapplication.theme.spacing
 import java.text.SimpleDateFormat
 import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddNoteScreen(
-    modifier: Modifier = Modifier,
+fun AddNoteRoute(
     navController: NavController,
     addNoteViewModel: AddNoteViewModel = hiltViewModel()
 ) {
-    val addNoteState by remember {
-        mutableStateOf(addNoteViewModel.addNoteUiState)
-    }
+    val addNoteState by addNoteViewModel.state.collectAsStateWithLifecycle()
+    AddNoteScreen(
+        addNoteState = addNoteState,
+        navigationIconOnClick = navController::popBackStack,
+        titleOnChange = { addNoteViewModel.setTitle(it) },
+        onDescriptionChange = { addNoteViewModel.setDescription(it) },
+        doneIconOnClick = {
+            addNoteViewModel.addNote(
+                inputTitle = addNoteState.title,
+                inputDescription = addNoteState.description
+            )
+            navController.popBackStack()
+        }
+    )
+}
+
+@Composable
+fun AddNoteScreen(
+    modifier: Modifier = Modifier,
+    addNoteState: AddNoteUIState,
+    navigationIconOnClick: () -> Unit,
+    titleOnChange: (String) -> Unit,
+    onDescriptionChange: (String) -> Unit,
+    doneIconOnClick: () -> Unit
+) {
     Scaffold(
         modifier = modifier
             .fillMaxSize()
@@ -36,13 +58,8 @@ fun AddNoteScreen(
         topBar = {
             NavigationTopAppBar(
                 isDoneIconVisible = addNoteState.isBothTitleAndDescriptionEntered(),
-                doneIconOnClick = {
-                    addNoteViewModel.addNote(
-                        inputTitle = addNoteState.title,
-                        inputDescription = addNoteState.description
-                    )
-                    navController.popBackStack() },
-                navigationIconOnClick = { navController.popBackStack() }
+                doneIconOnClick = doneIconOnClick,
+                navigationIconOnClick = navigationIconOnClick
             )
         }
     ) {
@@ -53,19 +70,16 @@ fun AddNoteScreen(
         ) {
             TitleInput(
                 title = addNoteState.title,
-                titleOnChange = { newTitleValue ->
-                    addNoteViewModel.updateTitleStateValue(newTitleValue)
-                }
+                titleOnChange = titleOnChange
             )
             ShowDate()
             NoteContentView(
                 description = addNoteState.description,
-                onDescriptionChange = { newDescriptionValue ->
-                    addNoteViewModel.updateDescriptionStateValue(newDescriptionValue)
-                }
+                onDescriptionChange = onDescriptionChange
             )
         }
     }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -109,30 +123,32 @@ fun TitleInput(
     title: String,
     titleOnChange: (String) -> Unit
 ) {
-    OutlinedTextField(
-        modifier = modifier
-            .fillMaxWidth()
-            .wrapContentHeight(),
-        value = title,
-        onValueChange = titleOnChange,
-        placeholder = {
-            Text(
-                text = stringResource(id = R.string.title),
+    Column( modifier = modifier
+        .fillMaxWidth()
+        .wrapContentHeight()) {
+        OutlinedTextField(
+
+            value = title,
+            onValueChange = titleOnChange,
+            placeholder = {
+                Text(
+                    text = stringResource(id = R.string.title),
+                    fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                    fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily
+                )
+            },
+            textStyle = TextStyle(
                 fontSize = MaterialTheme.typography.headlineLarge.fontSize,
                 fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily
-            )
-        },
-        textStyle = TextStyle(
-            fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-            fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily
-        ),
-        singleLine = true,
-        colors = TextFieldDefaults.textFieldColors(
-            focusedIndicatorColor = Color.Transparent,
-            containerColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
-        ),
-    )
+            ),
+            singleLine = true,
+            colors = TextFieldDefaults.textFieldColors(
+                focusedIndicatorColor = Color.Transparent,
+                containerColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

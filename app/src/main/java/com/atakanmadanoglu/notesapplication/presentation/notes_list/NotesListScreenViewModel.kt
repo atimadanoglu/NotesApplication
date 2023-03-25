@@ -1,66 +1,76 @@
 package com.atakanmadanoglu.notesapplication.presentation.notes_list
 
-import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.atakanmadanoglu.notesapplication.domain.usecases.DeleteNotesByIdsUseCase
 import com.atakanmadanoglu.notesapplication.domain.usecases.GetNotesByCreatedAtUseCase
 import com.atakanmadanoglu.notesapplication.domain.usecases.SearchNotesUseCase
 import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
+import com.atakanmadanoglu.notesapplication.presentation.model.NotesListUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-@Stable
-interface NotesListUiState {
-    val allNotesList: SnapshotStateList<NoteUI>
-    val searchedNotesList: SnapshotStateList<NoteUI>
-    val totalNotesCount: Int
-    val searchValue: String
-    fun isSearchValueEntered(): Boolean
-}
-
-private class MutableNotesListUiState: NotesListUiState {
-    override var allNotesList = mutableStateListOf<NoteUI>()
-    override var searchedNotesList = mutableStateListOf<NoteUI>()
-    override var totalNotesCount by mutableStateOf(allNotesList.size)
-    override var searchValue by mutableStateOf("")
-    override fun isSearchValueEntered(): Boolean {
-        return searchValue.isNotEmpty()
-    }
-}
 
 @HiltViewModel
 class NotesListScreenViewModel @Inject constructor(
     private val getNotesByCreatedAtUseCase: GetNotesByCreatedAtUseCase,
-    private val searchNotesUseCase: SearchNotesUseCase
+    private val searchNotesUseCase: SearchNotesUseCase,
+    private val deleteNotesByIdsUseCase: DeleteNotesByIdsUseCase
 ): ViewModel() {
-    private val _notesListUiState = MutableNotesListUiState()
-    val notesListUiState: NotesListUiState = _notesListUiState
+
+    private val _state = MutableStateFlow(NotesListUIState())
+    val state: StateFlow<NotesListUIState> get() = _state
 
     fun getAllNotes() {
         viewModelScope.launch {
-            getNotesByCreatedAtUseCase.invoke().collectLatest {
-                with(_notesListUiState) {
-                    allNotesList.clear()
-                    allNotesList.addAll(it)
-                    totalNotesCount = it.size
+            getNotesByCreatedAtUseCase.invoke().collectLatest { list ->
+                _state.update {
+                    makeNotesChecked(list)
+                    it.copy(
+                        allNotesList = list,
+                        totalNotesCount = list.size
+                    )
                 }
             }
         }
     }
-
-    fun searchAndGetNotes() = viewModelScope.launch {
-        with(_notesListUiState) {
-            val filteredList = searchNotesUseCase.invoke(allNotesList, searchValue)
-            searchedNotesList.clear()
-            searchedNotesList.addAll(filteredList)
+    private fun setSearchValueEntered() {
+        _state.update { it.copy(isSearchValueEntered = it.searchValue.isNotEmpty()) }
+    }
+    private fun setSelectedNotesCount() {
+        _state.update {
+            val selectedNotesCount = it.allNotesList.count { noteUI -> noteUI.isChecked }
+            it.copy(selectedNotesCount = selectedNotesCount)
         }
     }
 
-    fun decideWhichListWillBeUsed(): List<NoteUI> = with(_notesListUiState) {
-        return if (!isSearchValueEntered()) {
+    private fun setDeleteButtonEnabled() {
+        _state.update { it.copy(deleteButtonEnabled = it.selectedNotesCount != 0) }
+    }
+    private fun makeNotesChecked(list: List<NoteUI>) {
+        _state.value.selectedNotesIndexes.forEach {index ->
+            list[index].isChecked = true
+        }
+    }
+
+    private fun emptySelectedNotesIndexes() {
+        _state.update { it.copy(selectedNotesIndexes = emptyList()) }
+    }
+
+    fun searchAndGetNotes() = viewModelScope.launch {
+        _state.update {
+            val filteredList = searchNotesUseCase(it.allNotesList, it.searchValue)
+            it.copy(searchedNotesList = filteredList)
+        }
+    }
+
+    fun decideWhichListWillBeUsed(): List<NoteUI> = with(_state.value) {
+        setSearchValueEntered()
+        return if (!isSearchValueEntered) {
             allNotesList
         } else {
             searchedNotesList
@@ -68,6 +78,79 @@ class NotesListScreenViewModel @Inject constructor(
     }
 
     fun setSearchValue(newValue: String) {
-        _notesListUiState.searchValue = newValue
+        _state.update { it.copy(searchValue = newValue) }
+    }
+
+    fun setStartChoosingNoteOperation(
+        startChoosing: Boolean,
+        noteIndex: Int
+    ) {
+        _state.update { it.copy(startChoosingNoteOperation = startChoosing) }
+        if (startChoosing) setNoteCheckedState(noteIndex)
+    }
+
+    private fun setAllNotesCheckboxUnchecked() {
+        _state.update {
+            it.allNotesList.map { noteUI -> noteUI.isChecked = false }
+            it.copy(allNotesList = it.allNotesList)
+        }
+        setSelectedNotesCount()
+    }
+
+    private fun setAllNotesCheckboxChecked() {
+        _state.update {
+            it.allNotesList.map { noteUI -> noteUI.isChecked = true }
+            it.copy(allNotesList = it.allNotesList)
+        }
+        setSelectedNotesCount()
+    }
+
+    fun setOpenDeleteDialog(value: Boolean) {
+        _state.update { it.copy(openDeleteDialog = value) }
+    }
+
+    fun setNoteCheckedState(noteIndex: Int) {
+        _state.update {
+            with(it) {
+                allNotesList[noteIndex].apply { isChecked = !isChecked }
+                val selectedIndexes = selectedNotesIndexes.toMutableList()
+
+                if (allNotesList[noteIndex].isChecked) selectedIndexes.add(noteIndex)
+                else selectedIndexes.remove(noteIndex)
+                it.copy(
+                    allNotesList = allNotesList,
+                    selectedNotesIndexes = selectedIndexes
+                )
+            }
+        }
+        setSelectedNotesCount()
+        setDeleteButtonEnabled()
+    }
+
+    private fun deleteNotes() {
+        viewModelScope.launch {
+            val selectedNotesIds = _state.value.getSelectedNotesIds()
+            deleteNotesByIdsUseCase(selectedNotesIds)
+            emptySelectedNotesIndexes()
+        }
+    }
+
+    fun cancelChoosingNoteOperation() {
+        setStartChoosingNoteOperation(false, -1)
+        setAllNotesCheckboxUnchecked()
+        emptySelectedNotesIndexes()
+        _state.update { it.copy(selectAllClicked = false) }
+    }
+
+    fun onDeleteOperationApproved() {
+        deleteNotes()
+        setOpenDeleteDialog(false)
+        cancelChoosingNoteOperation()
+    }
+
+    fun onSelectAllClicked() {
+        _state.update { it.copy(selectAllClicked = !it.selectAllClicked) }
+        if (_state.value.selectAllClicked) setAllNotesCheckboxChecked()
+        else setAllNotesCheckboxUnchecked()
     }
 }

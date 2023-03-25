@@ -4,7 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.atakanmadanoglu.notesapplication.presentation.navigation.Screen
-import com.atakanmadanoglu.notesapplication.presentation.notes_list.NotesListScreen
+import com.atakanmadanoglu.notesapplication.presentation.notes_list.NotesListRoute
 
 fun NavController.navigateToNotesListScreen() {
     this.navigate(Screen.NotesListScreen.route)
@@ -15,7 +15,7 @@ fun NavGraphBuilder.notesList(
     navigateToEditNoteScreen: (Int) -> Unit
 ) {
     composable(route = Screen.NotesListScreen.route) {
-        NotesListScreen(
+        NotesListRoute(
             addNoteButtonClicked = navigateToAddNoteScreen,
             cardOnClick = navigateToEditNoteScreen
         )
