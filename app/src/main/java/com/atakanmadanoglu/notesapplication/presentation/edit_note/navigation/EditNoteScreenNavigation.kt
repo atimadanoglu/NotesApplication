@@ -6,7 +6,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.atakanmadanoglu.notesapplication.presentation.edit_note.EditNoteScreen
+import com.atakanmadanoglu.notesapplication.presentation.edit_note.EditNoteRoute
 import com.atakanmadanoglu.notesapplication.presentation.navigation.Screen
 
 private const val noteIdArg = "noteId"
@@ -36,7 +36,5 @@ fun NavGraphBuilder.editNoteScreen(
                 type = NavType.IntType
             }
         )
-    ) {
-        EditNoteScreen(navController = navController)
-    }
+    ) { EditNoteRoute(navController = navController) }
 }
