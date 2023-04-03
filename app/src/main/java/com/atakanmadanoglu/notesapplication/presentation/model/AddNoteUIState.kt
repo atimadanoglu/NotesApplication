@@ -5,7 +5,13 @@ data class AddNoteUIState(
     val description: String = "",
     val createdAt: String = ""
 ){
-    fun isBothTitleAndDescriptionEntered(): Boolean {
+    fun isAnyValueEntered(): Boolean {
         return title.isNotEmpty() || description.isNotEmpty()
     }
+}
+
+sealed interface AddNoteUiEvent {
+    data class TitleChanged(val newInput: String): AddNoteUiEvent
+    data class DescriptionChanged(val newInput: String): AddNoteUiEvent
+    object DoneIconClicked: AddNoteUiEvent
 }
