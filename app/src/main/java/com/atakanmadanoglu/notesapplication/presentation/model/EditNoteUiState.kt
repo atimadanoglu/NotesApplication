@@ -18,3 +18,14 @@ data class EditNoteUiState(
                 !description.contentEquals(retrievedDescription)
     }
 }
+
+sealed interface EditNoteScreenEvent {
+    data class TitleChanged(val newInput: String): EditNoteScreenEvent
+    data class DescriptionChanged(val newInput: String): EditNoteScreenEvent
+    object WhenIsFocused: EditNoteScreenEvent
+    object WhenNotHaveFocus: EditNoteScreenEvent
+    object DeleteButtonClicked: EditNoteScreenEvent
+    object DoneIconClicked: EditNoteScreenEvent
+    object DeletionDismissed: EditNoteScreenEvent
+    object DeletionApproved: EditNoteScreenEvent
+}
