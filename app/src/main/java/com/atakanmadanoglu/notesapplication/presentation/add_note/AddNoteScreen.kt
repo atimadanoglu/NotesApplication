@@ -15,6 +15,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.atakanmadanoglu.notesapplication.R
 import com.atakanmadanoglu.notesapplication.presentation.model.AddNoteUIState
+import com.atakanmadanoglu.notesapplication.presentation.model.AddNoteUiEvent
 import com.atakanmadanoglu.notesapplication.theme.openSansRegular
 import com.atakanmadanoglu.notesapplication.theme.openSansSemiBold
 import com.atakanmadanoglu.notesapplication.theme.spacing
@@ -27,16 +28,14 @@ fun AddNoteRoute(
     addNoteViewModel: AddNoteViewModel = hiltViewModel()
 ) {
     val addNoteState by addNoteViewModel.state.collectAsStateWithLifecycle()
+
     AddNoteScreen(
         addNoteState = addNoteState,
         navigationIconOnClick = navController::popBackStack,
-        titleOnChange = { addNoteViewModel.setTitle(it) },
-        onDescriptionChange = { addNoteViewModel.setDescription(it) },
+        titleOnChange = { addNoteViewModel.onEvent(AddNoteUiEvent.TitleChanged(it)) },
+        onDescriptionChange = { addNoteViewModel.onEvent(AddNoteUiEvent.DescriptionChanged(it)) },
         doneIconOnClick = {
-            addNoteViewModel.addNote(
-                inputTitle = addNoteState.title,
-                inputDescription = addNoteState.description
-            )
+            addNoteViewModel.onEvent(AddNoteUiEvent.DoneIconClicked)
             navController.popBackStack()
         }
     )
@@ -57,7 +56,7 @@ fun AddNoteScreen(
             .padding(horizontal = MaterialTheme.spacing.small),
         topBar = {
             NavigationTopAppBar(
-                isDoneIconVisible = addNoteState.isBothTitleAndDescriptionEntered(),
+                isDoneIconVisible = addNoteState.isAnyValueEntered(),
                 doneIconOnClick = doneIconOnClick,
                 navigationIconOnClick = navigationIconOnClick
             )

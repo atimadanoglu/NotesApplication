@@ -3,9 +3,7 @@ package com.atakanmadanoglu.notesapplication.presentation.notes_list
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -25,8 +23,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.atakanmadanoglu.notesapplication.R
-import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
-import com.atakanmadanoglu.notesapplication.presentation.model.NotesListUIState
+import com.atakanmadanoglu.notesapplication.presentation.model.*
 import com.atakanmadanoglu.notesapplication.theme.*
 import java.util.*
 
@@ -36,27 +33,29 @@ internal fun NotesListRoute(
     cardOnClick: (Int) -> Unit,
     viewModel: NotesListScreenViewModel = hiltViewModel()
 ) {
-    println("its before")
     val notesListScreenState by viewModel.state.collectAsStateWithLifecycle()
 
     NotesListScreen(
         addNoteButtonClicked = addNoteButtonClicked,
         cardOnClick = cardOnClick,
         notesListScreenState = notesListScreenState,
-        getAllNotes = viewModel::getAllNotes,
         makeSearchValueEmpty = { viewModel.setSearchValue("") },
-        cardOnLongClick = { viewModel.setStartChoosingNoteOperation(true, it) },
-        cancelChoosingNoteOperation = viewModel::cancelChoosingNoteOperation,
+        cardOnLongClick = { viewModel.onEvent(NotesListUiEvent.NoteCardLongPressed(it)) },
+        cancelChoosingNoteOperation = { viewModel.onEvent(NotesListUiEvent.CancelButtonClicked) },
         getNotes = viewModel::decideWhichListWillBeUsed,
-        updateCheckboxState = { viewModel.setNoteCheckedState(it) },
-        onDeleteClicked = { viewModel.setOpenDeleteDialog(true) },
-        onSelectAllClicked = viewModel::onSelectAllClicked,
-        onDismissRequest = { viewModel.setOpenDeleteDialog(false) },
-        onDeleteOperationApproved = viewModel::onDeleteOperationApproved,
-        onSearchValueChange = {
-            viewModel.setSearchValue(it)
-            viewModel.searchAndGetNotes()
-        },
+        updateCheckboxState = { viewModel.onEvent(NotesListUiEvent.CheckboxClicked(it)) },
+        onDeleteClicked = { viewModel.onEvent(NotesListUiEvent.DeleteButtonClicked) },
+        onSelectAllClicked = { viewModel.onEvent(NotesListUiEvent.SelectAllButtonClicked) },
+        onDismissRequest = { viewModel.onEvent(NotesListUiEvent.DeletionDismissed) },
+        onDeleteOperationApproved = { viewModel.onEvent(NotesListUiEvent.DeletionApproved) },
+        onSearchValueChange = { viewModel.onEvent(NotesListUiEvent.SearchValueChanged(it)) },
+        showCheckbox = {
+            val showCheckbox = when (notesListScreenState.operationType) {
+                NotesListUiOperation.SelectNotes -> true
+                else -> false
+            }
+            showCheckbox
+        }
     )
 }
 
@@ -64,7 +63,6 @@ internal fun NotesListRoute(
 fun NotesListScreen(
     addNoteButtonClicked: () -> Unit,
     makeSearchValueEmpty: () -> Unit,
-    getAllNotes: () -> Unit,
     cardOnClick: (Int) -> Unit,
     cardOnLongClick: (noteIndex: Int) -> Unit,
     onSearchValueChange: (newValue: String) -> Unit,
@@ -75,14 +73,12 @@ fun NotesListScreen(
     onSelectAllClicked: () -> Unit,
     onDismissRequest: () -> Unit,
     onDeleteOperationApproved: () -> Unit,
-    notesListScreenState: NotesListUIState
+    showCheckbox: () -> Boolean,
+    notesListScreenState: NotesListUIState,
 ) {
     LaunchedEffect(key1 = notesListScreenState.allNotesList) {
         makeSearchValueEmpty()
-        // To display all list after editing or adding a note
-        getAllNotes()
     }
-    val listState = rememberLazyListState()
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -90,8 +86,9 @@ fun NotesListScreen(
         floatingActionButton = {
             // To make invisible fab during choosing any notes. This will
             // prevent users to add any note in that moment.
-            if (!notesListScreenState.startChoosingNoteOperation) {
-                Fab(addNoteButtonClicked)
+            when (notesListScreenState.operationType) {
+                NotesListUiOperation.DisplayNotes -> Fab(addNoteButtonClicked)
+                else -> {}
             }
         }
     ) { paddingValues ->
@@ -99,48 +96,61 @@ fun NotesListScreen(
             .fillMaxSize()
             .padding(paddingValues)
         ) {
-            if (!notesListScreenState.startChoosingNoteOperation) {
-                AllNotesText()
-                TotalNotesCount(notesCount = notesListScreenState.totalNotesCount)
-                Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
-                SearchBar(
-                    searchValue = notesListScreenState.searchValue,
-                    onSearchValueChange = onSearchValueChange
-                )
-            } else {
-                CancelChoosingNoteButton(
-                    cancelChoosingNoteOperation = cancelChoosingNoteOperation
-                )
-                SelectedNumberOfNotesText(selectedNumberOfNotes = notesListScreenState.selectedNotesCount)
-                Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
-                SearchBar(
-                    modifier = Modifier.alpha(0.2f),
-                    searchValue = notesListScreenState.searchValue,
-                    readOnly = true
-                )
+            when (notesListScreenState.operationType) {
+                NotesListUiOperation.DisplayNotes -> {
+                    AllNotesText()
+                    TotalNotesCount(notesCount = notesListScreenState.totalNotesCount)
+                    Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
+                    SearchBar(
+                        searchValue = notesListScreenState.searchValue,
+                        onSearchValueChange = onSearchValueChange
+                    )
+                }
+                NotesListUiOperation.SelectNotes -> {
+                    CancelChoosingNoteButton(
+                        cancelChoosingNoteOperation = cancelChoosingNoteOperation
+                    )
+                    SelectedNumberOfNotesText(selectedNumberOfNotes = notesListScreenState.selectedNotesCount)
+                    Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
+                    SearchBar(
+                        modifier = Modifier.alpha(0.2f),
+                        searchValue = notesListScreenState.searchValue,
+                        readOnly = true
+                    )
+                }
             }
-
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
             NotesListView(
                 notes = getNotes(),
                 cardOnClick = cardOnClick,
                 cardOnLongClick = cardOnLongClick,
-                showCheckbox = {
-                    notesListScreenState.startChoosingNoteOperation
-                },
-                updateCheckboxState = updateCheckboxState,
-                lazyListState = listState
+                showCheckbox = showCheckbox,
+                updateCheckboxState = updateCheckboxState
             )
         }
-        if (notesListScreenState.startChoosingNoteOperation) {
-            OptionsWhenChosenNote(
-                isDeleteButtonEnabled = notesListScreenState.deleteButtonEnabled,
-                isSelectAllButtonClicked = notesListScreenState.selectAllClicked,
-                onDeleteClicked = onDeleteClicked,
-                onSelectAllClicked = onSelectAllClicked
-            )
+        when (notesListScreenState.operationType) {
+            NotesListUiOperation.SelectNotes ->  {
+                OptionsWhenChosenNote(
+                    isAllSelected = { notesListScreenState.isAllSelected() },
+                    isDeleteButtonEnabled = notesListScreenState.isDeleteButtonEnabled(),
+                    onDeleteClicked = onDeleteClicked,
+                    onSelectAllClicked = onSelectAllClicked
+                )
+            }
+            else -> {}
         }
-        if (notesListScreenState.openDeleteDialog) {
+        when (notesListScreenState.operationType) {
+            NotesListUiOperation.SelectNotes ->  {
+                OptionsWhenChosenNote(
+                    isAllSelected = { notesListScreenState.isAllSelected() },
+                    isDeleteButtonEnabled = notesListScreenState.isDeleteButtonEnabled(),
+                    onDeleteClicked = onDeleteClicked,
+                    onSelectAllClicked = onSelectAllClicked
+                )
+            }
+            else -> {}
+        }
+        if (notesListScreenState.showDeletionDialog) {
             DeleteAlertDialog(
                 selectedNoteCount = notesListScreenState.selectedNotesCount,
                 onDismissRequest = onDismissRequest,
@@ -375,8 +385,7 @@ fun NotesListView(
     cardOnClick: (Int) -> Unit,
     cardOnLongClick: (noteIndex: Int) -> Unit,
     showCheckbox: () -> Boolean,
-    updateCheckboxState: (noteIndex: Int) -> Unit,
-    lazyListState: LazyListState = rememberLazyListState()
+    updateCheckboxState: (noteIndex: Int) -> Unit
 ) {
     LazyColumn(
         contentPadding = PaddingValues(
@@ -384,8 +393,7 @@ fun NotesListView(
             top = MaterialTheme.spacing.extraSmall,
             end = MaterialTheme.spacing.extraSmall,
             bottom = MaterialTheme.spacing.extraExtraLarge
-        ),
-        state = lazyListState
+        )
     ) {
         items(
             items = notes,
@@ -504,7 +512,7 @@ fun Fab(
 @Composable
 private fun OptionsWhenChosenNote(
     isDeleteButtonEnabled: Boolean,
-    isSelectAllButtonClicked: Boolean = true,
+    isAllSelected: () -> Boolean,
     onDeleteClicked: () -> Unit,
     onSelectAllClicked: () -> Unit
 ) {
@@ -512,6 +520,9 @@ private fun OptionsWhenChosenNote(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Bottom
     ) {
+        val deleteAlphaValue: Float =
+            if (isDeleteButtonEnabled) 1f
+            else 0.3f
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -523,9 +534,11 @@ private fun OptionsWhenChosenNote(
             Column(
                 modifier = Modifier
                     .padding(bottom = MaterialTheme.spacing.small)
+                    .weight(1f)
                     .clickable(enabled = isDeleteButtonEnabled) {
                         onDeleteClicked()
-                    },
+                    }
+                    .alpha(deleteAlphaValue),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -543,16 +556,15 @@ private fun OptionsWhenChosenNote(
             Column(
                 modifier = Modifier
                     .padding(bottom = MaterialTheme.spacing.small)
-                    .clickable {
-                        onSelectAllClicked()
-                    },
+                    .weight(1f)
+                    .clickable { onSelectAllClicked() },
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 val iconAndTextColor: Color
                 val text: String
 
-                if (isSelectAllButtonClicked) {
+                if (isAllSelected()) {
                     iconAndTextColor = MaterialTheme.colorScheme.primary
                     text = stringResource(id = R.string.deselect_all)
                 } else {
