@@ -1,5 +1,5 @@
 # My Notes
-My Notes is a simple, easy and fast notebook app. It helps you to create notes quickly and easily. You can also edit and list your notes.
+My Notes is a simple, easy and fast notebook app. It helps you to create notes quickly and easily. You can also edit, delete, and list your notes.
 <br>
 <br>
 It is currently available in Google Play Store.
@@ -11,6 +11,8 @@ It is currently available in Google Play Store.
 * Editing notes
 * Displaying notes as a list
 * Searching specific notes
+* Deleting multiple and single notes
+* Selecting notes to make specific operations
 
 # Built With 🛠
 
