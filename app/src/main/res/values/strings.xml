@@ -13,4 +13,15 @@
     <string name="back_button">Back button</string>
     <string name="done_button">Done button</string>
     <string name="theme_color_icon">Theme color icon</string>
+    <string name="delete">Delete</string>
+    <string name="delete_icon">Delete icon</string>
+    <string name="close_icon">Close icon</string>
+    <string name="singular_selected_number_of_notes">%d item selected</string>
+    <string name="plural_selected_number_of_notes">%d items selected</string>
+    <string name="none_item_selected">None selected</string>
+    <string name="select_all">Select all</string>
+    <string name="deselect_all">Deselect all</string>
+    <string name="delete_one_note">Delete this note?</string>
+    <string name="delete_multiple_notes">Delete %d notes?</string>
+    <string name="cancel">Cancel</string>
 </resources>

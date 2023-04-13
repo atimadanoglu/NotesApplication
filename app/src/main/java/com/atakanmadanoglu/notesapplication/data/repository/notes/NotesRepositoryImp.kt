@@ -37,4 +37,12 @@ class NotesRepositoryImp @Inject constructor(
         val noteEntity = noteMapper.mapToNoteEntity(noteDomain)
         notesDao.editNote(noteEntity)
     }
+
+    override suspend fun deleteNoteById(noteId: Int) = withContext(ioDispatcher) {
+        notesDao.deleteNoteById(noteId)
+    }
+
+    override suspend fun deleteNotesByIds(noteIds: List<Int>) {
+        notesDao.deleteNotesByIds(noteIds)
+    }
 }
