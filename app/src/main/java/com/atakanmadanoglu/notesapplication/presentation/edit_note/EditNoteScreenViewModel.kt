@@ -7,7 +7,6 @@ import com.atakanmadanoglu.notesapplication.domain.usecases.DeleteNoteByIdUseCas
 import com.atakanmadanoglu.notesapplication.domain.usecases.EditNoteUseCase
 import com.atakanmadanoglu.notesapplication.domain.usecases.GetNoteByIdUseCase
 import com.atakanmadanoglu.notesapplication.presentation.edit_note.navigation.EditNoteArgs
-import com.atakanmadanoglu.notesapplication.presentation.model.EditNoteScreenEvent
 import com.atakanmadanoglu.notesapplication.presentation.model.EditNoteUiState
 import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,50 +26,37 @@ class EditNoteScreenViewModel @Inject constructor(
 
     private val editNoteArgs = EditNoteArgs(savedStateHandle)
     // it will be used to compare the first retrieved and edited values
-    private val retrievedData = MutableStateFlow(NoteUI())
+    private val retrievedDataFromPreviousPage = MutableStateFlow(NoteUI())
 
     private val _editNoteUiState = MutableStateFlow(EditNoteUiState())
     val editNoteUiState: StateFlow<EditNoteUiState> get() = _editNoteUiState
 
     init { getNoteById() }
 
-    fun onEvent(event: EditNoteScreenEvent) {
-        when (event) {
-            is EditNoteScreenEvent.TitleChanged -> onTitleChanged(event.newInput)
-            is EditNoteScreenEvent.DescriptionChanged -> onDescriptionChanged(event.newInput)
-            is EditNoteScreenEvent.WhenIsFocused -> whenIsFocused()
-            is EditNoteScreenEvent.WhenNotHaveFocus -> whenNotHaveFocus()
-            is EditNoteScreenEvent.DeleteButtonClicked -> onDeleteButtonClicked()
-            is EditNoteScreenEvent.DoneIconClicked -> onDoneIconClicked()
-            is EditNoteScreenEvent.DeletionDismissed -> onDeletionDismissed()
-            is EditNoteScreenEvent.DeletionApproved -> onDeletionApproved()
-        }
-    }
-
-    private fun onTitleChanged(newInput: String) {
+    fun onTitleChanged(newInput: String) {
         setTitle(newInput)
         setDoneIconVisible()
     }
 
-    private fun onDescriptionChanged(newValue: String) {
+    fun onDescriptionChanged(newValue: String) {
         setDescription(newValue)
         setDoneIconVisible()
     }
 
-    private fun whenIsFocused() = setFocus(true)
-    private fun whenNotHaveFocus() = setFocus(false)
-    private fun onDeleteButtonClicked() = setOpenDeleteDialog(true)
-    private fun onDeletionDismissed() = setOpenDeleteDialog(false)
-    private fun onDeletionApproved() = deleteNote()
+    fun whenIsFocused() = setFocus(true)
+    fun whenNotHaveFocus() = setFocus(false)
+    fun onDeleteButtonClicked() = setOpenDeleteDialog(true)
+    fun onDeletionDismissed() = setOpenDeleteDialog(false)
+    fun onDeletionApproved() = deleteNote()
 
-    private fun onDoneIconClicked() {
+    fun onDoneIconClicked() {
         editNote(
             inputTitle = _editNoteUiState.value.title,
             inputDescription = _editNoteUiState.value.description
         )
         // RetrievedData needs to be updated to prevent contradiction
         // between old and new data after user click doneIcon
-        retrievedData.update {
+        retrievedDataFromPreviousPage.update {
             it.copy(
                 title = _editNoteUiState.value.title,
                 description = _editNoteUiState.value.description,
@@ -92,7 +78,7 @@ class EditNoteScreenViewModel @Inject constructor(
         _editNoteUiState.update { it.copy(isFocused = newValue) }
     }
 
-    private fun setDoneIconVisible() = with(retrievedData.value) {
+    private fun setDoneIconVisible() = with(retrievedDataFromPreviousPage.value) {
         val isNewValueEntered = _editNoteUiState.value.isNewValueEntered(
             retrievedTitle = title,
             retrievedDescription = description
@@ -109,7 +95,7 @@ class EditNoteScreenViewModel @Inject constructor(
             getNoteByIdUseCase.invoke(
                 id = editNoteArgs.noteId
             ).collect { noteUI ->
-                retrievedData.value = noteUI
+                retrievedDataFromPreviousPage.value = noteUI
                 _editNoteUiState.update {
                     it.copy(
                         title = noteUI.title,
@@ -127,7 +113,7 @@ class EditNoteScreenViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             editNoteUseCase(
-                id = retrievedData.value.id,
+                id = retrievedDataFromPreviousPage.value.id,
                 title = inputTitle,
                 description = inputDescription
             )

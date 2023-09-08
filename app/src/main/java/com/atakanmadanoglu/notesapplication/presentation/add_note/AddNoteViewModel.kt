@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.atakanmadanoglu.notesapplication.domain.usecases.AddNoteUseCase
 import com.atakanmadanoglu.notesapplication.presentation.model.AddNoteUIState
-import com.atakanmadanoglu.notesapplication.presentation.model.AddNoteUiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,17 +18,9 @@ class AddNoteViewModel @Inject constructor(
     private val _state = MutableStateFlow(AddNoteUIState())
     val state: StateFlow<AddNoteUIState> get() = _state
 
-    fun onEvent(event: AddNoteUiEvent) {
-        when (event) {
-            is AddNoteUiEvent.TitleChanged -> onTitleChanged(event.newInput)
-            is AddNoteUiEvent.DescriptionChanged -> onDescriptionChanged(event.newInput)
-            is AddNoteUiEvent.DoneIconClicked -> onDoneIconClicked()
-        }
-    }
-
-    private fun onTitleChanged(newInput: String) = setTitle(newInput)
-    private fun onDescriptionChanged(newInput: String) = setDescription(newInput)
-    private fun onDoneIconClicked() {
+    fun onTitleChanged(newInput: String) = setTitle(newInput)
+    fun onDescriptionChanged(newInput: String) = setDescription(newInput)
+    fun onDoneIconClicked() {
         addNote(
             inputTitle = _state.value.title,
             inputDescription = _state.value.description

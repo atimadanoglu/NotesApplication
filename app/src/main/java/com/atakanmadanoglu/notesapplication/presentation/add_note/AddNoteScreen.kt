@@ -15,7 +15,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.atakanmadanoglu.notesapplication.R
 import com.atakanmadanoglu.notesapplication.presentation.model.AddNoteUIState
-import com.atakanmadanoglu.notesapplication.presentation.model.AddNoteUiEvent
 import com.atakanmadanoglu.notesapplication.theme.openSansRegular
 import com.atakanmadanoglu.notesapplication.theme.openSansSemiBold
 import com.atakanmadanoglu.notesapplication.theme.spacing
@@ -29,14 +28,27 @@ fun AddNoteRoute(
 ) {
     val addNoteState by addNoteViewModel.state.collectAsStateWithLifecycle()
 
+    val onTitleChanged: (newValue: String) -> Unit = remember {
+        return@remember addNoteViewModel::onTitleChanged
+    }
+    val onDescriptionChanged: (newValue: String) -> Unit = remember {
+        return@remember addNoteViewModel::onDescriptionChanged
+    }
+    val onDoneIconClicked: () -> Unit = remember {
+        return@remember addNoteViewModel::onDoneIconClicked
+    }
+    val popBackStack: () -> Unit = remember {
+        { navController.popBackStack() }
+    }
+
     AddNoteScreen(
         addNoteState = addNoteState,
-        navigationIconOnClick = navController::popBackStack,
-        titleOnChange = { addNoteViewModel.onEvent(AddNoteUiEvent.TitleChanged(it)) },
-        onDescriptionChange = { addNoteViewModel.onEvent(AddNoteUiEvent.DescriptionChanged(it)) },
-        doneIconOnClick = {
-            addNoteViewModel.onEvent(AddNoteUiEvent.DoneIconClicked)
-            navController.popBackStack()
+        onNavigationIconClick = navController::popBackStack,
+        onTitleChange = onTitleChanged,
+        onDescriptionChange = onDescriptionChanged,
+        onDoneIconClick = {
+            onDoneIconClicked()
+            popBackStack()
         }
     )
 }
@@ -45,10 +57,10 @@ fun AddNoteRoute(
 fun AddNoteScreen(
     modifier: Modifier = Modifier,
     addNoteState: AddNoteUIState,
-    navigationIconOnClick: () -> Unit,
-    titleOnChange: (String) -> Unit,
+    onNavigationIconClick: () -> Unit,
+    onTitleChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
-    doneIconOnClick: () -> Unit
+    onDoneIconClick: () -> Unit
 ) {
     Scaffold(
         modifier = modifier
@@ -57,8 +69,8 @@ fun AddNoteScreen(
         topBar = {
             NavigationTopAppBar(
                 isDoneIconVisible = addNoteState.isAnyValueEntered(),
-                doneIconOnClick = doneIconOnClick,
-                navigationIconOnClick = navigationIconOnClick
+                onDoneIconClick = onDoneIconClick,
+                onNavigationIconClick = onNavigationIconClick
             )
         }
     ) {
@@ -69,7 +81,7 @@ fun AddNoteScreen(
         ) {
             TitleInput(
                 title = addNoteState.title,
-                titleOnChange = titleOnChange
+                onTitleChange = onTitleChange
             )
             ShowDate()
             NoteContentView(
@@ -85,14 +97,14 @@ fun AddNoteScreen(
 @Composable
 fun NavigationTopAppBar(
     isDoneIconVisible: Boolean = false,
-    doneIconOnClick: () -> Unit,
-    navigationIconOnClick: () -> Unit
+    onDoneIconClick: () -> Unit,
+    onNavigationIconClick: () -> Unit
 ) {
     TopAppBar(
-        title = { Text(text = "") },
+        title = {  },
         navigationIcon = {
             IconButton(
-                onClick = navigationIconOnClick
+                onClick = onNavigationIconClick
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_baseline_arrow_back_24),
@@ -103,7 +115,7 @@ fun NavigationTopAppBar(
         actions = {
             if (isDoneIconVisible) {
                 IconButton(
-                    onClick = doneIconOnClick
+                    onClick = onDoneIconClick
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_done_24),
@@ -120,7 +132,7 @@ fun NavigationTopAppBar(
 fun TitleInput(
     modifier: Modifier = Modifier,
     title: String,
-    titleOnChange: (String) -> Unit
+    onTitleChange: (String) -> Unit
 ) {
     Column( modifier = modifier
         .fillMaxWidth()
@@ -128,7 +140,7 @@ fun TitleInput(
         OutlinedTextField(
 
             value = title,
-            onValueChange = titleOnChange,
+            onValueChange = onTitleChange,
             placeholder = {
                 Text(
                     text = stringResource(id = R.string.title),
@@ -183,7 +195,7 @@ fun NoteContentView(
 }
 
 @Composable
-fun ShowDate() {
+private fun ShowDate() {
     val calendar = Calendar.getInstance().time
     val formatter = SimpleDateFormat("MMM d, HH:mm", Locale.ENGLISH)
     val current = formatter.format(calendar)
