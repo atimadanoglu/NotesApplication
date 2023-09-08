@@ -37,28 +37,10 @@ internal fun NotesListRoute(
 ) {
     val notesListScreenState by viewModel.state.collectAsStateWithLifecycle()
 
-    /*NotesListScreen(
-        addNoteButtonClicked = addNoteButtonClicked,
-        onCardClick = cardOnClick,
-        notesListScreenState = notesListScreenState,
-        makeSearchValueEmpty = { viewModel.setSearchValue("") },
-        onCardLongClick = { viewModel.onEvent(NotesListUiEvent.NoteCardLongPressed(it)) },
-        cancelChoosingNote = { viewModel.onEvent(NotesListUiEvent.CancelButtonClicked) },
-        getNotes = viewModel::decideWhichListWillBeUsed,
-        updateCheckboxState = { viewModel.onEvent(NotesListUiEvent.CheckboxClicked(it)) },
-        onDeleteClicked = { viewModel.onEvent(NotesListUiEvent.DeleteButtonClicked) },
-        onSelectAllClicked = { viewModel.onEvent(NotesListUiEvent.SelectAllButtonClicked) },
-        onDismissRequest = { viewModel.onEvent(NotesListUiEvent.DeletionDismissed) },
-        onDeleteOperationApproved = { viewModel.onEvent(NotesListUiEvent.DeletionApproved) },
-        onSearchValueChange = { viewModel.onEvent(NotesListUiEvent.SearchValueChanged(it)) },
-        showCheckbox = {
-            val showCheckbox = when (notesListScreenState.operationType) {
-                NotesListUiOperation.SelectNotes -> true
-                else -> false
-            }
-            showCheckbox
-        }
-    )*/
+    val cancelChoosingNote: () -> Unit = remember {
+        return@remember viewModel::onCancelButtonClicked
+    }
+
     val showCheckbox by remember {
         derivedStateOf {
             when (notesListScreenState.operationType) {
@@ -70,7 +52,13 @@ internal fun NotesListRoute(
 
     val isAllSelected by remember {
         derivedStateOf {
-            notesListScreenState.selectedNotesCount == notesListScreenState.totalNotesCount
+            { notesListScreenState.selectedNotesCount == notesListScreenState.totalNotesCount }
+        }
+    }
+
+    val isDeleteButtonEnabled by remember {
+        derivedStateOf {
+            { notesListScreenState.selectedNotesCount != 0 }
         }
     }
     NotesListScreen(
@@ -85,21 +73,22 @@ internal fun NotesListRoute(
         },
         notesListScreenState = notesListScreenState,
         makeSearchValueEmpty = { viewModel.setSearchValue("") },
-        onCardLongClick = { viewModel.onEvent(NotesListUiEvent.NoteCardLongPressed(it)) },
-        cancelChoosingNote = viewModel::onCancelButtonClicked,
+        onCardLongClick = { viewModel.onNoteCardLongPressed(it) },
+        cancelChoosingNote = cancelChoosingNote,
         getNotes = viewModel::decideWhichListWillBeUsed,
         onDeleteClicked = viewModel::onDeleteButtonClicked,
         onSelectAllClicked = viewModel::onSelectAllClicked,
         onDismissRequest = viewModel::onDeletionDismissed,
         onDeleteOperationApproved = viewModel::onDeletionApproved,
-        onSearchValueChange = { viewModel.onEvent(NotesListUiEvent.SearchValueChanged(it)) },
+        onSearchValueChange = { viewModel.onSearchValueChange(it) },
         showCheckbox = {
             showCheckbox
         },
         updateCheckboxState = {
             viewModel.onCheckboxClicked(it)
         },
-        isAllSelected = isAllSelected
+        isAllSelected = isAllSelected,
+        isDeleteButtonEnabled = isDeleteButtonEnabled
     )
 }
 
@@ -119,7 +108,8 @@ fun NotesListScreen(
     notesListScreenState: NotesListUIState,
     showCheckbox: () -> Boolean,
     updateCheckboxState: (Int) -> Unit,
-    isAllSelected: Boolean
+    isAllSelected: () -> Boolean,
+    isDeleteButtonEnabled: () -> Boolean
 ) {
     LaunchedEffect(key1 = notesListScreenState.allNotesList) {
         makeSearchValueEmpty()
@@ -152,9 +142,11 @@ fun NotesListScreen(
                     )
                 }
                 NotesListUiOperation.SelectNotes -> {
-                    CancelChoosingNoteButton(
-                        cancelChoosingNote = cancelChoosingNote
-                    )
+                    Column {
+                        CancelChoosingNoteButton(
+                            cancelChoosingNote = cancelChoosingNote
+                        )
+                    }
                     SelectedNumberOfNotesText(selectedNumberOfNotes = notesListScreenState.selectedNotesCount)
                     Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
                     SearchBar(
@@ -177,7 +169,7 @@ fun NotesListScreen(
             NotesListUiOperation.SelectNotes ->  {
                 OptionsWhenChosenNote(
                     isAllSelected = isAllSelected,
-                    isDeleteButtonEnabled = notesListScreenState.isDeleteButtonEnabled(),
+                    isDeleteButtonEnabled = isDeleteButtonEnabled,
                     onDeleteClicked = onDeleteClicked,
                     onSelectAllClicked = onSelectAllClicked
                 )
@@ -552,8 +544,8 @@ fun Fab(
 
 @Composable
 private fun OptionsWhenChosenNote(
-    isDeleteButtonEnabled: Boolean,
-    isAllSelected: Boolean,
+    isDeleteButtonEnabled: () -> Boolean,
+    isAllSelected: () -> Boolean,
     onDeleteClicked: () -> Unit,
     onSelectAllClicked: () -> Unit
 ) {
@@ -562,7 +554,7 @@ private fun OptionsWhenChosenNote(
         verticalArrangement = Arrangement.Bottom
     ) {
         val deleteAlphaValue: Float =
-            if (isDeleteButtonEnabled) 1f
+            if (isDeleteButtonEnabled()) 1f
             else 0.3f
         Row(
             modifier = Modifier
@@ -576,7 +568,7 @@ private fun OptionsWhenChosenNote(
                 modifier = Modifier
                     .padding(bottom = MaterialTheme.spacing.small)
                     .weight(1f)
-                    .clickable(enabled = isDeleteButtonEnabled) {
+                    .clickable(enabled = isDeleteButtonEnabled()) {
                         onDeleteClicked()
                     }
                     .alpha(deleteAlphaValue),
@@ -595,7 +587,7 @@ private fun OptionsWhenChosenNote(
                 verticalArrangement = Arrangement.Center
             ) {
                 SelectAllOption(
-                    isAllSelected = isAllSelected
+                    isAllSelected = isAllSelected()
                 )
             }
         }
@@ -661,6 +653,7 @@ fun Preview() {
         onDeleteOperationApproved = { },
         showCheckbox = { true },
         notesListScreenState = NotesListUIState(),
-        isAllSelected = false
+        isAllSelected = {false},
+        isDeleteButtonEnabled = {false}
     )
 }

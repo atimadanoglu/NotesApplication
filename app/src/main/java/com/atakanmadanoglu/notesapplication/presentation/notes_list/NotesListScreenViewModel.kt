@@ -7,7 +7,6 @@ import com.atakanmadanoglu.notesapplication.domain.usecases.GetNotesByCreatedAtU
 import com.atakanmadanoglu.notesapplication.domain.usecases.SearchNotesUseCase
 import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
 import com.atakanmadanoglu.notesapplication.presentation.model.NotesListUIState
-import com.atakanmadanoglu.notesapplication.presentation.model.NotesListUiEvent
 import com.atakanmadanoglu.notesapplication.presentation.model.NotesListUiOperation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,25 +28,12 @@ class NotesListScreenViewModel @Inject constructor(
 
     init { getAllNotes() }
 
-    fun onEvent(events: NotesListUiEvent) {
-        when (events) {
-            is NotesListUiEvent.NoteCardLongPressed -> onNoteCardLongPressed(events.noteIndex)
-            is NotesListUiEvent.CancelButtonClicked -> onCancelButtonClicked()
-            is NotesListUiEvent.CheckboxClicked -> onCheckboxClicked(events.noteIndex)
-            is NotesListUiEvent.DeleteButtonClicked -> onDeleteButtonClicked()
-            is NotesListUiEvent.DeletionApproved -> onDeletionApproved()
-            is NotesListUiEvent.DeletionDismissed -> onDeletionDismissed()
-            is NotesListUiEvent.SelectAllButtonClicked -> onSelectAllClicked()
-            is NotesListUiEvent.SearchValueChanged -> onSearchValueChange(events.newInput)
-        }
-    }
-
-    private fun onSearchValueChange(newValue: String) {
+    fun onSearchValueChange(newValue: String) {
         setSearchValue(newValue = newValue)
         searchAndGetNotes()
     }
 
-    private fun onDeletionApproved() {
+    fun onDeletionApproved() {
         deleteNotes()
         setShowDeletionDialog(showDialog = false)
         setOperationType(NotesListUiOperation.DisplayNotes)
@@ -56,28 +42,28 @@ class NotesListScreenViewModel @Inject constructor(
         setSelectAll(false)
     }
 
-    private fun onDeletionDismissed() {
+    fun onDeletionDismissed() {
         setShowDeletionDialog(showDialog = false)
     }
 
-    private fun onDeleteButtonClicked() {
+    fun onDeleteButtonClicked() {
         setShowDeletionDialog(showDialog = true)
     }
-    private fun onCheckboxClicked(noteIndex: Int) {
+    fun onCheckboxClicked(noteIndex: Int) {
         setNoteCheckedState(noteIndex)
         setSelectedNotesCount()
         // each time user changes the state of checkbox, synchronise the value of allSelected
         setSelectAll(_state.value.isAllSelected())
     }
 
-    private fun onNoteCardLongPressed(noteIndex: Int) {
+    fun onNoteCardLongPressed(noteIndex: Int) {
         _state.update {
             it.copy(operationType = NotesListUiOperation.SelectNotes)
         }
         onCheckboxClicked(noteIndex)
     }
 
-    private fun onCancelButtonClicked() {
+    fun onCancelButtonClicked() {
         _state.update {
             setAllNotesCheckboxUnchecked()
             it.copy(
@@ -105,6 +91,7 @@ class NotesListScreenViewModel @Inject constructor(
     private fun setSearchValueEntered() {
         _state.update { it.copy(isSearchValueEntered = it.searchValue.isNotEmpty()) }
     }
+
     private fun setSelectedNotesCount() {
         _state.update {
             val selectedNotesCount = it.allNotesList.count { noteUI -> noteUI.isChecked }
@@ -193,7 +180,7 @@ class NotesListScreenViewModel @Inject constructor(
         _state.update { it.copy(selectAllClicked = value) }
     }
 
-    private fun onSelectAllClicked() {
+    fun onSelectAllClicked() {
         setSelectAll(_state.value.selectAllClicked.not())
        // _state.update { it.copy(selectAllClicked = !it.selectAllClicked) }
         if (_state.value.selectAllClicked) setAllNotesCheckboxChecked()
