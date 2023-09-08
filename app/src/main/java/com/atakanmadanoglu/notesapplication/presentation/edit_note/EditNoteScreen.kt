@@ -1,13 +1,20 @@
 package com.atakanmadanoglu.notesapplication.presentation.edit_note
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
@@ -24,7 +31,6 @@ import com.atakanmadanoglu.notesapplication.R
 import com.atakanmadanoglu.notesapplication.presentation.add_note.NavigationTopAppBar
 import com.atakanmadanoglu.notesapplication.presentation.add_note.NoteContentView
 import com.atakanmadanoglu.notesapplication.presentation.add_note.TitleInput
-import com.atakanmadanoglu.notesapplication.presentation.model.EditNoteScreenEvent
 import com.atakanmadanoglu.notesapplication.presentation.model.EditNoteUiState
 import com.atakanmadanoglu.notesapplication.presentation.notes_list.DeleteAlertDialog
 import com.atakanmadanoglu.notesapplication.theme.openSansRegular
@@ -37,20 +43,41 @@ internal fun EditNoteRoute(
 ) {
     val editNoteUiState by editNoteScreenViewModel.editNoteUiState.collectAsStateWithLifecycle()
 
+    val isDoneIconVisible by remember {
+        derivedStateOf { editNoteUiState.isDoneIconVisible }
+    }
+
+    val onTitleChange: (newValue: String) -> Unit = remember {
+        return@remember editNoteScreenViewModel::onTitleChanged
+    }
+
+    val onDescriptionChange: (newValue: String) -> Unit = remember {
+        return@remember editNoteScreenViewModel::onDescriptionChanged
+    }
+
+    val popBackStack = remember {
+        { navController.popBackStack() }
+    }
+
+    val onDeletionApproved: () -> Unit = remember {
+        return@remember editNoteScreenViewModel::onDeletionApproved
+    }
+
     EditNoteScreen(
         editNoteUiState = editNoteUiState,
-        navigationIconOnClick = navController::popBackStack,
-        whenIsFocused = { editNoteScreenViewModel.onEvent(EditNoteScreenEvent.WhenIsFocused) },
-        whenNotHaveFocus = { editNoteScreenViewModel.onEvent(EditNoteScreenEvent.WhenNotHaveFocus) },
-        titleOnChange = { editNoteScreenViewModel.onEvent(EditNoteScreenEvent.TitleChanged(it)) },
-        descriptionOnChange = { editNoteScreenViewModel.onEvent(EditNoteScreenEvent.DescriptionChanged(it)) },
-        onDeleteClicked = { editNoteScreenViewModel.onEvent(EditNoteScreenEvent.DeleteButtonClicked) },
-        doneIconOnClick = { editNoteScreenViewModel.onEvent(EditNoteScreenEvent.DoneIconClicked) },
-        onDismissRequest = { editNoteScreenViewModel.onEvent(EditNoteScreenEvent.DeletionDismissed) },
+        onNavigationIconClick = navController::popBackStack,
+        whenIsFocused = editNoteScreenViewModel::whenIsFocused,
+        whenNotHaveFocus = editNoteScreenViewModel::whenNotHaveFocus,
+        onTitleChange = onTitleChange,
+        onDescriptionChange = onDescriptionChange,
+        onDeleteClicked = editNoteScreenViewModel::onDeleteButtonClicked,
+        onDoneIconClick = editNoteScreenViewModel::onDoneIconClicked,
+        onDismissRequest = editNoteScreenViewModel::onDeletionDismissed,
         onDeleteOperationApproved = {
-            editNoteScreenViewModel.onEvent(EditNoteScreenEvent.DeletionApproved)
-            navController.popBackStack()
-        }
+            onDeletionApproved()
+            popBackStack()
+        },
+        isDoneIconVisible = isDoneIconVisible
     )
 }
 
@@ -58,15 +85,16 @@ internal fun EditNoteRoute(
 fun EditNoteScreen(
     modifier: Modifier = Modifier,
     editNoteUiState: EditNoteUiState,
-    doneIconOnClick: () -> Unit,
-    navigationIconOnClick: () -> Unit,
+    onDoneIconClick: () -> Unit,
+    onNavigationIconClick: () -> Unit,
     whenIsFocused: () -> Unit,
     whenNotHaveFocus: () -> Unit,
-    titleOnChange: (String) -> Unit,
-    descriptionOnChange: (String) -> Unit,
+    onTitleChange: (String) -> Unit,
+    onDescriptionChange: (String) -> Unit,
     onDeleteClicked: () -> Unit,
     onDismissRequest: () -> Unit,
-    onDeleteOperationApproved: () -> Unit
+    onDeleteOperationApproved: () -> Unit,
+    isDoneIconVisible: Boolean
 ) {
     val focusManager = LocalFocusManager.current
     Scaffold(
@@ -75,12 +103,12 @@ fun EditNoteScreen(
             .padding(horizontal = MaterialTheme.spacing.small),
         topBar = {
             NavigationTopAppBar(
-                isDoneIconVisible = editNoteUiState.isDoneIconVisible,
-                doneIconOnClick = {
-                    doneIconOnClick()
+                isDoneIconVisible = isDoneIconVisible,
+                onDoneIconClick = {
+                    onDoneIconClick()
                     focusManager.clearFocus()
                 },
-                navigationIconOnClick = navigationIconOnClick
+                onNavigationIconClick = onNavigationIconClick
             )
         }
     ) {
@@ -100,21 +128,12 @@ fun EditNoteScreen(
                         }
                     },
                 title = editNoteUiState.title,
-                titleOnChange = { title -> titleOnChange(title) }
+                onTitleChange = { title -> onTitleChange(title) },
             )
             ShowDate(date = editNoteUiState.createdAt)
             NoteContentView(
-                modifier = Modifier
-                    .fillMaxHeight(0.9f)
-                    .fillMaxWidth()
-                    .onFocusChanged { focusState ->
-                        when {
-                            focusState.isFocused -> whenIsFocused()
-                            !focusState.hasFocus -> whenNotHaveFocus()
-                        }
-                    },
                 description = editNoteUiState.description,
-                onDescriptionChange = { desc -> descriptionOnChange(desc) }
+                onDescriptionChange = { desc -> onDescriptionChange(desc) },
             )
             if (!editNoteUiState.isFocused) {
                 Column(
@@ -127,26 +146,31 @@ fun EditNoteScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.outline_delete_24),
-                        contentDescription = stringResource(id = R.string.delete_icon)
-                    )
-                    Text(
-                        text = stringResource(id = R.string.delete),
-                        fontSize = MaterialTheme.typography.labelMedium.fontSize,
-                        fontFamily = MaterialTheme.typography.openSansRegular.fontFamily
-                    )
+                    DeleteButton()
                 }
             }
         }
         if (editNoteUiState.openDeleteDialog) {
             DeleteAlertDialog(
-                selectedNoteCount = 1,
+                selectedNoteCount = 1, // default value is 1
                 onDismissRequest = onDismissRequest,
                 onDeleteOperationApproved = onDeleteOperationApproved
             )
         }
     }
+}
+
+@Composable
+private fun DeleteButton() {
+    Icon(
+        painter = painterResource(id = R.drawable.outline_delete_24),
+        contentDescription = stringResource(id = R.string.delete_icon)
+    )
+    Text(
+        text = stringResource(id = R.string.delete),
+        fontSize = MaterialTheme.typography.labelMedium.fontSize,
+        fontFamily = MaterialTheme.typography.openSansRegular.fontFamily
+    )
 }
 
 @Composable
