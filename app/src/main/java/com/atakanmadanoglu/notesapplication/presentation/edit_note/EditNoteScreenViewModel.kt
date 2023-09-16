@@ -1,5 +1,6 @@
 package com.atakanmadanoglu.notesapplication.presentation.edit_note
 
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@Immutable
 @HiltViewModel
 class EditNoteScreenViewModel @Inject constructor(
     private val getNoteByIdUseCase: GetNoteByIdUseCase,
@@ -79,11 +81,13 @@ class EditNoteScreenViewModel @Inject constructor(
     }
 
     private fun setDoneIconVisible() = with(retrievedDataFromPreviousPage.value) {
-        val isNewValueEntered = _editNoteUiState.value.isNewValueEntered(
-            retrievedTitle = title,
-            retrievedDescription = description
-        )
-        _editNoteUiState.update { it.copy(isDoneIconVisible = isNewValueEntered) }
+        if (
+            !title.contentEquals(_editNoteUiState.value.title) ||
+            !description.contentEquals(_editNoteUiState.value.description)) {
+            _editNoteUiState.update { it.copy(isDoneIconVisible = true) }
+        } else {
+            _editNoteUiState.update { it.copy(isDoneIconVisible = false) }
+        }
     }
 
     private fun setOpenDeleteDialog(value: Boolean) {

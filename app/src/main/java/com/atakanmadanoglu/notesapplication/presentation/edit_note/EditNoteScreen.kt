@@ -12,7 +12,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -27,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.atakanmadanoglu.notesapplication.R
 import com.atakanmadanoglu.notesapplication.presentation.add_note.NavigationTopAppBar
 import com.atakanmadanoglu.notesapplication.presentation.add_note.NoteContentView
@@ -38,13 +38,15 @@ import com.atakanmadanoglu.notesapplication.theme.spacing
 
 @Composable
 internal fun EditNoteRoute(
-    navController: NavController,
+    navController: NavController = rememberNavController(),
     editNoteScreenViewModel: EditNoteScreenViewModel = hiltViewModel()
 ) {
     val editNoteUiState by editNoteScreenViewModel.editNoteUiState.collectAsStateWithLifecycle()
-
-    val isDoneIconVisible by remember {
-        derivedStateOf { editNoteUiState.isDoneIconVisible }
+    val focusManager = LocalFocusManager.current
+    val isDoneIconVisible = remember {
+        {
+            editNoteUiState.isDoneIconVisible
+        }
     }
 
     val onTitleChange: (newValue: String) -> Unit = remember {
@@ -63,15 +65,26 @@ internal fun EditNoteRoute(
         return@remember editNoteScreenViewModel::onDeletionApproved
     }
 
+    val onDoneIconClicked: () -> Unit = remember {
+        return@remember editNoteScreenViewModel::onDoneIconClicked
+    }
+
+    val clearFocus: () -> Unit = remember {
+        { focusManager.clearFocus() }
+    }
+
     EditNoteScreen(
         editNoteUiState = editNoteUiState,
-        onNavigationIconClick = navController::popBackStack,
+        onNavigationIconClick = { popBackStack() },
         whenIsFocused = editNoteScreenViewModel::whenIsFocused,
         whenNotHaveFocus = editNoteScreenViewModel::whenNotHaveFocus,
         onTitleChange = onTitleChange,
         onDescriptionChange = onDescriptionChange,
         onDeleteClicked = editNoteScreenViewModel::onDeleteButtonClicked,
-        onDoneIconClick = editNoteScreenViewModel::onDoneIconClicked,
+        onDoneIconClick = {
+            onDoneIconClicked()
+            clearFocus()
+        },
         onDismissRequest = editNoteScreenViewModel::onDeletionDismissed,
         onDeleteOperationApproved = {
             onDeletionApproved()
@@ -94,9 +107,8 @@ fun EditNoteScreen(
     onDeleteClicked: () -> Unit,
     onDismissRequest: () -> Unit,
     onDeleteOperationApproved: () -> Unit,
-    isDoneIconVisible: Boolean
+    isDoneIconVisible: () -> Boolean
 ) {
-    val focusManager = LocalFocusManager.current
     Scaffold(
         modifier = modifier
             .fillMaxSize()
@@ -104,10 +116,10 @@ fun EditNoteScreen(
         topBar = {
             NavigationTopAppBar(
                 isDoneIconVisible = isDoneIconVisible,
-                onDoneIconClick = {
+                onDoneIconClick = onDoneIconClick/*{
                     onDoneIconClick()
                     focusManager.clearFocus()
-                },
+                }*/,
                 onNavigationIconClick = onNavigationIconClick
             )
         }

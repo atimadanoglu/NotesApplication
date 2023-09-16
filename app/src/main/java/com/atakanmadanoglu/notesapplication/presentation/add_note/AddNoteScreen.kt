@@ -1,5 +1,6 @@
 package com.atakanmadanoglu.notesapplication.presentation.add_note
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -40,6 +41,11 @@ fun AddNoteRoute(
     val popBackStack: () -> Unit = remember {
         { navController.popBackStack() }
     }
+    val isDoneIconVisible: () -> Boolean by remember {
+        derivedStateOf {
+            { addNoteState.isAnyValueEntered() }
+        }
+    }
 
     AddNoteScreen(
         addNoteState = addNoteState,
@@ -49,7 +55,8 @@ fun AddNoteRoute(
         onDoneIconClick = {
             onDoneIconClicked()
             popBackStack()
-        }
+        },
+        isDoneIconVisible = isDoneIconVisible
     )
 }
 
@@ -60,7 +67,8 @@ fun AddNoteScreen(
     onNavigationIconClick: () -> Unit,
     onTitleChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
-    onDoneIconClick: () -> Unit
+    onDoneIconClick: () -> Unit,
+    isDoneIconVisible: () -> Boolean
 ) {
     Scaffold(
         modifier = modifier
@@ -68,7 +76,7 @@ fun AddNoteScreen(
             .padding(horizontal = MaterialTheme.spacing.small),
         topBar = {
             NavigationTopAppBar(
-                isDoneIconVisible = addNoteState.isAnyValueEntered(),
+                isDoneIconVisible = isDoneIconVisible/*{ addNoteState.isAnyValueEntered() }*/,
                 onDoneIconClick = onDoneIconClick,
                 onNavigationIconClick = onNavigationIconClick
             )
@@ -96,35 +104,63 @@ fun AddNoteScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationTopAppBar(
-    isDoneIconVisible: Boolean = false,
+    isDoneIconVisible: () -> Boolean,
     onDoneIconClick: () -> Unit,
     onNavigationIconClick: () -> Unit
 ) {
     TopAppBar(
         title = {  },
         navigationIcon = {
-            IconButton(
+            SpecificIconButton(
+                onClick = onNavigationIconClick,
+                id = R.drawable.ic_baseline_arrow_back_24,
+                contentDesc = stringResource(id = R.string.back_button)
+            )
+            /*IconButton(
                 onClick = onNavigationIconClick
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_baseline_arrow_back_24),
                     contentDescription = stringResource(id = R.string.back_button)
                 )
-            }
+            }*/
         },
         actions = {
-            if (isDoneIconVisible) {
-                IconButton(
+            if (isDoneIconVisible()) {
+                SpecificIconButton(
+                    onClick = onDoneIconClick,
+                    id = R.drawable.ic_baseline_done_24,
+                    contentDesc = stringResource(id = R.string.done_button)
+                )
+                /*IconButton(
                     onClick = onDoneIconClick
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_done_24),
                         contentDescription = stringResource(id = R.string.done_button)
                     )
-                }
+                }*/
             }
         }
     )
+}
+
+@Composable
+private fun SpecificIconButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    @DrawableRes id: Int,
+    contentDesc: String
+) {
+    IconButton(
+        modifier = modifier,
+        onClick = onClick
+    ) {
+        Icon(
+            painter = painterResource(id = id),
+            contentDescription = contentDesc
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
