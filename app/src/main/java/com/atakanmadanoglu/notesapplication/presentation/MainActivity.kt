@@ -3,7 +3,6 @@ package com.atakanmadanoglu.notesapplication.presentation
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
@@ -14,7 +13,7 @@ import com.atakanmadanoglu.notesapplication.presentation.add_note.navigation.nav
 import com.atakanmadanoglu.notesapplication.presentation.edit_note.navigation.editNoteScreen
 import com.atakanmadanoglu.notesapplication.presentation.edit_note.navigation.navigateToEditNoteScreen
 import com.atakanmadanoglu.notesapplication.presentation.navigation.Screen
-import com.atakanmadanoglu.notesapplication.presentation.notes_list.navigation.notesList
+import com.atakanmadanoglu.notesapplication.presentation.notes_list.navigation.noteListScreen
 import com.atakanmadanoglu.notesapplication.theme.NotesApplicationTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -24,22 +23,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             NotesApplicationTheme(
-                darkTheme = isSystemInDarkTheme(),
                 dynamicColor = false
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     val navController = rememberNavController()
                     NavHost(
                         navController = navController,
-                        startDestination = Screen.NotesListScreen.route
+                        startDestination = Screen.NOTE_LIST.route
                     ) {
-                        notesList(
-                            navigateToAddNoteScreen = {
-                                navController.navigateToAddNote()
-                            },
-                            navigateToEditNoteScreen = { noteId ->
-                                navController.navigateToEditNoteScreen(noteId)
-                            }
+                        noteListScreen(
+                            navigateToAddNoteScreen = navController::navigateToAddNote,
+                            navigateToEditNoteScreen = { navController.navigateToEditNoteScreen(it) }
                         )
                         editNoteScreen(navController)
                         addNoteScreen(navController)
