@@ -2,6 +2,7 @@ package com.atakanmadanoglu.notesapplication.presentation.notes_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.atakanmadanoglu.notesapplication.domain.usecases.DeleteNoteByIdUseCase
 import com.atakanmadanoglu.notesapplication.domain.usecases.DeleteNotesByIdsUseCase
 import com.atakanmadanoglu.notesapplication.domain.usecases.GetNotesByCreatedAtUseCase
 import com.atakanmadanoglu.notesapplication.domain.usecases.SearchNotesUseCase
@@ -17,10 +18,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class NotesListScreenViewModel @Inject constructor(
+class NoteListScreenViewModel @Inject constructor(
     private val getNotesByCreatedAtUseCase: GetNotesByCreatedAtUseCase,
     private val searchNotesUseCase: SearchNotesUseCase,
-    private val deleteNotesByIdsUseCase: DeleteNotesByIdsUseCase
+    private val deleteNotesByIdsUseCase: DeleteNotesByIdsUseCase,
+    private val deleteNoteByIdUseCase: DeleteNoteByIdUseCase
 ): ViewModel() {
 
     private val _state = MutableStateFlow(NotesListUIState())
@@ -169,6 +171,12 @@ class NotesListScreenViewModel @Inject constructor(
         viewModelScope.launch {
             val selectedNotesIds = _state.value.getSelectedNotesIds()
             deleteNotesByIdsUseCase(selectedNotesIds)
+        }
+    }
+
+    fun deleteNote(id: Int) {
+        viewModelScope.launch {
+            deleteNoteByIdUseCase.invoke(id)
         }
     }
 

@@ -1,14 +1,5 @@
 package com.atakanmadanoglu.notesapplication.presentation.model
 
-/*data class DisplayNotesState(
-    val totalNotesCount: Int = 0
-)
-
-data class SelectNotesState(
-    val selectedNotesCount: Int = 0,
-    val selectedNotesIndexes: List<Int> = emptyList()
-)*/
-
 data class NotesListUIState(
     val operationType: NotesListUiOperation =
         NotesListUiOperation.DisplayNotes,
@@ -28,13 +19,10 @@ data class NotesListUIState(
             .map { it.id }
     }
 
-    fun isDeleteButtonEnabled(): Boolean = selectedNotesCount != 0
     fun isAllSelected(): Boolean = (selectedNotesCount == totalNotesCount)
 }
 
-enum class NotesListUiOperation {
-    DisplayNotes, SelectNotes
-}
+enum class NotesListUiOperation { DisplayNotes, SelectNotes }
 
 sealed interface NotesListUiEvent {
     data class NoteCardLongPressed(val noteIndex: Int): NotesListUiEvent

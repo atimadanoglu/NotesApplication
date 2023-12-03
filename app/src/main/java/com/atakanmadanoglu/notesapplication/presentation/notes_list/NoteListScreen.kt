@@ -1,67 +1,108 @@
 package com.atakanmadanoglu.notesapplication.presentation.notes_list
 
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DismissDirection
+import androidx.compose.material3.DismissState
+import androidx.compose.material3.DismissValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SwipeToDismiss
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberDismissState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.*
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.atakanmadanoglu.notesapplication.R
-import com.atakanmadanoglu.notesapplication.presentation.model.*
-import com.atakanmadanoglu.notesapplication.theme.*
-import java.util.*
+import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
+import com.atakanmadanoglu.notesapplication.presentation.model.NotesListUIState
+import com.atakanmadanoglu.notesapplication.presentation.model.NotesListUiOperation
+import com.atakanmadanoglu.notesapplication.theme.dismissColor
+import com.atakanmadanoglu.notesapplication.theme.openSansLightItalic
+import com.atakanmadanoglu.notesapplication.theme.openSansRegular
+import com.atakanmadanoglu.notesapplication.theme.openSansSemiBold
+import com.atakanmadanoglu.notesapplication.theme.spacing
+import com.atakanmadanoglu.notesapplication.theme.warningColor
+import kotlinx.coroutines.delay
 
 @Composable
-internal fun NotesListRoute(
+internal fun NoteListRoute(
     addNoteButtonClicked: () -> Unit,
     cardOnClick: (Int) -> Unit,
-    viewModel: NotesListScreenViewModel = hiltViewModel()
+    viewModel: NoteListScreenViewModel = hiltViewModel()
 ) {
-    val notesListScreenState by viewModel.state.collectAsStateWithLifecycle()
-
-    val cancelChoosingNote: () -> Unit = remember {
-        return@remember viewModel::onCancelButtonClicked
-    }
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
 
     val showCheckbox by remember {
         derivedStateOf {
-            when (notesListScreenState.operationType) {
-                NotesListUiOperation.SelectNotes -> true
-                else -> false
-            }
+            uiState.operationType == NotesListUiOperation.SelectNotes
         }
     }
 
     val isAllSelected by remember {
         derivedStateOf {
-            { notesListScreenState.selectedNotesCount == notesListScreenState.totalNotesCount }
+            { uiState.selectedNotesCount == uiState.totalNotesCount }
         }
     }
 
     val isDeleteButtonEnabled by remember {
-        derivedStateOf {
-            { notesListScreenState.selectedNotesCount != 0 }
-        }
+        derivedStateOf { { uiState.selectedNotesCount != 0 } }
     }
-    NotesListScreen(
+    NoteListScreen(
         addNoteButtonClicked = addNoteButtonClicked,
         onCardClick = { noteId: Int, noteIndex: Int ->
             // If user presses long the note card before, cardOnClick will not be available
@@ -71,29 +112,26 @@ internal fun NotesListRoute(
                 viewModel.onCheckboxClicked(noteIndex)
             }
         },
-        notesListScreenState = notesListScreenState,
+        notesListScreenState = uiState,
         makeSearchValueEmpty = { viewModel.setSearchValue("") },
-        onCardLongClick = { viewModel.onNoteCardLongPressed(it) },
-        cancelChoosingNote = cancelChoosingNote,
+        onCardLongClick = viewModel::onNoteCardLongPressed,
+        cancelChoosingNote = viewModel::onCancelButtonClicked,
         getNotes = viewModel::decideWhichListWillBeUsed,
         onDeleteClicked = viewModel::onDeleteButtonClicked,
         onSelectAllClicked = viewModel::onSelectAllClicked,
         onDismissRequest = viewModel::onDeletionDismissed,
         onDeleteOperationApproved = viewModel::onDeletionApproved,
-        onSearchValueChange = { viewModel.onSearchValueChange(it) },
-        showCheckbox = {
-            showCheckbox
-        },
-        updateCheckboxState = {
-            viewModel.onCheckboxClicked(it)
-        },
+        onSearchValueChange = viewModel::onSearchValueChange,
+        showCheckbox = { showCheckbox },
+        updateCheckboxState = viewModel::onCheckboxClicked,
         isAllSelected = isAllSelected,
-        isDeleteButtonEnabled = isDeleteButtonEnabled
+        isDeleteButtonEnabled = isDeleteButtonEnabled,
+        onSwiped = viewModel::deleteNote
     )
 }
 
 @Composable
-fun NotesListScreen(
+fun NoteListScreen(
     addNoteButtonClicked: () -> Unit,
     makeSearchValueEmpty: () -> Unit,
     onCardClick: (noteId: Int, noteIndex: Int) -> Unit,
@@ -109,10 +147,17 @@ fun NotesListScreen(
     showCheckbox: () -> Boolean,
     updateCheckboxState: (Int) -> Unit,
     isAllSelected: () -> Boolean,
-    isDeleteButtonEnabled: () -> Boolean
+    isDeleteButtonEnabled: () -> Boolean,
+    onSwiped: (Int) -> Unit
 ) {
+    val listState = rememberLazyListState()
+
     LaunchedEffect(key1 = notesListScreenState.allNotesList) {
         makeSearchValueEmpty()
+        listState.animateScrollToItem(0)
+    }
+    LaunchedEffect(key1 = notesListScreenState.searchedNotesList) {
+        listState.animateScrollToItem(0)
     }
     Scaffold(
         modifier = Modifier
@@ -127,43 +172,47 @@ fun NotesListScreen(
             }
         }
     ) { paddingValues ->
-        Column(modifier = Modifier
+        Box(modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
         ) {
-            when (notesListScreenState.operationType) {
-                NotesListUiOperation.DisplayNotes -> {
-                    AllNotesText()
-                    TotalNotesCount(notesCount = notesListScreenState.totalNotesCount)
-                    Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
-                    SearchBar(
-                        searchValue = notesListScreenState.searchValue,
-                        onSearchValueChange = onSearchValueChange
-                    )
-                }
-                NotesListUiOperation.SelectNotes -> {
-                    Column {
-                        CancelChoosingNoteButton(
-                            cancelChoosingNote = cancelChoosingNote
+            Column {
+                when (notesListScreenState.operationType) {
+                    NotesListUiOperation.DisplayNotes -> {
+                        AllNotesText()
+                        TotalNotesCount(notesCount = notesListScreenState.totalNotesCount)
+                        Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
+                        SearchBar(
+                            searchValue = notesListScreenState.searchValue,
+                            onSearchValueChange = onSearchValueChange
                         )
                     }
-                    SelectedNumberOfNotesText(selectedNumberOfNotes = notesListScreenState.selectedNotesCount)
-                    Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
-                    SearchBar(
-                        modifier = Modifier.alpha(0.2f),
-                        searchValue = notesListScreenState.searchValue,
-                        readOnly = true
-                    )
+
+                    NotesListUiOperation.SelectNotes -> {
+                        Column {
+                            CancelChoosingNoteButton(
+                                cancelChoosingNote = cancelChoosingNote
+                            )
+                        }
+                        SelectedNumberOfNotesText(selectedNumberOfNotes = notesListScreenState.selectedNotesCount)
+                        Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
+                        SearchBar(
+                            modifier = Modifier.alpha(0.2f),
+                            searchValue = notesListScreenState.searchValue,
+                            readOnly = true
+                        )
+                    }
                 }
+                NoteListView(
+                    notes = getNotes(),
+                    onCardClick = onCardClick,
+                    onCardLongClick = onCardLongClick,
+                    showCheckbox = showCheckbox,
+                    updateCheckboxState = updateCheckboxState,
+                    onSwiped = onSwiped,
+                    listState = listState
+                )
             }
-            Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
-            NotesListView(
-                notes = getNotes(),
-                onCardClick = onCardClick,
-                onCardLongClick = onCardLongClick,
-                showCheckbox = showCheckbox,
-                updateCheckboxState = updateCheckboxState
-            )
         }
         when (notesListScreenState.operationType) {
             NotesListUiOperation.SelectNotes ->  {
@@ -406,42 +455,85 @@ fun SearchBar(
 }
 
 @Composable
-fun NotesListView(
+@OptIn(ExperimentalMaterial3Api::class)
+fun SwipeBackground(dismissState: DismissState) {
+    val scale by animateFloatAsState(
+        if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f, label = ""
+    )
+    Box(
+        Modifier
+            .fillMaxSize()
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color.Red)
+            .padding(horizontal = 20.dp),
+        contentAlignment = Alignment.CenterEnd
+    ) {
+        Icon(
+            imageVector = Icons.Default.Delete,
+            contentDescription = "",
+            modifier = Modifier.scale(scale)
+        )
+    }
+}
+
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalFoundationApi::class
+)
+@Composable
+fun NoteListView(
     notes: List<NoteUI>,
     onCardClick: (noteId: Int, noteIndex: Int) -> Unit,
     onCardLongClick: (noteIndex: Int) -> Unit,
     showCheckbox: () -> Boolean,
     updateCheckboxState: (Int) -> Unit,
+    onSwiped: (Int) -> Unit,
     listState: LazyListState = rememberLazyListState()
 ) {
     LazyColumn(
         contentPadding = PaddingValues(
-            start = MaterialTheme.spacing.extraSmall,
-            top = MaterialTheme.spacing.extraSmall,
-            end = MaterialTheme.spacing.extraSmall,
+            top = MaterialTheme.spacing.medium,
             bottom = MaterialTheme.spacing.extraExtraLarge
         ),
         state = listState
     ) {
-        items(
+        itemsIndexed(
             items = notes,
-            key = { it.id }
-        ) { note ->
-            val index = notes.indexOf(note)
-            NoteRow(
-                onCardClick = { onCardClick(note.id, index) },
-                onCardLongClick = {
-                    onCardLongClick(index)
-                },
-                showCheckbox = showCheckbox,
-                updateCheckboxState = {
-                    updateCheckboxState(index)
-                },
-                title = note.title,
-                createdAt = note.createdAt,
-                description = note.description,
-                isChecked = note.isChecked
-            )
+            key = { _, note ->  note.id }
+        ) { index, note ->
+            val swipeState = rememberDismissState()
+            var isDeleted by remember { mutableStateOf(false) }
+            if (swipeState.isDismissed(DismissDirection.EndToStart)) {
+                LaunchedEffect(key1 = Unit) {
+                    isDeleted = true
+                    delay(300)
+                    onSwiped(note.id)
+                    isDeleted = false
+                }
+            }
+            AnimatedVisibility(
+                visible = !isDeleted,
+                modifier = Modifier.animateItemPlacement()
+            ) {
+                SwipeToDismiss(
+                    directions = setOf(DismissDirection.EndToStart),
+                    state = swipeState,
+                    background = { SwipeBackground(dismissState = swipeState) },
+                    dismissContent = {
+                        NoteRow(
+                            onCardClick = { onCardClick(note.id, index) },
+                            onCardLongClick = { onCardLongClick(index) },
+                            showCheckbox = showCheckbox,
+                            updateCheckboxState = { updateCheckboxState(index) },
+                            title = note.title,
+                            createdAt = note.createdAt,
+                            description = note.description,
+                            isChecked = note.isChecked
+                        )
+                    }
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
@@ -463,18 +555,12 @@ private fun NoteRow(
         modifier = modifier
             .fillMaxWidth()
             .height(80.dp)
-            .padding(vertical = MaterialTheme.spacing.extraSmall)
             .combinedClickable(
-                onClick = onCardClick/* {
-                    // If user presses long the note card before, cardOnClick will not be available
-                    if (!showCheckbox()) {
-                        onCardClick(note.id)
-                    } else {
-                        updateCheckboxState()
-                    }
-                }*/,
+                onClick = onCardClick,
                 onLongClick = onCardLongClick
-            )
+            ),
+
+        shape = RoundedCornerShape(12.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -514,16 +600,16 @@ private fun NoteRow(
                         maxLines = 1
                     )
 
+                        }
+                    }
+                    if (showCheckbox()) {
+                        Checkbox(
+                            checked = isChecked,
+                            onCheckedChange = { updateCheckboxState() }
+                        )
+                    }
                 }
             }
-            if (showCheckbox()) {
-                Checkbox(
-                    checked = isChecked,
-                    onCheckedChange = { updateCheckboxState() }
-                )
-            }
-        }
-    }
 }
 
 @Composable
@@ -632,28 +718,5 @@ private fun SelectAllOption(
         color = iconAndTextColor,
         fontSize = MaterialTheme.typography.labelMedium.fontSize,
         fontFamily = MaterialTheme.typography.openSansRegular.fontFamily
-    )
-}
-
-@Preview
-@Composable
-fun Preview() {
-    NotesListScreen(
-        addNoteButtonClicked = { /*TODO*/ },
-        makeSearchValueEmpty = { /*TODO*/ },
-        onCardClick = {noteId, noteIndex ->  } ,
-        onCardLongClick = {},
-        onSearchValueChange = {},
-        cancelChoosingNote = { },
-        getNotes = { listOf() },
-        updateCheckboxState = {},
-        onDeleteClicked = {  },
-        onSelectAllClicked = {  },
-        onDismissRequest = { },
-        onDeleteOperationApproved = { },
-        showCheckbox = { true },
-        notesListScreenState = NotesListUIState(),
-        isAllSelected = {false},
-        isDeleteButtonEnabled = {false}
     )
 }

@@ -7,13 +7,13 @@ import com.atakanmadanoglu.notesapplication.presentation.add_note.AddNoteRoute
 import com.atakanmadanoglu.notesapplication.presentation.navigation.Screen
 
 fun NavController.navigateToAddNote() {
-    this.navigate(Screen.AddNoteScreen.route)
+    this.navigate(Screen.ADD_NOTE.route)
 }
 
 fun NavGraphBuilder.addNoteScreen(
     navController: NavController
 ) {
-    composable(route = Screen.AddNoteScreen.route) {
+    composable(route = Screen.ADD_NOTE.route) {
         AddNoteRoute(navController = navController)
     }
 }

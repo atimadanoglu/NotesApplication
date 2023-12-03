@@ -44,9 +44,7 @@ internal fun EditNoteRoute(
     val editNoteUiState by editNoteScreenViewModel.editNoteUiState.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
     val isDoneIconVisible = remember {
-        {
-            editNoteUiState.isDoneIconVisible
-        }
+        { editNoteUiState.isDoneIconVisible }
     }
 
     val onTitleChange: (newValue: String) -> Unit = remember {
@@ -92,6 +90,26 @@ internal fun EditNoteRoute(
         },
         isDoneIconVisible = isDoneIconVisible
     )
+
+   /* EditNoteScreen(
+        editNoteUiState = editNoteUiState,
+        onNavigationIconClick = navController::popBackStack,
+        whenIsFocused = editNoteScreenViewModel::whenIsFocused,
+        whenNotHaveFocus = editNoteScreenViewModel::whenNotHaveFocus,
+        onTitleChange = { editNoteScreenViewModel.onTitleChanged(it) },
+        onDescriptionChange = { editNoteScreenViewModel.onDescriptionChanged(it) },
+        onDeleteClicked = editNoteScreenViewModel::onDeleteButtonClicked,
+        onDoneIconClick = {
+            editNoteScreenViewModel.onDoneIconClicked()
+            focusManager.clearFocus()
+        },
+        onDismissRequest = editNoteScreenViewModel::onDeletionDismissed,
+        onDeleteOperationApproved = {
+            editNoteScreenViewModel.onDeletionApproved()
+            navController.popBackStack()
+        },
+        isDoneIconVisible = { editNoteUiState.isDoneIconVisible }
+    )*/
 }
 
 @Composable
@@ -116,10 +134,7 @@ fun EditNoteScreen(
         topBar = {
             NavigationTopAppBar(
                 isDoneIconVisible = isDoneIconVisible,
-                onDoneIconClick = onDoneIconClick/*{
-                    onDoneIconClick()
-                    focusManager.clearFocus()
-                }*/,
+                onDoneIconClick = onDoneIconClick,
                 onNavigationIconClick = onNavigationIconClick
             )
         }
