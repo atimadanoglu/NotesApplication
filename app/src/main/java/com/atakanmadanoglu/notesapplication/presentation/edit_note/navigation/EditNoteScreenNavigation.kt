@@ -20,7 +20,7 @@ fun NavController.navigateToEditNoteScreen(
     noteId: Int
 ) {
     this.navigate(
-        route = Screen.EditNoteScreen.route
+        route = Screen.EDIT_NOTE.route
                 + "/$noteId"
     )
 }
@@ -29,7 +29,7 @@ fun NavGraphBuilder.editNoteScreen(
     navController: NavController
 ) {
     composable(
-        route = Screen.EditNoteScreen.route +
+        route = Screen.EDIT_NOTE.route +
                 "/{$noteIdArg}",
         arguments = listOf(
             navArgument(noteIdArg) {

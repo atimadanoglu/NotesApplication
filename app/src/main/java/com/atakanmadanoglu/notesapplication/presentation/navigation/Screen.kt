@@ -1,7 +1,7 @@
 package com.atakanmadanoglu.notesapplication.presentation.navigation
 
-sealed class Screen(val route: String) {
-    object NotesListScreen: Screen("notes_list")
-    object AddNoteScreen: Screen("add_note_screen")
-    object EditNoteScreen: Screen("edit_note_screen")
+enum class Screen(val route: String) {
+    NOTE_LIST("note_list_screen"),
+    ADD_NOTE("add_note_screen"),
+    EDIT_NOTE("edit_note_screen");
 }
