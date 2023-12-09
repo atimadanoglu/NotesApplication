@@ -559,7 +559,7 @@ private fun NoteRow(
                 onClick = onCardClick,
                 onLongClick = onCardLongClick
             ),
-
+        colors = CardDefaults.cardColors(containerColor = Color.Gray),
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(
