@@ -1,32 +1,67 @@
+import com.atakanmadanoglu.buildSrc.Configs
+import com.atakanmadanoglu.buildSrc.Dependencies.activityCompose
+import com.atakanmadanoglu.buildSrc.Dependencies.androidXExtJUnit
+import com.atakanmadanoglu.buildSrc.Dependencies.androidXExtTruth
+import com.atakanmadanoglu.buildSrc.Dependencies.androidXTestRunner
+import com.atakanmadanoglu.buildSrc.Dependencies.androidxTestRules
+import com.atakanmadanoglu.buildSrc.Dependencies.appCompat
+import com.atakanmadanoglu.buildSrc.Dependencies.archCoreTesting
+import com.atakanmadanoglu.buildSrc.Dependencies.composeLifecycleRuntime
+import com.atakanmadanoglu.buildSrc.Dependencies.composeMaterial3
+import com.atakanmadanoglu.buildSrc.Dependencies.composeNavigation
+import com.atakanmadanoglu.buildSrc.Dependencies.composeUi
+import com.atakanmadanoglu.buildSrc.Dependencies.composeUiTestJUnit4
+import com.atakanmadanoglu.buildSrc.Dependencies.composeUiTestManifest
+import com.atakanmadanoglu.buildSrc.Dependencies.composeUiTooling
+import com.atakanmadanoglu.buildSrc.Dependencies.composeUiToolingPreview
+import com.atakanmadanoglu.buildSrc.Dependencies.constraintLayout
+import com.atakanmadanoglu.buildSrc.Dependencies.coreKtx
+import com.atakanmadanoglu.buildSrc.Dependencies.dataStorePreferences
+import com.atakanmadanoglu.buildSrc.Dependencies.espressoAccessibility
+import com.atakanmadanoglu.buildSrc.Dependencies.espressoContrib
+import com.atakanmadanoglu.buildSrc.Dependencies.espressoCore
+import com.atakanmadanoglu.buildSrc.Dependencies.espressoIdling
+import com.atakanmadanoglu.buildSrc.Dependencies.espressoIntents
+import com.atakanmadanoglu.buildSrc.Dependencies.espressoWeb
+import com.atakanmadanoglu.buildSrc.Dependencies.hiltAndroid
+import com.atakanmadanoglu.buildSrc.Dependencies.hiltAndroidTesting
+import com.atakanmadanoglu.buildSrc.Dependencies.hiltCompiler
+import com.atakanmadanoglu.buildSrc.Dependencies.hiltNavigationCompose
+import com.atakanmadanoglu.buildSrc.Dependencies.jUnit4
+import com.atakanmadanoglu.buildSrc.Dependencies.kotlinCoroutinesTest
+import com.atakanmadanoglu.buildSrc.Dependencies.lifecycleRuntimeKtx
+import com.atakanmadanoglu.buildSrc.Dependencies.material
+import com.atakanmadanoglu.buildSrc.Dependencies.mockK
+import com.atakanmadanoglu.buildSrc.Dependencies.roomCompiler
+import com.atakanmadanoglu.buildSrc.Dependencies.roomKtx
+import com.atakanmadanoglu.buildSrc.Dependencies.roomRuntime
+import com.atakanmadanoglu.buildSrc.Dependencies.truth
+
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
-    id("kotlin-parcelize")
+    id("com.google.devtools.ksp")
+    kotlin("android")
 }
 
 android {
     namespace = "com.atakanmadanoglu.notesapplication"
-    compileSdk = 33
+    compileSdk = Configs.compileSdkVersion
 
     defaultConfig {
-        applicationId = "com.atakanmadanoglu.notesapplication"
-        minSdk = 24
-        targetSdk = 33
-        versionCode = 3
-        versionName = "1.2"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        applicationId = Configs.applicationId
+        minSdk = Configs.minSdkVersion
+        targetSdk = Configs.targetSdkVersion
+        versionCode = Configs.versionCode
+        versionName = Configs.versionName
+        testInstrumentationRunner = Configs.testInstrumentationRunner
         testInstrumentationRunnerArguments["clearPackageData"] = "true"
         vectorDrawables {
             useSupportLibrary = true
         }
 
-        kapt {
-            arguments {
-                arg("room.schemaLocation", "$projectDir/schemas")
-            }
-            correctErrorTypes = true
+        ksp {
+            arg("room.schemaLocation", "$projectDir/schemas")
         }
     }
 
@@ -52,7 +87,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
     buildFeatures {
         compose = true
@@ -60,7 +95,7 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.6"
     }
-    
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -69,79 +104,62 @@ android {
 }
 
 dependencies {
-    val composeVersion = "1.4.0-alpha04"
-    val hiltVersion = "2.44.2"
-    val roomVersion = "2.5.0"
-    val espressoVersion = "3.5.1"
-    val testJunitVersion = "1.1.5"
-    val testRunnerVersion = "1.5.2"
-    val mockkVersion = "1.13.2"
-    val arcCoreTestingVersion = "2.2.0"
-    val coroutinesVersion = "1.6.4"
-    val navComposeVersion = "2.5.3"
-    val androidXTestVersion = "1.5.0"
-    val truthVersion = "1.5.0"
-    val testRulesVersion = "1.5.0"
-    val kotlin_version = "1.8.10"
-
-    implementation ("androidx.core:core-ktx:1.9.0")
-    implementation( "androidx.appcompat:appcompat:1.6.1")
-    implementation ("com.google.android.material:material:1.8.0")
-    implementation( "androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation( "androidx.lifecycle:lifecycle-runtime-ktx:2.6.0")
-    implementation( "androidx.activity:activity-compose:1.6.1")
+    implementation(coreKtx)
+    implementation(appCompat)
+    implementation(constraintLayout)
+    implementation(lifecycleRuntimeKtx)
+    implementation(material)
+    implementation(activityCompose)
 
     // Hilt
-    implementation( "com.google.dagger:hilt-android:$hiltVersion")
-    implementation( "androidx.core:core-ktx:1.9.0")
-    kapt( "com.google.dagger:hilt-compiler:$hiltVersion")
-    implementation( "androidx.hilt:hilt-navigation-compose:1.0.0")
+    implementation(hiltAndroid)
+    implementation(hiltNavigationCompose)
+    ksp(hiltCompiler)
 
     // Compose
-    implementation( "androidx.compose.ui:ui:$composeVersion")
-    implementation( "androidx.compose.material3:material3:1.1.0-alpha08")
-    implementation( "androidx.compose.ui:ui-tooling-preview:$composeVersion")
-    implementation( "androidx.navigation:navigation-compose:$navComposeVersion")
-    debugImplementation( "androidx.compose.ui:ui-tooling:$composeVersion")
-    debugImplementation( "androidx.compose.ui:ui-test-manifest:$composeVersion")
+    implementation(composeUi)
+    implementation(composeMaterial3)
+    implementation(composeUiToolingPreview)
+    implementation(composeNavigation)
+    implementation(composeLifecycleRuntime)
+    debugImplementation(composeUiTooling)
+    debugImplementation(composeUiTestManifest)
 
     // Room
-    implementation( "androidx.room:room-ktx:$roomVersion")
-    implementation( "androidx.room:room-runtime:$roomVersion")
-    annotationProcessor( "androidx.room:room-compiler:$roomVersion")
-    kapt( "androidx.room:room-compiler:$roomVersion")
+    implementation(roomKtx)
+    implementation(roomRuntime)
+    ksp(roomCompiler)
 
     // DataStore
-    implementation( "androidx.datastore:datastore-preferences:1.0.0")
-
-    implementation( "androidx.lifecycle:lifecycle-runtime-compose:2.6.0")
+    implementation(dataStorePreferences)
 
     // Testing
-    testImplementation ("junit:junit:4.13.2")
-    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
-    testImplementation( "com.google.truth:truth:1.1.3")
-    androidTestImplementation( "androidx.test:core:$androidXTestVersion")
-    androidTestImplementation( "androidx.test:runner:$testRunnerVersion")
-    androidTestImplementation( "androidx.test:rules:$testRulesVersion")
-    androidTestImplementation( "androidx.compose.ui:ui-test-junit4:$composeVersion")
+    testImplementation(jUnit4)
+    testImplementation(kotlinCoroutinesTest)
+    testImplementation(truth)
+    androidTestImplementation(androidXTestRunner)
+    androidTestImplementation(androidxTestRules)
+    androidTestImplementation(composeUiTestJUnit4)
+
     // For instrumentation tests
-    androidTestImplementation( "com.google.dagger:hilt-android-testing:$hiltVersion")
-    kaptAndroidTest( "com.google.dagger:hilt-compiler:$hiltVersion")
-    testImplementation( "com.google.dagger:hilt-android-testing:$hiltVersion")
-    kaptTest( "com.google.dagger:hilt-compiler:$hiltVersion")
+    androidTestImplementation(hiltAndroidTesting)
+    testImplementation(hiltAndroidTesting)
+    kspTest(hiltAndroidTesting)
     // Mocking
-    testImplementation( "io.mockk:mockk:$mockkVersion")
+    testImplementation(mockK)
     // Assertions
-    androidTestImplementation( "androidx.test.ext:junit:$testJunitVersion")
-    androidTestImplementation( "androidx.test.ext:truth:$truthVersion")
+    androidTestImplementation(androidXExtJUnit)
+    androidTestImplementation(androidXExtTruth)
+
     // Espresso dependencies
-    androidTestImplementation( "androidx.test.espresso:espresso-core:$espressoVersion")
-    androidTestImplementation( "androidx.test.espresso:espresso-contrib:$espressoVersion")
-    androidTestImplementation( "androidx.test.espresso:espresso-intents:$espressoVersion")
-    androidTestImplementation( "androidx.test.espresso:espresso-accessibility:$espressoVersion")
-    androidTestImplementation( "androidx.test.espresso:espresso-web:$espressoVersion")
-    androidTestImplementation( "androidx.test.espresso.idling:idling-concurrent:$espressoVersion")
+    androidTestImplementation(espressoCore)
+    androidTestImplementation(espressoContrib)
+    androidTestImplementation(espressoIntents)
+    androidTestImplementation(espressoAccessibility)
+    androidTestImplementation(espressoWeb)
+    androidTestImplementation(espressoIdling)
+
     // Arc_core
-    testImplementation( "androidx.arch.core:core-testing:$arcCoreTestingVersion")
-    androidTestImplementation( "androidx.arch.core:core-testing:$arcCoreTestingVersion")
+    testImplementation(archCoreTesting)
+    androidTestImplementation(archCoreTesting)
 }
