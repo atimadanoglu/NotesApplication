@@ -6,6 +6,7 @@ import com.atakanmadanoglu.buildSrc.Dependencies.androidXTestRunner
 import com.atakanmadanoglu.buildSrc.Dependencies.androidxTestRules
 import com.atakanmadanoglu.buildSrc.Dependencies.appCompat
 import com.atakanmadanoglu.buildSrc.Dependencies.archCoreTesting
+import com.atakanmadanoglu.buildSrc.Dependencies.composeConstraintLayout
 import com.atakanmadanoglu.buildSrc.Dependencies.composeLifecycleRuntime
 import com.atakanmadanoglu.buildSrc.Dependencies.composeMaterial3
 import com.atakanmadanoglu.buildSrc.Dependencies.composeNavigation
@@ -122,6 +123,7 @@ dependencies {
     implementation(composeUiToolingPreview)
     implementation(composeNavigation)
     implementation(composeLifecycleRuntime)
+    implementation(composeConstraintLayout)
     debugImplementation(composeUiTooling)
     debugImplementation(composeUiTestManifest)
 

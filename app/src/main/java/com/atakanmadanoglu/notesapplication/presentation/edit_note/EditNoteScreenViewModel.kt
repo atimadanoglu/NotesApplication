@@ -13,6 +13,8 @@ import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -81,12 +83,11 @@ class EditNoteScreenViewModel @Inject constructor(
     }
 
     private fun setDoneIconVisible() = with(retrievedDataFromPreviousPage.value) {
-        if (
-            !title.contentEquals(_editNoteUiState.value.title) ||
-            !description.contentEquals(_editNoteUiState.value.description)) {
-            _editNoteUiState.update { it.copy(isDoneIconVisible = true) }
-        } else {
-            _editNoteUiState.update { it.copy(isDoneIconVisible = false) }
+        _editNoteUiState.update {
+            it.copy(
+                isDoneIconVisible = !title.contentEquals(_editNoteUiState.value.title) ||
+                        !description.contentEquals(_editNoteUiState.value.description)
+            )
         }
     }
 
@@ -98,7 +99,11 @@ class EditNoteScreenViewModel @Inject constructor(
         viewModelScope.launch {
             getNoteByIdUseCase.invoke(
                 id = editNoteArgs.noteId
-            ).collect { noteUI ->
+            ).onStart {
+
+            }.catch {
+
+            }.collect { noteUI ->
                 retrievedDataFromPreviousPage.value = noteUI
                 _editNoteUiState.update {
                     it.copy(

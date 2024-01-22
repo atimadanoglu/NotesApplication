@@ -30,6 +30,10 @@ object Dependencies {
     // DataStore
     const val dataStorePreferences = "androidx.datastore:datastore-preferences:1.0.0"
 
+    // Compose Constraint Layout
+    const val composeConstraintLayout = "androidx.constraintlayout:constraintlayout-compose:${Versions.composeConstraintLayoutVersion}"
+
+
 
     // Testing
     const val jUnit4 = "junit:junit:4.13.2"

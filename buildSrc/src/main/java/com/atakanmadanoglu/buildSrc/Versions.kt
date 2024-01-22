@@ -17,4 +17,5 @@ object Versions {
     const val testRulesVersion = "1.5.0"
     const val kotlin_version = "1.8.10"
     const val activityCompose = "1.6.1"
+    const val composeConstraintLayoutVersion = "1.0.1"
 }

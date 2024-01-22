@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -60,11 +59,17 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.atakanmadanoglu.notesapplication.R
@@ -562,54 +567,73 @@ private fun NoteRow(
         colors = CardDefaults.cardColors(containerColor = Color.Gray),
         shape = RoundedCornerShape(12.dp)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            ConstraintLayout(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.85f)
-                    .padding(
-                        start = MaterialTheme.spacing.medium
-                    ),
-                verticalArrangement = Arrangement.Center
+                    .weight(0.7f, true)
+                    .padding(start = 12.dp, end = 8.dp)
             ) {
+                val (titleRef, createdAtRef) = createRefs()
                 Text(
+                    modifier = Modifier
+                        .constrainAs(titleRef) {
+                            top.linkTo(parent.top)
+                            bottom.linkTo(parent.bottom)
+                        },
                     text = title,
                     fontSize = MaterialTheme.typography.titleMedium.fontSize,
                     fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily,
                     maxLines = 1
                 )
-                Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
-                Row {
-                    Text(
-                        text = createdAt,
-                        fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                        fontFamily = MaterialTheme.typography.openSansLightItalic.fontFamily,
-                        maxLines = 1
-                    )
-                    Text(
-                        text = stringResource(id = R.string.vertical_line),
-                        fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                        fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily
-                    )
-                    Text(
-                        text = description,
-                        fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                        fontFamily = MaterialTheme.typography.openSansRegular.fontFamily,
-                        maxLines = 1
-                    )
 
-                        }
-                    }
-                    if (showCheckbox()) {
-                        Checkbox(
-                            checked = isChecked,
-                            onCheckedChange = { updateCheckboxState() }
+                val text = buildAnnotatedString {
+                    append(
+                        AnnotatedString(
+                            text = createdAt,
+                            spanStyle = SpanStyle(
+                                fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                                fontFamily = MaterialTheme.typography.openSansLightItalic.fontFamily
+                            )
                         )
-                    }
+                    )
+                    append(
+                        AnnotatedString(
+                            text = stringResource(id = R.string.vertical_line),
+                            spanStyle = SpanStyle(
+                                fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                                fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily
+                            )
+                        )
+                    )
+                    append(
+                        AnnotatedString(
+                            text = description,
+                            spanStyle = SpanStyle(
+                                fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                                fontFamily = MaterialTheme.typography.openSansRegular.fontFamily,
+                            )
+                        )
+                    )
                 }
+                Text(
+                    modifier = Modifier.constrainAs(createdAtRef) {
+                        top.linkTo(titleRef.bottom, 2.dp)
+                        start.linkTo(titleRef.start)
+                    },
+                    text = text,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
+                )
             }
+            if (showCheckbox()) {
+                Checkbox(
+                    modifier = Modifier.weight(0.3f, true),
+                    checked = isChecked,
+                    onCheckedChange = { updateCheckboxState() }
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -719,4 +743,58 @@ private fun SelectAllOption(
         fontSize = MaterialTheme.typography.labelMedium.fontSize,
         fontFamily = MaterialTheme.typography.openSansRegular.fontFamily
     )
+}
+
+@Preview
+@Composable
+fun NoteRowPreview() {
+    ConstraintLayout(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+    ) {
+        val (titleRef, createdAtRef, descriptionRef, line) = createRefs()
+
+        Text(
+            modifier = Modifier.constrainAs(titleRef) {
+                start.linkTo(anchor = parent.start, 16.dp)
+                top.linkTo(anchor = parent.top, 8.dp)
+            },
+            text = "This is the title",
+            fontSize = MaterialTheme.typography.titleMedium.fontSize,
+            fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily,
+            maxLines = 1
+        )
+
+        Text(
+            modifier = Modifier.constrainAs(createdAtRef) {
+                top.linkTo(titleRef.bottom, 4.dp)
+                start.linkTo(titleRef.start)
+            },
+            text = "22.12.2002",
+            fontSize = MaterialTheme.typography.bodySmall.fontSize,
+            fontFamily = MaterialTheme.typography.openSansLightItalic.fontFamily,
+            maxLines = 1
+        )
+        Text(
+            modifier = Modifier.constrainAs(line) {
+                baseline.linkTo(createdAtRef.baseline)
+                start.linkTo(createdAtRef.end, 2.dp)
+            },
+            text = stringResource(id = R.string.vertical_line),
+            fontSize = MaterialTheme.typography.bodySmall.fontSize,
+            fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily
+        )
+
+        Text(
+            modifier = Modifier.constrainAs(descriptionRef) {
+                baseline.linkTo(line.baseline)
+                start.linkTo(line.end)
+            },
+            text = "This is the description",
+            fontSize = MaterialTheme.typography.bodySmall.fontSize,
+            fontFamily = MaterialTheme.typography.openSansRegular.fontFamily,
+            maxLines = 1
+        )
+    }
 }
