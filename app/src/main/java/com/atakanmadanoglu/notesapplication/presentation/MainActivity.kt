@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         noteListScreen(
                             navigateToAddNoteScreen = navController::navigateToAddNote,
-                            navigateToEditNoteScreen = { navController.navigateToEditNoteScreen(it) }
+                            navigateToEditNoteScreen = navController::navigateToEditNoteScreen
                         )
                         editNoteScreen(navController)
                         addNoteScreen(navController)

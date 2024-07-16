@@ -28,8 +28,6 @@ class NoteListScreenViewModel @Inject constructor(
     private val _state = MutableStateFlow(NotesListUIState())
     val state: StateFlow<NotesListUIState> get() = _state
 
-    init { getAllNotes() }
-
     fun onSearchValueChange(newValue: String) {
         setSearchValue(newValue = newValue)
         searchAndGetNotes()
@@ -76,7 +74,7 @@ class NoteListScreenViewModel @Inject constructor(
         }
     }
 
-    private fun getAllNotes() {
+    fun getAllNotes() {
         viewModelScope.launch {
             getNotesByCreatedAtUseCase.invoke().collectLatest { list ->
                 _state.update {
@@ -118,7 +116,7 @@ class NoteListScreenViewModel @Inject constructor(
         }
     }
 
-    fun decideWhichListWillBeUsed(): List<NoteUI> = with(_state.value) {
+    fun getNotes(): List<NoteUI> = with(_state.value) {
         setSearchValueEntered()
         return if (!isSearchValueEntered) {
             allNotesList

@@ -87,6 +87,10 @@ internal fun NoteListRoute(
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
 
+    LaunchedEffect(key1 = Unit) {
+        viewModel.getAllNotes()
+    }
+
     val showCheckbox by remember {
         derivedStateOf {
             uiState.operationType == NotesListUiOperation.SelectNotes
@@ -102,58 +106,68 @@ internal fun NoteListRoute(
     val isDeleteButtonEnabled by remember {
         derivedStateOf { { uiState.selectedNotesCount != 0 } }
     }
+
     NoteListScreen(
-        addNoteButtonClicked = addNoteButtonClicked,
-        onCardClick = { noteId: Int, noteIndex: Int ->
-            // If user presses long the note card before, cardOnClick will not be available
-            if (!showCheckbox) {
-                cardOnClick(noteId)
-            } else {
-                viewModel.onCheckboxClicked(noteIndex)
-            }
-        },
+        notes = viewModel.getNotes(),
         notesListScreenState = uiState,
-        makeSearchValueEmpty = { viewModel.setSearchValue("") },
-        onCardLongClick = viewModel::onNoteCardLongPressed,
-        cancelChoosingNote = viewModel::onCancelButtonClicked,
-        getNotes = viewModel::decideWhichListWillBeUsed,
-        onDeleteClicked = viewModel::onDeleteButtonClicked,
-        onSelectAllClicked = viewModel::onSelectAllClicked,
-        onDismissRequest = viewModel::onDeletionDismissed,
-        onDeleteOperationApproved = viewModel::onDeletionApproved,
-        onSearchValueChange = viewModel::onSearchValueChange,
         showCheckbox = { showCheckbox },
-        updateCheckboxState = viewModel::onCheckboxClicked,
         isAllSelected = isAllSelected,
         isDeleteButtonEnabled = isDeleteButtonEnabled,
-        onSwiped = viewModel::deleteNote
+        onEvent = {
+            when (it) {
+                NoteListEvent.AddNoteButtonClicked -> addNoteButtonClicked()
+                NoteListEvent.CancelChoosingNote -> viewModel.onCancelButtonClicked()
+                NoteListEvent.MakeSearchValueEmpty -> viewModel.setSearchValue("")
+                NoteListEvent.OnDeleteClicked -> viewModel.onDeleteButtonClicked()
+                NoteListEvent.OnDeleteOperationApproved -> viewModel.onDeletionApproved()
+                NoteListEvent.OnDismissRequest -> viewModel.onDeletionDismissed()
+                NoteListEvent.OnSelectAllClicked -> viewModel.onSelectAllClicked()
+                is NoteListEvent.OnCardLongClick -> viewModel.onNoteCardLongPressed(it.noteIndex)
+                is NoteListEvent.OnSearchValueChange -> viewModel.onSearchValueChange(it.newValue)
+                is NoteListEvent.OnSwiped -> viewModel.deleteNote(it.index)
+                is NoteListEvent.UpdateCheckboxState -> viewModel.onCheckboxClicked(it.index)
+                is NoteListEvent.OnCardClick -> {
+                    // If user presses long the note card before, cardOnClick will not be available
+                    if (!showCheckbox) {
+                        cardOnClick(it.noteId)
+                    } else {
+                        viewModel.onCheckboxClicked(it.noteIndex)
+                    }
+                }
+            }
+        }
     )
 }
 
+sealed class NoteListEvent {
+    object AddNoteButtonClicked : NoteListEvent()
+    object MakeSearchValueEmpty : NoteListEvent()
+    data class OnCardClick(val noteId: Int, val noteIndex: Int) : NoteListEvent()
+    data class OnCardLongClick(val noteIndex: Int) : NoteListEvent()
+    data class OnSearchValueChange(val newValue: String) : NoteListEvent()
+    object CancelChoosingNote : NoteListEvent()
+    object OnDeleteClicked : NoteListEvent()
+    object OnSelectAllClicked : NoteListEvent()
+    object OnDismissRequest : NoteListEvent()
+    object OnDeleteOperationApproved : NoteListEvent()
+    data class UpdateCheckboxState(val index: Int) : NoteListEvent()
+    data class OnSwiped(val index: Int) : NoteListEvent()
+}
+
+
 @Composable
 fun NoteListScreen(
-    addNoteButtonClicked: () -> Unit,
-    makeSearchValueEmpty: () -> Unit,
-    onCardClick: (noteId: Int, noteIndex: Int) -> Unit,
-    onCardLongClick: (noteIndex: Int) -> Unit,
-    onSearchValueChange: (newValue: String) -> Unit,
-    cancelChoosingNote: () -> Unit,
-    getNotes: () -> List<NoteUI>,
-    onDeleteClicked: () -> Unit,
-    onSelectAllClicked: () -> Unit,
-    onDismissRequest: () -> Unit,
-    onDeleteOperationApproved: () -> Unit,
+    notes: List<NoteUI>,
     notesListScreenState: NotesListUIState,
     showCheckbox: () -> Boolean,
-    updateCheckboxState: (Int) -> Unit,
     isAllSelected: () -> Boolean,
     isDeleteButtonEnabled: () -> Boolean,
-    onSwiped: (Int) -> Unit
+    onEvent: (NoteListEvent) -> Unit
 ) {
     val listState = rememberLazyListState()
 
     LaunchedEffect(key1 = notesListScreenState.allNotesList) {
-        makeSearchValueEmpty()
+        onEvent(NoteListEvent.MakeSearchValueEmpty)
         listState.animateScrollToItem(0)
     }
     LaunchedEffect(key1 = notesListScreenState.searchedNotesList) {
@@ -167,7 +181,7 @@ fun NoteListScreen(
             // To make invisible fab during choosing any notes. This will
             // prevent users to add any note in that moment.
             when (notesListScreenState.operationType) {
-                NotesListUiOperation.DisplayNotes -> Fab(addNoteButtonClicked)
+                NotesListUiOperation.DisplayNotes -> Fab(fabClicked = { onEvent(NoteListEvent.AddNoteButtonClicked) })
                 else -> {}
             }
         }
@@ -184,14 +198,14 @@ fun NoteListScreen(
                         Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
                         SearchBar(
                             searchValue = notesListScreenState.searchValue,
-                            onSearchValueChange = onSearchValueChange
+                            onSearchValueChange = { onEvent(NoteListEvent.OnSearchValueChange(it)) }
                         )
                     }
 
                     NotesListUiOperation.SelectNotes -> {
                         Column {
                             CancelChoosingNoteButton(
-                                cancelChoosingNote = cancelChoosingNote
+                                cancelChoosingNote = { onEvent(NoteListEvent.CancelChoosingNote) }
                             )
                         }
                         SelectedNumberOfNotesText(selectedNumberOfNotes = notesListScreenState.selectedNotesCount)
@@ -204,12 +218,12 @@ fun NoteListScreen(
                     }
                 }
                 NoteListView(
-                    notes = getNotes(),
-                    onCardClick = onCardClick,
-                    onCardLongClick = onCardLongClick,
+                    notes = notes,
+                    onCardClick = { noteId, noteIndex ->  onEvent(NoteListEvent.OnCardClick(noteId, noteIndex)) },
+                    onCardLongClick = { onEvent(NoteListEvent.OnCardLongClick(it)) },
                     showCheckbox = showCheckbox,
-                    updateCheckboxState = updateCheckboxState,
-                    onSwiped = onSwiped,
+                    updateCheckboxState = { onEvent(NoteListEvent.UpdateCheckboxState(it)) },
+                    onSwiped = { onEvent(NoteListEvent.OnSwiped(it)) },
                     listState = listState
                 )
             }
@@ -219,8 +233,8 @@ fun NoteListScreen(
                 OptionsWhenChosenNote(
                     isAllSelected = isAllSelected,
                     isDeleteButtonEnabled = isDeleteButtonEnabled,
-                    onDeleteClicked = onDeleteClicked,
-                    onSelectAllClicked = onSelectAllClicked
+                    onDeleteClicked = { onEvent(NoteListEvent.OnDeleteClicked) },
+                    onSelectAllClicked = { onEvent(NoteListEvent.OnSelectAllClicked) }
                 )
             }
             else -> {}
@@ -228,8 +242,8 @@ fun NoteListScreen(
         if (notesListScreenState.showDeletionDialog) {
             DeleteAlertDialog(
                 selectedNoteCount = notesListScreenState.selectedNotesCount,
-                onDismissRequest = onDismissRequest,
-                onDeleteOperationApproved = onDeleteOperationApproved
+                onDismissRequest = { onEvent(NoteListEvent.OnDismissRequest) },
+                onDeleteOperationApproved = { onEvent(NoteListEvent.OnDeleteOperationApproved) }
             )
         }
     }
