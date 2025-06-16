@@ -1,8 +1,6 @@
 package com.atakanmadanoglu.notesapplication.presentation.notes_list
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -18,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -30,32 +29,30 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DismissDirection
-import androidx.compose.material3.DismissState
-import androidx.compose.material3.DismissValue
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SwipeToDismiss
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.rememberDismissState
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -66,30 +63,14 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.atakanmadanoglu.notesapplication.R
+import com.atakanmadanoglu.notesapplication.presentation.model.NoteListEvent
 import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
 import com.atakanmadanoglu.notesapplication.presentation.model.NotesListUIState
 import com.atakanmadanoglu.notesapplication.presentation.model.NotesListUiOperation
-import com.atakanmadanoglu.notesapplication.theme.dismissColor
 import com.atakanmadanoglu.notesapplication.theme.openSansLightItalic
 import com.atakanmadanoglu.notesapplication.theme.openSansRegular
 import com.atakanmadanoglu.notesapplication.theme.openSansSemiBold
 import com.atakanmadanoglu.notesapplication.theme.spacing
-import com.atakanmadanoglu.notesapplication.theme.warningColor
-
-sealed class NoteListEvent {
-    object AddNoteButtonClicked : NoteListEvent()
-    object MakeSearchValueEmpty : NoteListEvent()
-    data class OnCardClick(val noteId: Int, val noteIndex: Int) : NoteListEvent()
-    data class OnCardLongClick(val noteIndex: Int) : NoteListEvent()
-    data class OnSearchValueChange(val newValue: String) : NoteListEvent()
-    object CancelChoosingNote : NoteListEvent()
-    object OnDeleteClicked : NoteListEvent()
-    object OnSelectAllClicked : NoteListEvent()
-    object OnDismissRequest : NoteListEvent()
-    object OnDeleteOperationApproved : NoteListEvent()
-    data class UpdateCheckboxState(val index: Int) : NoteListEvent()
-    data class OnSwiped(val index: Int) : NoteListEvent()
-}
 
 @Composable
 internal fun NoteListRoute(
@@ -103,23 +84,23 @@ internal fun NoteListRoute(
         viewModel.getAllNotes()
     }
 
-    val showCheckbox by remember {
+    val showCheckbox by remember(uiState.operationType) {
         derivedStateOf {
             uiState.operationType == NotesListUiOperation.SelectNotes
         }
     }
 
-    val isAllSelected by remember {
+    val isAllSelected by remember(uiState.selectedNotesCount) {
         derivedStateOf { uiState.selectedNotesCount == uiState.totalNotesCount }
     }
 
-    val isDeleteButtonEnabled by remember {
+    val isDeleteButtonEnabled by remember(uiState.selectedNotesCount) {
         derivedStateOf { uiState.selectedNotesCount != 0 }
     }
 
     NoteListScreen(
         notes = viewModel.getNotes(),
-        notesListScreenState = uiState,
+        uiState = uiState,
         showCheckbox = showCheckbox,
         isAllSelected = isAllSelected,
         isDeleteButtonEnabled = isDeleteButtonEnabled,
@@ -131,7 +112,7 @@ internal fun NoteListRoute(
                     if (!showCheckbox) {
                         onCardClicked(it.noteId)
                     } else {
-                        viewModel.onCheckboxClicked(it.noteIndex)
+                        viewModel.onEvent(NoteListEvent.UpdateCheckboxState(it.noteIndex))
                     }
                 }
                 else -> viewModel.onEvent(it)
@@ -143,19 +124,29 @@ internal fun NoteListRoute(
 @Composable
 fun NoteListScreen(
     notes: List<NoteUI>,
-    notesListScreenState: NotesListUIState,
+    uiState: NotesListUIState,
     showCheckbox: Boolean,
     isAllSelected: Boolean,
     isDeleteButtonEnabled: Boolean,
     onEvent: (NoteListEvent) -> Unit
 ) {
     val listState = rememberLazyListState()
+    val context = LocalContext.current
+    val noNotesText by remember(uiState.searchText, uiState.notes, uiState.searchedNotesList) {
+        derivedStateOf {
+            if (uiState.searchText.isNotEmpty() && notes.isEmpty()) {
+                context.getString(R.string.no_searched_notes)
+            } else if (uiState.searchText.isEmpty() && notes.isEmpty()) {
+                context.getString(R.string.no_notes)
+            } else null
+        }
+    }
 
-    LaunchedEffect(key1 = notesListScreenState.notes) {
+    LaunchedEffect(key1 = uiState.notes) {
         onEvent(NoteListEvent.MakeSearchValueEmpty)
         listState.animateScrollToItem(0)
     }
-    LaunchedEffect(key1 = notesListScreenState.searchedNotesList) {
+    LaunchedEffect(key1 = uiState.searchedNotesList) {
         listState.animateScrollToItem(0)
     }
     Scaffold(
@@ -163,9 +154,7 @@ fun NoteListScreen(
             .fillMaxSize()
             .padding(horizontal = MaterialTheme.spacing.medium),
         floatingActionButton = {
-            // To make invisible fab during choosing any notes. This will
-            // prevent users to add any note in that moment.
-            when (notesListScreenState.operationType) {
+            when (uiState.operationType) {
                 NotesListUiOperation.DisplayNotes -> Fab(fabClicked = { onEvent(NoteListEvent.AddNoteButtonClicked) })
                 else -> {}
             }
@@ -176,13 +165,13 @@ fun NoteListScreen(
             .padding(paddingValues)
         ) {
             Column {
-                when (notesListScreenState.operationType) {
+                when (uiState.operationType) {
                     NotesListUiOperation.DisplayNotes -> {
                         AllNotesText()
-                        TotalNotesCount(notesCount = notesListScreenState.totalNotesCount)
+                        TotalNotesCount(notesCount = uiState.totalNotesCount)
                         Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
                         SearchBar(
-                            searchValue = notesListScreenState.searchText,
+                            searchValue = uiState.searchText,
                             onSearchValueChange = { onEvent(NoteListEvent.OnSearchValueChange(it)) }
                         )
                     }
@@ -193,27 +182,32 @@ fun NoteListScreen(
                                 cancelChoosingNote = { onEvent(NoteListEvent.CancelChoosingNote) }
                             )
                         }
-                        SelectedNumberOfNotesText(selectedNumberOfNotes = notesListScreenState.selectedNotesCount)
+                        SelectedNumberOfNotesText(selectedNumberOfNotes = uiState.selectedNotesCount)
                         Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
                         SearchBar(
                             modifier = Modifier.alpha(0.2f),
-                            searchValue = notesListScreenState.searchText,
+                            searchValue = uiState.searchText,
                             readOnly = true
                         )
                     }
                 }
-                NoteListView(
-                    notes = notes,
-                    onCardClick = { noteId, noteIndex ->  onEvent(NoteListEvent.OnCardClick(noteId, noteIndex)) },
-                    onCardLongClick = { onEvent(NoteListEvent.OnCardLongClick(it)) },
-                    showCheckbox = showCheckbox,
-                    updateCheckboxState = { onEvent(NoteListEvent.UpdateCheckboxState(it)) },
-                    onSwiped = { onEvent(NoteListEvent.OnSwiped(it)) },
-                    listState = listState
-                )
+
+                if (noNotesText == null) {
+                    NoteListView(
+                        notes = notes,
+                        onCardClick = { noteId, noteIndex ->  onEvent(NoteListEvent.OnCardClick(noteId, noteIndex)) },
+                        onCardLongClick = { onEvent(NoteListEvent.OnCardLongClick(it)) },
+                        showCheckbox = showCheckbox,
+                        updateCheckboxState = { onEvent(NoteListEvent.UpdateCheckboxState(it)) },
+                        onSwiped = { onEvent(NoteListEvent.OnSwiped(it)) },
+                        listState = listState
+                    )
+                } else {
+                    NoNotesScreen(noNotesText.orEmpty())
+                }
             }
         }
-        when (notesListScreenState.operationType) {
+        when (uiState.operationType) {
             NotesListUiOperation.SelectNotes ->  {
                 OptionsWhenChosenNote(
                     isAllSelected = isAllSelected,
@@ -224,9 +218,9 @@ fun NoteListScreen(
             }
             else -> {}
         }
-        if (notesListScreenState.showDeletionDialog) {
+        if (uiState.showDeletionDialog) {
             DeleteAlertDialog(
-                selectedNoteCount = notesListScreenState.selectedNotesCount,
+                selectedNoteCount = uiState.selectedNotesCount,
                 onDismissRequest = { onEvent(NoteListEvent.OnDismissRequest) },
                 onDeleteOperationApproved = { onEvent(NoteListEvent.OnDeleteOperationApproved) }
             )
@@ -240,10 +234,15 @@ fun DeleteAlertDialog(
     onDismissRequest: () -> Unit,
     onDeleteOperationApproved: () -> Unit
 ) {
-    val questionText = if (selectedNoteCount != 1) {
-        stringResource(id = R.string.delete_multiple_notes, selectedNoteCount)
-    } else {
-        stringResource(id = R.string.delete_one_note)
+    val context = LocalContext.current
+    val questionText by remember(selectedNoteCount) {
+        derivedStateOf {
+            if (selectedNoteCount != 1) {
+                context.getString(R.string.delete_multiple_notes, selectedNoteCount)
+            } else {
+                context.getString(R.string.delete_one_note)
+            }
+        }
     }
 
     val dialogContainerColor = MaterialTheme.colorScheme.background
@@ -313,8 +312,7 @@ fun DeleteAlertDialog(
                             Text(
                                 text = cancelText.uppercase(),
                                 fontSize = MaterialTheme.typography.titleMedium.fontSize,
-                                fontFamily = MaterialTheme.typography.openSansRegular.fontFamily,
-                                color = dismissColor
+                                fontFamily = MaterialTheme.typography.openSansRegular.fontFamily
                             )
                         }
                         Text(
@@ -330,8 +328,7 @@ fun DeleteAlertDialog(
                             Text(
                                 text = deleteText.uppercase(),
                                 fontSize = MaterialTheme.typography.titleMedium.fontSize,
-                                fontFamily = MaterialTheme.typography.openSansRegular.fontFamily,
-                                color = warningColor
+                                fontFamily = MaterialTheme.typography.openSansRegular.fontFamily
                             )
                         }
                     }
@@ -363,14 +360,19 @@ private fun SelectedNumberOfNotesText(
     modifier: Modifier = Modifier,
     selectedNumberOfNotes: Int
 ) {
-    val text = when {
-        selectedNumberOfNotes == 1 -> {
-            stringResource(id = R.string.singular_selected_number_of_notes, selectedNumberOfNotes)
+    val context = LocalContext.current
+    val text by remember(selectedNumberOfNotes) {
+        derivedStateOf {
+            when {
+                selectedNumberOfNotes == 1 -> {
+                    context.getString(R.string.singular_selected_number_of_notes, selectedNumberOfNotes)
+                }
+                selectedNumberOfNotes > 1 -> {
+                    context.getString(R.string.plural_selected_number_of_notes, selectedNumberOfNotes)
+                }
+                else -> context.getString(R.string.none_item_selected)
+            }
         }
-        selectedNumberOfNotes > 1 -> {
-            stringResource(id = R.string.plural_selected_number_of_notes, selectedNumberOfNotes)
-        }
-        else -> stringResource(id = R.string.none_item_selected)
     }
 
     Text(
@@ -406,10 +408,15 @@ private fun TotalNotesCount(
     modifier: Modifier = Modifier,
     notesCount: Int
 ) {
-    val totalNotes = if (notesCount != 1) {
-        stringResource(id = R.string.plural_note_count, notesCount)
-    } else {
-        stringResource(id = R.string.singular_note_count, notesCount)
+    val context = LocalContext.current
+    val totalNotes by remember(notesCount) {
+        mutableStateOf(
+            if (notesCount != 1) {
+                context.getString(R.string.plural_note_count, notesCount)
+            } else {
+                context.getString(R.string.singular_note_count, notesCount)
+            }
+        )
     }
     Text(
         modifier = modifier.padding(start = MaterialTheme.spacing.small),
@@ -419,7 +426,6 @@ private fun TotalNotesCount(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchBar(
     modifier: Modifier = Modifier,
@@ -446,39 +452,13 @@ fun SearchBar(
             text = stringResource(id = R.string.search_notes),
             fontFamily = MaterialTheme.typography.openSansRegular.fontFamily
         ) },
-        colors = TextFieldDefaults.textFieldColors(
+        colors = TextFieldDefaults.colors(
             unfocusedIndicatorColor = Color.Transparent,
             focusedIndicatorColor = Color.Transparent
         )
     )
 }
 
-@Composable
-@OptIn(ExperimentalMaterial3Api::class)
-fun SwipeBackground(dismissState: DismissState) {
-    val scale by animateFloatAsState(
-        if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f, label = ""
-    )
-    Box(
-        Modifier
-            .fillMaxSize()
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.Red)
-            .padding(horizontal = 20.dp),
-        contentAlignment = Alignment.CenterEnd
-    ) {
-        Icon(
-            imageVector = Icons.Default.Delete,
-            contentDescription = "",
-            modifier = Modifier.scale(scale)
-        )
-    }
-}
-
-@OptIn(
-    ExperimentalMaterial3Api::class,
-    ExperimentalFoundationApi::class
-)
 @Composable
 fun NoteListView(
     notes: List<NoteUI>,
@@ -494,46 +474,29 @@ fun NoteListView(
             top = MaterialTheme.spacing.medium,
             bottom = MaterialTheme.spacing.extraExtraLarge
         ),
-        state = listState
+        state = listState,
+        modifier = Modifier.padding(top = 4.dp)
     ) {
         itemsIndexed(
             items = notes,
             key = { _, note ->  note.id }
         ) { index, note ->
-            val swipeState = rememberDismissState()
-            if (swipeState.isDismissed(DismissDirection.EndToStart)) {
-                LaunchedEffect(key1 = Unit) {
-                    onSwiped(note.id)
-                }
-            }
-            AnimatedVisibility(
-                visible = notes.contains(note),
-                modifier = Modifier.animateItemPlacement()
-            ) {
-                SwipeToDismiss(
-                    directions = setOf(DismissDirection.EndToStart),
-                    state = swipeState,
-                    background = { SwipeBackground(dismissState = swipeState) },
-                    dismissContent = {
-                        NoteRow(
-                            onCardClick = { onCardClick(note.id, index) },
-                            onCardLongClick = { onCardLongClick(index) },
-                            showCheckbox = showCheckbox,
-                            updateCheckboxState = { updateCheckboxState(index) },
-                            title = note.title,
-                            createdAt = note.createdAt,
-                            description = note.description,
-                            isChecked = note.isChecked
-                        )
-                    }
-                )
-            }
+            NoteRow(
+                onCardClick = { onCardClick(note.id, index) },
+                onCardLongClick = { onCardLongClick(index) },
+                showCheckbox = showCheckbox,
+                updateCheckboxState = { updateCheckboxState(index) },
+                title = note.title,
+                createdAt = note.createdAt,
+                description = note.description,
+                isChecked = note.isChecked,
+                onDelete = { onSwiped(note.id) }
+            )
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun NoteRow(
     modifier: Modifier = Modifier,
@@ -541,89 +504,135 @@ private fun NoteRow(
     onCardLongClick: () -> Unit,
     showCheckbox: Boolean,
     updateCheckboxState: () -> Unit,
+    onDelete: () -> Unit,
     title: String,
     createdAt: String,
     description: String,
     isChecked: Boolean
 ) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(80.dp)
-            .combinedClickable(
-                onClick = onCardClick,
-                onLongClick = onCardLongClick
-            ),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSystemInDarkTheme())
-                Color(0xFF4D648D)
-            else Color(0xffd3d3d3)
-        ),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.85f)
-                    .padding(
-                        start = MaterialTheme.spacing.medium
-                    ),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = title,
-                    fontSize = MaterialTheme.typography.titleMedium.fontSize,
-                    fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily,
-                    maxLines = 1
-                )
-                Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
-                Row {
-                    Text(
-                        text = createdAt,
-                        fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                        fontFamily = MaterialTheme.typography.openSansLightItalic.fontFamily,
-                        maxLines = 1
-                    )
-                    Text(
-                        text = stringResource(id = R.string.vertical_line),
-                        fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                        fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily
-                    )
-                    Text(
-                        text = description,
-                        fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                        fontFamily = MaterialTheme.typography.openSansRegular.fontFamily,
-                        maxLines = 1
-                    )
+    val state = rememberSwipeToDismissBoxState(
+        confirmValueChange = { dismissValue ->
+            when (dismissValue) {
+                SwipeToDismissBoxValue.EndToStart -> {
+                    onDelete()
+                    true
+                }
+                else -> { false }
+            }
+        }
+    )
+    SwipeToDismissBox(
+        state = state,
+        enableDismissFromStartToEnd = false,
+        backgroundContent = {
+            val backgroundColor = when (state.dismissDirection) {
+                SwipeToDismissBoxValue.EndToStart -> Color.Red
+                else -> Color.Transparent
+            }
 
-                        }
-                    }
-                    if (showCheckbox) {
-                        Checkbox(
-                            checked = isChecked,
-                            onCheckedChange = { updateCheckboxState() }
-                        )
-                    }
+            val size by animateDpAsState(
+                targetValue = if (state.progress > 0.15f) 30.dp else 24.dp
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(backgroundColor, shape = RoundedCornerShape(12.dp))
+                    .clip(shape = RoundedCornerShape(12.dp))
+                    .padding(horizontal = 16.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                if (state.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Sil",
+                        tint = Color.White,
+                        modifier = Modifier.size(size)
+                    )
                 }
             }
+        }
+    ) {
+        Card(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(80.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .combinedClickable(
+                    onClick = onCardClick,
+                    onLongClick = onCardLongClick
+                ),
+            colors = CardDefaults.cardColors(
+                containerColor = if (isSystemInDarkTheme())
+                    Color(0xFF4D648D)
+                else Color(0xffd3d3d3)
+            ),
+            shape = RoundedCornerShape(12.dp),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = if (state.dismissDirection != SwipeToDismissBoxValue.EndToStart) 4.dp else 1.dp
+            )
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(0.85f)
+                        .padding(
+                            start = MaterialTheme.spacing.medium
+                        ),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = title,
+                        fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                        fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily,
+                        maxLines = 1
+                    )
+                    Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
+                    Row {
+                        Text(
+                            text = createdAt,
+                            fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                            fontFamily = MaterialTheme.typography.openSansLightItalic.fontFamily,
+                            maxLines = 1
+                        )
+                        Text(
+                            text = stringResource(id = R.string.vertical_line),
+                            fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                            fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily
+                        )
+                        Text(
+                            text = description,
+                            fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                            fontFamily = MaterialTheme.typography.openSansRegular.fontFamily,
+                            maxLines = 1
+                        )
+
+                    }
+                }
+                if (showCheckbox) {
+                    Checkbox(
+                        checked = isChecked,
+                        onCheckedChange = { updateCheckboxState() }
+                    )
+                }
+            }
+        }
+    }
+
 }
 
 @Composable
-fun Fab(
-    fabClicked: () -> Unit
-) {
+fun Fab(fabClicked: () -> Unit) {
     FloatingActionButton(
         onClick = fabClicked,
         shape = CircleShape
     ) {
         Icon(
             painter = painterResource(id = R.drawable.ic_baseline_add_24),
-            contentDescription = stringResource(id = R.string.add_note),
-            tint = Color.White
-        )
+            contentDescription = stringResource(id = R.string.add_note))
     }
 }
 
@@ -644,7 +653,6 @@ private fun OptionsWhenChosenNote(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background)
                 .padding(top = MaterialTheme.spacing.small),
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.SpaceAround
@@ -696,26 +704,37 @@ private fun DeleteOption() {
 private fun SelectAllOption(
     isAllSelected: Boolean
 ) {
-    val iconAndTextColor: Color
-    val text: String
-
-    if (isAllSelected) {
-        iconAndTextColor = MaterialTheme.colorScheme.primary
-        text = stringResource(id = R.string.deselect_all)
+    val text = if (isAllSelected) {
+        stringResource(id = R.string.deselect_all)
     } else {
-        iconAndTextColor = MaterialTheme.colorScheme.onBackground
-        text = stringResource(id = R.string.select_all)
+        stringResource(id = R.string.select_all)
     }
-
     Icon(
         painter = painterResource(id = R.drawable.select_all_56),
         contentDescription = stringResource(id = R.string.select_all),
-        tint = iconAndTextColor
     )
     Text(
         text = text,
-        color = iconAndTextColor,
         fontSize = MaterialTheme.typography.labelMedium.fontSize,
         fontFamily = MaterialTheme.typography.openSansRegular.fontFamily
     )
+}
+
+
+@Composable
+fun NoNotesScreen(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(MaterialTheme.spacing.medium),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(top = 24.dp)
+        )
+    }
 }

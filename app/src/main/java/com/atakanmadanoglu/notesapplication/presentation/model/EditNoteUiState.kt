@@ -9,23 +9,15 @@ data class EditNoteUiState(
     val isFocused: Boolean = false,
     val isDeleteButtonClicked: Boolean = false,
     val openDeleteDialog: Boolean = false
-) {
-    fun isNewValueEntered(
-        retrievedTitle: String,
-        retrievedDescription: String
-    ): Boolean {
-        return !title.contentEquals(retrievedTitle) ||
-                !description.contentEquals(retrievedDescription)
-    }
-}
+)
 
-sealed interface EditNoteScreenEvent {
-    data class TitleChanged(val newInput: String): EditNoteScreenEvent
-    data class DescriptionChanged(val newInput: String): EditNoteScreenEvent
-    object WhenIsFocused: EditNoteScreenEvent
-    object WhenNotHaveFocus: EditNoteScreenEvent
-    object DeleteButtonClicked: EditNoteScreenEvent
-    object DoneIconClicked: EditNoteScreenEvent
-    object DeletionDismissed: EditNoteScreenEvent
-    object DeletionApproved: EditNoteScreenEvent
+sealed interface EditNoteAction {
+    data object OnDoneIconClicked: EditNoteAction
+    data object OnBackClicked: EditNoteAction
+    data class OnTitleChanged(val title: String): EditNoteAction
+    data class OnDescriptionChanged(val desc: String): EditNoteAction
+    data object OnDeleteClicked: EditNoteAction
+    data object OnDismissRequest: EditNoteAction
+    data object OnDeleteApproved: EditNoteAction
+    data class OnFocusChanged(val isFocused: Boolean): EditNoteAction
 }

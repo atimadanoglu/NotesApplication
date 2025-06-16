@@ -24,4 +24,6 @@
     <string name="delete_one_note">Delete this note?</string>
     <string name="delete_multiple_notes">Delete %d notes?</string>
     <string name="cancel">Cancel</string>
+    <string name="no_notes">No notes found.</string>
+    <string name="no_searched_notes">No matching notes found.</string>
 </resources>

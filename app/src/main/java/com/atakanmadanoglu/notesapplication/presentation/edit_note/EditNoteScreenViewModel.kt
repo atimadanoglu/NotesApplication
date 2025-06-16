@@ -1,13 +1,11 @@
 package com.atakanmadanoglu.notesapplication.presentation.edit_note
 
 import androidx.compose.runtime.Immutable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.atakanmadanoglu.notesapplication.domain.usecases.DeleteNoteByIdUseCase
 import com.atakanmadanoglu.notesapplication.domain.usecases.EditNoteUseCase
 import com.atakanmadanoglu.notesapplication.domain.usecases.GetNoteByIdUseCase
-import com.atakanmadanoglu.notesapplication.presentation.edit_note.navigation.EditNoteArgs
 import com.atakanmadanoglu.notesapplication.presentation.model.EditNoteUiState
 import com.atakanmadanoglu.notesapplication.presentation.model.NoteUI
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,18 +20,14 @@ import javax.inject.Inject
 class EditNoteScreenViewModel @Inject constructor(
     private val getNoteByIdUseCase: GetNoteByIdUseCase,
     private val editNoteUseCase: EditNoteUseCase,
-    private val deleteNoteByIdUseCase: DeleteNoteByIdUseCase,
-    savedStateHandle: SavedStateHandle
+    private val deleteNoteByIdUseCase: DeleteNoteByIdUseCase
 ): ViewModel() {
 
-    private val editNoteArgs = EditNoteArgs(savedStateHandle)
     // it will be used to compare the first retrieved and edited values
     private val retrievedDataFromPreviousPage = MutableStateFlow(NoteUI())
 
-    private val _editNoteUiState = MutableStateFlow(EditNoteUiState())
-    val editNoteUiState: StateFlow<EditNoteUiState> get() = _editNoteUiState
-
-    init { getNoteById() }
+    private val _uiState = MutableStateFlow(EditNoteUiState())
+    val uiState: StateFlow<EditNoteUiState> get() = _uiState
 
     fun onTitleChanged(newInput: String) {
         setTitle(newInput)
@@ -45,62 +39,58 @@ class EditNoteScreenViewModel @Inject constructor(
         setDoneIconVisible()
     }
 
-    fun whenIsFocused() = setFocus(true)
-    fun whenNotHaveFocus() = setFocus(false)
     fun onDeleteButtonClicked() = setOpenDeleteDialog(true)
     fun onDeletionDismissed() = setOpenDeleteDialog(false)
-    fun onDeletionApproved() = deleteNote()
 
     fun onDoneIconClicked() {
         editNote(
-            inputTitle = _editNoteUiState.value.title,
-            inputDescription = _editNoteUiState.value.description
+            inputTitle = _uiState.value.title,
+            inputDescription = _uiState.value.description
         )
         // RetrievedData needs to be updated to prevent contradiction
         // between old and new data after user click doneIcon
         retrievedDataFromPreviousPage.update {
             it.copy(
-                title = _editNoteUiState.value.title,
-                description = _editNoteUiState.value.description,
-                createdAt = _editNoteUiState.value.createdAt
+                title = _uiState.value.title,
+                description = _uiState.value.description,
+                createdAt = _uiState.value.createdAt
             )
         }
         setDoneIconVisible()
     }
 
     private fun setTitle(newValue: String) {
-        _editNoteUiState.update { it.copy(title = newValue) }
+        _uiState.update { it.copy(title = newValue) }
     }
 
     private fun setDescription(newValue: String) {
-        _editNoteUiState.update { it.copy(description = newValue) }
+        _uiState.update { it.copy(description = newValue) }
     }
 
-    private fun setFocus(newValue: Boolean) {
-        _editNoteUiState.update { it.copy(isFocused = newValue) }
+    fun setFocus(newValue: Boolean) {
+        _uiState.update { it.copy(isFocused = newValue) }
     }
 
     private fun setDoneIconVisible() = with(retrievedDataFromPreviousPage.value) {
-        if (
-            !title.contentEquals(_editNoteUiState.value.title) ||
-            !description.contentEquals(_editNoteUiState.value.description)) {
-            _editNoteUiState.update { it.copy(isDoneIconVisible = true) }
-        } else {
-            _editNoteUiState.update { it.copy(isDoneIconVisible = false) }
+        _uiState.update {
+            it.copy(
+                isDoneIconVisible = !title.contentEquals(_uiState.value.title) ||
+                        !description.contentEquals(_uiState.value.description)
+            )
         }
     }
 
     private fun setOpenDeleteDialog(value: Boolean) {
-        _editNoteUiState.update { it.copy(openDeleteDialog = value) }
+        _uiState.update { it.copy(openDeleteDialog = value) }
     }
 
-    private fun getNoteById() {
+    fun getNoteById(id: Int) {
         viewModelScope.launch {
             getNoteByIdUseCase.invoke(
-                id = editNoteArgs.noteId
+                id = id
             ).collect { noteUI ->
                 retrievedDataFromPreviousPage.value = noteUI
-                _editNoteUiState.update {
+                _uiState.update {
                     it.copy(
                         title = noteUI.title,
                         description = noteUI.description,
@@ -124,9 +114,9 @@ class EditNoteScreenViewModel @Inject constructor(
         }
     }
 
-    private fun deleteNote() {
+    fun deleteNote(id: Int) {
         viewModelScope.launch {
-            deleteNoteByIdUseCase(editNoteArgs.noteId)
+            deleteNoteByIdUseCase(id)
         }
     }
 }

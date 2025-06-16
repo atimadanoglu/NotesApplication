@@ -12,8 +12,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
@@ -26,11 +26,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.atakanmadanoglu.notesapplication.R
 import com.atakanmadanoglu.notesapplication.presentation.add_note.NavigationTopAppBar
 import com.atakanmadanoglu.notesapplication.presentation.add_note.NoteContentView
 import com.atakanmadanoglu.notesapplication.presentation.add_note.TitleInput
+import com.atakanmadanoglu.notesapplication.presentation.model.EditNoteAction
 import com.atakanmadanoglu.notesapplication.presentation.model.EditNoteUiState
 import com.atakanmadanoglu.notesapplication.presentation.notes_list.DeleteAlertDialog
 import com.atakanmadanoglu.notesapplication.theme.openSansRegular
@@ -38,94 +38,45 @@ import com.atakanmadanoglu.notesapplication.theme.spacing
 
 @Composable
 internal fun EditNoteRoute(
-    navController: NavController = rememberNavController(),
-    editNoteScreenViewModel: EditNoteScreenViewModel = hiltViewModel()
+    id: Int,
+    navController: NavController,
+    viewModel: EditNoteScreenViewModel = hiltViewModel()
 ) {
-    val editNoteUiState by editNoteScreenViewModel.editNoteUiState.collectAsStateWithLifecycle()
+    val editNoteUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
-    val isDoneIconVisible = remember {
-        { editNoteUiState.isDoneIconVisible }
-    }
 
-    val onTitleChange: (newValue: String) -> Unit = remember {
-        return@remember editNoteScreenViewModel::onTitleChanged
-    }
-
-    val onDescriptionChange: (newValue: String) -> Unit = remember {
-        return@remember editNoteScreenViewModel::onDescriptionChanged
-    }
-
-    val popBackStack = remember {
-        { navController.popBackStack() }
-    }
-
-    val onDeletionApproved: () -> Unit = remember {
-        return@remember editNoteScreenViewModel::onDeletionApproved
-    }
-
-    val onDoneIconClicked: () -> Unit = remember {
-        return@remember editNoteScreenViewModel::onDoneIconClicked
-    }
-
-    val clearFocus: () -> Unit = remember {
-        { focusManager.clearFocus() }
+    LaunchedEffect(id) {
+        viewModel.getNoteById(id)
     }
 
     EditNoteScreen(
-        editNoteUiState = editNoteUiState,
-        onNavigationIconClick = { popBackStack() },
-        whenIsFocused = editNoteScreenViewModel::whenIsFocused,
-        whenNotHaveFocus = editNoteScreenViewModel::whenNotHaveFocus,
-        onTitleChange = onTitleChange,
-        onDescriptionChange = onDescriptionChange,
-        onDeleteClicked = editNoteScreenViewModel::onDeleteButtonClicked,
-        onDoneIconClick = {
-            onDoneIconClicked()
-            clearFocus()
-        },
-        onDismissRequest = editNoteScreenViewModel::onDeletionDismissed,
-        onDeleteOperationApproved = {
-            onDeletionApproved()
-            popBackStack()
-        },
-        isDoneIconVisible = isDoneIconVisible
+        uiState = editNoteUiState,
+        onAction = { action ->
+            when (action) {
+                EditNoteAction.OnBackClicked -> { navController.navigateUp() }
+                EditNoteAction.OnDeleteClicked -> { viewModel.onDeleteButtonClicked() }
+                is EditNoteAction.OnDescriptionChanged -> { viewModel.onDescriptionChanged(action.desc) }
+                is EditNoteAction.OnTitleChanged -> { viewModel.onTitleChanged(action.title) }
+                is EditNoteAction.OnFocusChanged -> { viewModel.setFocus(action.isFocused) }
+                EditNoteAction.OnDismissRequest -> { viewModel.onDeletionDismissed() }
+                EditNoteAction.OnDeleteApproved -> {
+                    viewModel.deleteNote(id)
+                    navController.navigateUp()
+                }
+                EditNoteAction.OnDoneIconClicked -> {
+                    viewModel.onDoneIconClicked()
+                    focusManager.clearFocus()
+                }
+            }
+        }
     )
-
-   /* EditNoteScreen(
-        editNoteUiState = editNoteUiState,
-        onNavigationIconClick = navController::popBackStack,
-        whenIsFocused = editNoteScreenViewModel::whenIsFocused,
-        whenNotHaveFocus = editNoteScreenViewModel::whenNotHaveFocus,
-        onTitleChange = { editNoteScreenViewModel.onTitleChanged(it) },
-        onDescriptionChange = { editNoteScreenViewModel.onDescriptionChanged(it) },
-        onDeleteClicked = editNoteScreenViewModel::onDeleteButtonClicked,
-        onDoneIconClick = {
-            editNoteScreenViewModel.onDoneIconClicked()
-            focusManager.clearFocus()
-        },
-        onDismissRequest = editNoteScreenViewModel::onDeletionDismissed,
-        onDeleteOperationApproved = {
-            editNoteScreenViewModel.onDeletionApproved()
-            navController.popBackStack()
-        },
-        isDoneIconVisible = { editNoteUiState.isDoneIconVisible }
-    )*/
 }
 
 @Composable
 fun EditNoteScreen(
-    modifier: Modifier = Modifier,
-    editNoteUiState: EditNoteUiState,
-    onDoneIconClick: () -> Unit,
-    onNavigationIconClick: () -> Unit,
-    whenIsFocused: () -> Unit,
-    whenNotHaveFocus: () -> Unit,
-    onTitleChange: (String) -> Unit,
-    onDescriptionChange: (String) -> Unit,
-    onDeleteClicked: () -> Unit,
-    onDismissRequest: () -> Unit,
-    onDeleteOperationApproved: () -> Unit,
-    isDoneIconVisible: () -> Boolean
+    uiState: EditNoteUiState,
+    onAction: (EditNoteAction) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Scaffold(
         modifier = modifier
@@ -133,9 +84,9 @@ fun EditNoteScreen(
             .padding(horizontal = MaterialTheme.spacing.small),
         topBar = {
             NavigationTopAppBar(
-                isDoneIconVisible = isDoneIconVisible,
-                onDoneIconClick = onDoneIconClick,
-                onNavigationIconClick = onNavigationIconClick
+                isDoneIconVisible = uiState.isDoneIconVisible,
+                onDoneIconClick = { onAction(EditNoteAction.OnDoneIconClicked) },
+                onNavigationIconClick = { onAction(EditNoteAction.OnBackClicked) }
             )
         }
     ) {
@@ -150,26 +101,24 @@ fun EditNoteScreen(
                     .wrapContentHeight()
                     .onFocusChanged { focusState ->
                         when {
-                            focusState.isFocused -> whenIsFocused()
-                            !focusState.hasFocus -> whenNotHaveFocus()
+                            focusState.isFocused -> { onAction(EditNoteAction.OnFocusChanged(true)) }
+                            !focusState.hasFocus -> { onAction(EditNoteAction.OnFocusChanged(false)) }
                         }
                     },
-                title = editNoteUiState.title,
-                onTitleChange = { title -> onTitleChange(title) },
+                title = uiState.title,
+                onTitleChange = { title -> onAction(EditNoteAction.OnTitleChanged(title)) },
             )
-            ShowDate(date = editNoteUiState.createdAt)
+            ShowDate(date = uiState.createdAt)
             NoteContentView(
-                description = editNoteUiState.description,
-                onDescriptionChange = { desc -> onDescriptionChange(desc) },
+                description = uiState.description,
+                onDescriptionChange = { desc -> onAction(EditNoteAction.OnDescriptionChanged(desc)) },
             )
-            if (!editNoteUiState.isFocused) {
+            if (!uiState.isFocused) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(bottom = MaterialTheme.spacing.small)
-                        .clickable {
-                            onDeleteClicked()
-                        },
+                        .clickable { onAction(EditNoteAction.OnDeleteClicked) },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -177,11 +126,11 @@ fun EditNoteScreen(
                 }
             }
         }
-        if (editNoteUiState.openDeleteDialog) {
+        if (uiState.openDeleteDialog) {
             DeleteAlertDialog(
                 selectedNoteCount = 1, // default value is 1
-                onDismissRequest = onDismissRequest,
-                onDeleteOperationApproved = onDeleteOperationApproved
+                onDismissRequest = { onAction(EditNoteAction.OnDismissRequest) },
+                onDeleteOperationApproved = { onAction(EditNoteAction.OnDeleteApproved) }
             )
         }
     }
@@ -201,9 +150,7 @@ private fun DeleteButton() {
 }
 
 @Composable
-private fun ShowDate(
-    date: String
-) {
+private fun ShowDate(date: String) {
     Text(
         modifier = Modifier.fillMaxWidth(),
         text = date,
@@ -217,5 +164,5 @@ private fun ShowDate(
 @Preview
 @Composable
 fun Preview() {
-    /*EditNoteScreen(navController = rememberNavController())*/
+    EditNoteScreen(EditNoteUiState(), onAction = {})
 }
