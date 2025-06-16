@@ -18,30 +18,20 @@ class AddNoteViewModel @Inject constructor(
     private val _state = MutableStateFlow(AddNoteUIState())
     val state: StateFlow<AddNoteUIState> get() = _state
 
-    fun onTitleChanged(newInput: String) = setTitle(newInput)
-    fun onDescriptionChanged(newInput: String) = setDescription(newInput)
-    fun onDoneIconClicked() {
-        addNote(
-            inputTitle = _state.value.title,
-            inputDescription = _state.value.description
-        )
-    }
-
-    private fun setTitle(newValue: String) {
+    fun setTitle(newValue: String) {
         _state.update { it.copy(title = newValue) }
     }
 
-    private fun setDescription(newValue: String) {
+    fun setDescription(newValue: String) {
         _state.update { it.copy(description = newValue) }
     }
 
-    private fun addNote(
-        inputTitle: String,
-        inputDescription: String
-    ) = viewModelScope.launch {
-        addNoteUseCase(
-            inputTitle = inputTitle,
-            inputDescription = inputDescription
-        )
+    fun addNote() {
+        viewModelScope.launch {
+            addNoteUseCase(
+                inputTitle = _state.value.title,
+                inputDescription = _state.value.description
+            )
+        }
     }
 }

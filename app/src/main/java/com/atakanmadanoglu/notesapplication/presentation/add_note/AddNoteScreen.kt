@@ -1,9 +1,22 @@
 package com.atakanmadanoglu.notesapplication.presentation.add_note
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -15,48 +28,32 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.atakanmadanoglu.notesapplication.R
+import com.atakanmadanoglu.notesapplication.presentation.model.AddNoteAction
 import com.atakanmadanoglu.notesapplication.presentation.model.AddNoteUIState
 import com.atakanmadanoglu.notesapplication.theme.openSansRegular
 import com.atakanmadanoglu.notesapplication.theme.openSansSemiBold
 import com.atakanmadanoglu.notesapplication.theme.spacing
-import java.text.SimpleDateFormat
-import java.util.*
 
 @Composable
 fun AddNoteRoute(
     navController: NavController,
-    addNoteViewModel: AddNoteViewModel = hiltViewModel()
+    viewModel: AddNoteViewModel = hiltViewModel()
 ) {
-    val addNoteState by addNoteViewModel.state.collectAsStateWithLifecycle()
-
-    val onTitleChanged: (newValue: String) -> Unit = remember {
-        return@remember addNoteViewModel::onTitleChanged
-    }
-    val onDescriptionChanged: (newValue: String) -> Unit = remember {
-        return@remember addNoteViewModel::onDescriptionChanged
-    }
-    val onDoneIconClicked: () -> Unit = remember {
-        return@remember addNoteViewModel::onDoneIconClicked
-    }
-    val popBackStack: () -> Unit = remember {
-        { navController.popBackStack() }
-    }
-    val isDoneIconVisible: () -> Boolean by remember {
-        derivedStateOf {
-            { addNoteState.isAnyValueEntered() }
-        }
-    }
+    val addNoteState by viewModel.state.collectAsStateWithLifecycle()
 
     AddNoteScreen(
         addNoteState = addNoteState,
-        onNavigationIconClick = navController::popBackStack,
-        onTitleChange = onTitleChanged,
-        onDescriptionChange = onDescriptionChanged,
-        onDoneIconClick = {
-            onDoneIconClicked()
-            popBackStack()
-        },
-        isDoneIconVisible = isDoneIconVisible
+        onAction = { action ->
+            when (action) {
+                AddNoteAction.OnBackClicked -> navController.navigateUp()
+                AddNoteAction.OnDoneClicked -> {
+                    viewModel.addNote()
+                    navController.navigateUp()
+                }
+                is AddNoteAction.OnDescriptionChanged -> viewModel.setDescription(action.desc)
+                is AddNoteAction.OnTitleChanged -> viewModel.setTitle(action.title)
+            }
+        }
     )
 }
 
@@ -64,11 +61,7 @@ fun AddNoteRoute(
 fun AddNoteScreen(
     modifier: Modifier = Modifier,
     addNoteState: AddNoteUIState,
-    onNavigationIconClick: () -> Unit,
-    onTitleChange: (String) -> Unit,
-    onDescriptionChange: (String) -> Unit,
-    onDoneIconClick: () -> Unit,
-    isDoneIconVisible: () -> Boolean
+    onAction: (AddNoteAction) -> Unit
 ) {
     Scaffold(
         modifier = modifier
@@ -76,9 +69,9 @@ fun AddNoteScreen(
             .padding(horizontal = MaterialTheme.spacing.small),
         topBar = {
             NavigationTopAppBar(
-                isDoneIconVisible = isDoneIconVisible/*{ addNoteState.isAnyValueEntered() }*/,
-                onDoneIconClick = onDoneIconClick,
-                onNavigationIconClick = onNavigationIconClick
+                isDoneIconVisible = addNoteState.isAnyValueChanged,
+                onDoneIconClick = { onAction(AddNoteAction.OnDoneClicked) },
+                onNavigationIconClick = { onAction(AddNoteAction.OnBackClicked) }
             )
         }
     ) {
@@ -89,12 +82,12 @@ fun AddNoteScreen(
         ) {
             TitleInput(
                 title = addNoteState.title,
-                onTitleChange = onTitleChange
+                onTitleChange = { title -> onAction(AddNoteAction.OnTitleChanged(title)) }
             )
-            ShowDate()
+            ShowDate(currentTime = addNoteState.currentTime)
             NoteContentView(
                 description = addNoteState.description,
-                onDescriptionChange = onDescriptionChange
+                onDescriptionChange = { desc -> onAction(AddNoteAction.OnDescriptionChanged(desc)) }
             )
         }
     }
@@ -104,42 +97,26 @@ fun AddNoteScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationTopAppBar(
-    isDoneIconVisible: () -> Boolean,
+    isDoneIconVisible: Boolean,
     onDoneIconClick: () -> Unit,
     onNavigationIconClick: () -> Unit
 ) {
     TopAppBar(
-        title = {  },
+        title = {},
         navigationIcon = {
             SpecificIconButton(
                 onClick = onNavigationIconClick,
                 id = R.drawable.ic_baseline_arrow_back_24,
                 contentDesc = stringResource(id = R.string.back_button)
             )
-            /*IconButton(
-                onClick = onNavigationIconClick
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_baseline_arrow_back_24),
-                    contentDescription = stringResource(id = R.string.back_button)
-                )
-            }*/
         },
         actions = {
-            if (isDoneIconVisible()) {
+            if (isDoneIconVisible) {
                 SpecificIconButton(
                     onClick = onDoneIconClick,
                     id = R.drawable.ic_baseline_done_24,
                     contentDesc = stringResource(id = R.string.done_button)
                 )
-                /*IconButton(
-                    onClick = onDoneIconClick
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_done_24),
-                        contentDescription = stringResource(id = R.string.done_button)
-                    )
-                }*/
             }
         }
     )
@@ -163,7 +140,6 @@ private fun SpecificIconButton(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TitleInput(
     modifier: Modifier = Modifier,
@@ -189,16 +165,16 @@ fun TitleInput(
                 fontFamily = MaterialTheme.typography.openSansSemiBold.fontFamily
             ),
             singleLine = true,
-            colors = TextFieldDefaults.textFieldColors(
+            colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
-                containerColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent
             ),
         )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteContentView(
     modifier: Modifier = Modifier,
@@ -222,22 +198,20 @@ fun NoteContentView(
             fontFamily = MaterialTheme.typography.openSansRegular.fontFamily
         ),
         singleLine = false,
-        colors = TextFieldDefaults.textFieldColors(
+        colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
-            containerColor = Color.Transparent,
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
         )
     )
 }
 
 @Composable
-private fun ShowDate() {
-    val calendar = Calendar.getInstance().time
-    val formatter = SimpleDateFormat("MMM d, HH:mm", Locale.ENGLISH)
-    val current = formatter.format(calendar)
+private fun ShowDate(currentTime: String) {
     Text(
         modifier = Modifier.fillMaxWidth(),
-        text = current,
+        text = currentTime,
         fontFamily = MaterialTheme.typography.openSansRegular.fontFamily,
         fontSize = MaterialTheme.typography.bodyMedium.fontSize,
         color = Color.Gray,
@@ -247,6 +221,8 @@ private fun ShowDate() {
 
 @Preview
 @Composable
-private fun PreviewAddNoteScreenComponents() {
-    //NavigationTopAppBar(doneIconOnClick = {}, navigationIconOnClick = {})
+private fun AddNotePrev() {
+    AddNoteScreen(
+        addNoteState = AddNoteUIState()
+    ) { }
 }
