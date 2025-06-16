@@ -6,21 +6,21 @@ object Dependencies {
     const val material = "com.google.android.material:material:1.8.0"
     const val constraintLayout = "androidx.constraintlayout:constraintlayout:2.1.4"
     const val lifecycleRuntimeKtx = "androidx.lifecycle:lifecycle-runtime-ktx:2.6.0"
-    const val activityCompose = "androidx.activity:activity-compose:1.6.1"
+    const val activityCompose = "androidx.activity:activity-compose:1.10.1"
 
     // Hilt
     const val hiltAndroid = "com.google.dagger:hilt-android:${Versions.hiltVersion}"
-    const val hiltNavigationCompose = "androidx.hilt:hilt-navigation-compose:1.0.0"
+    const val hiltNavigationCompose = "androidx.hilt:hilt-navigation-compose:1.2.0"
     const val hiltCompiler = "com.google.dagger:hilt-compiler:${Versions.hiltVersion}"
 
     // Compose
     const val composeUi = "androidx.compose.ui:ui:${Versions.composeVersion}"
-    const val composeMaterial3 = "androidx.compose.material3:material3:1.1.0-alpha08"
+    const val composeMaterial3 = "androidx.compose.material3:material3:1.3.2"
     const val composeUiToolingPreview = "androidx.compose.ui:ui-tooling-preview:${Versions.composeVersion}"
     const val composeNavigation = "androidx.navigation:navigation-compose:${Versions.navComposeVersion}"
     const val composeUiTooling = "androidx.compose.ui:ui-tooling:${Versions.composeVersion}"
     const val composeUiTestManifest = "androidx.compose.ui:ui-test-manifest:${Versions.composeVersion}"
-    const val composeLifecycleRuntime = "androidx.lifecycle:lifecycle-runtime-compose:2.6.0"
+    const val composeLifecycleRuntime = "androidx.lifecycle:lifecycle-runtime-compose:2.9.0"
 
     // Room
     const val roomKtx = "androidx.room:room-ktx:${Versions.roomVersion}"

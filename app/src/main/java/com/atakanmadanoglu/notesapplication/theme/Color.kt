@@ -1,70 +1,127 @@
 package com.atakanmadanoglu.notesapplication.theme
 
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-val md_theme_light_primary = Color(0xFF006874)
-val md_theme_light_onPrimary = Color(0xFFFFFFFF)
-val md_theme_light_primaryContainer = Color(0xFF283655) // button
-val md_theme_light_onPrimaryContainer = Color(0xFF001F24)
-val md_theme_light_secondary = Color(0xFF4A6267)
-val md_theme_light_onSecondary = Color(0xFFFFFFFF)
-val md_theme_light_secondaryContainer = Color(0xFFCDE7EC)
-val md_theme_light_onSecondaryContainer = Color(0xFF051F23)
-val md_theme_light_tertiary = Color(0xFF535E7D)
-val md_theme_light_onTertiary = Color(0xFFFFFFFF)
-val md_theme_light_tertiaryContainer = Color(0xFFDAE2FF)
-val md_theme_light_onTertiaryContainer = Color(0xFF0E1A37)
-val md_theme_light_error = Color(0xFFBA1A1A)
-val md_theme_light_errorContainer = Color(0xFFFFDAD6)
-val md_theme_light_onError = Color(0xFFFFFFFF)
-val md_theme_light_onErrorContainer = Color(0xFF410002)
-val md_theme_light_background = Color(0xFFFBFCFD)
-val md_theme_light_onBackground = Color(0xFF191C1D)
-val md_theme_light_surface = Color(0xFFFBFCFD)
-val md_theme_light_onSurface = Color(0xFF191C1D)
-val md_theme_light_surfaceVariant = Color.hsl(0f, 0f, 0.90f, 0.8f)
-val md_theme_light_onSurfaceVariant = Color(0xFF3F484A)
-val md_theme_light_outline = Color(0xFF6F797B)
-val md_theme_light_inverseOnSurface = Color(0xFFEFF1F1)
-val md_theme_light_inverseSurface = Color(0xFF2E3132)
-val md_theme_light_inversePrimary = Color(0xFF4FD8EC)
-val md_theme_light_shadow = Color(0xFF000000)
-val md_theme_light_surfaceTint = Color(0xFF006874)
-val md_theme_light_outlineVariant = Color(0xFFBFC8CA)
-val md_theme_light_scrim = Color(0xFF000000)
+// Primary Colors - Soft Blue/Purple tones
+val PrimaryLight = Color(0xFF6B73FF)
+val OnPrimaryLight = Color(0xFFFFFFFF)
+val PrimaryContainerLight = Color(0xFFE1E4FF)
+val OnPrimaryContainerLight = Color(0xFF0B0F5C)
 
-val md_theme_dark_primary = Color(0xFF4FD8EC)
-val md_theme_dark_onPrimary = Color(0xFF00363D)
-val md_theme_dark_primaryContainer = Color(0xFF4D648D)
-val md_theme_dark_onPrimaryContainer = Color(0xFF99F0FF)
-val md_theme_dark_secondary = Color(0xFFB1CBD0)
-val md_theme_dark_onSecondary = Color(0xFF1C3438)
-val md_theme_dark_secondaryContainer = Color(0xFF334B4F)
-val md_theme_dark_onSecondaryContainer = Color(0xFFCDE7EC)
-val md_theme_dark_tertiary = Color(0xFFBBC6EA)
-val md_theme_dark_onTertiary = Color(0xFF24304D)
-val md_theme_dark_tertiaryContainer = Color(0xFF3B4665)
-val md_theme_dark_onTertiaryContainer = Color(0xFFDAE2FF)
-val md_theme_dark_error = Color(0xFFFFB4AB)
-val md_theme_dark_errorContainer = Color(0xFF93000A)
-val md_theme_dark_onError = Color(0xFF690005)
-val md_theme_dark_onErrorContainer = Color(0xFFFFDAD6)
-val md_theme_dark_background = Color(0xFF1E1F26)
-val md_theme_dark_onBackground = Color(0xFFE1E3E3)
-val md_theme_dark_surface = Color(0xFF1E1F26)
-val md_theme_dark_onSurface = Color(0xFFE1E3E3)
-val md_theme_dark_surfaceVariant = Color.hsl(215.1f, 0.774f, 0.896f, 0.06f) //list items
-val md_theme_dark_onSurfaceVariant = Color(0xFFBFC8CA)
-val md_theme_dark_outline = Color(0xFF899294)
-val md_theme_dark_inverseOnSurface = Color(0xFF191C1D)
-val md_theme_dark_inverseSurface = Color(0xFFE1E3E3)
-val md_theme_dark_inversePrimary = Color(0xFF006874)
-val md_theme_dark_shadow = Color(0xFF000000)
-val md_theme_dark_surfaceTint = Color(0xFF4FD8EC)
-val md_theme_dark_outlineVariant = Color(0xFF3F484A)
-val md_theme_dark_scrim = Color(0xFF000000)
+val PrimaryDark = Color(0xFFB8C3FF)
+val OnPrimaryDark = Color(0xFF1C2678)
+val PrimaryContainerDark = Color(0xFF373E8C)
+val OnPrimaryContainerDark = Color(0xFFE1E4FF)
 
-val warningColor = Color(0xFFD2042D)
-val dismissColor = Color(0xFF6699CC)
-var light_dialog_color = Color(color = 0xFFE5E5E5)
-val dark_dialog_color = Color(color = 0xFF171717)
+// Secondary Colors - Warm accent
+val SecondaryLight = Color(0xFF5F5C7B)
+val OnSecondaryLight = Color(0xFFFFFFFF)
+val SecondaryContainerLight = Color(0xFFE4E0FF)
+val OnSecondaryContainerLight = Color(0xFF1B1736)
+
+val SecondaryDark = Color(0xFFC8C4E3)
+val OnSecondaryDark = Color(0xFF302D4C)
+val SecondaryContainerDark = Color(0xFF474463)
+val OnSecondaryContainerDark = Color(0xFFE4E0FF)
+
+// Tertiary Colors - Soft green for accents
+val TertiaryLight = Color(0xFF7D5260)
+val OnTertiaryLight = Color(0xFFFFFFFF)
+val TertiaryContainerLight = Color(0xFFFFD8E4)
+val OnTertiaryContainerLight = Color(0xFF31111D)
+
+val TertiaryDark = Color(0xFFE4BAC8)
+val OnTertiaryDark = Color(0xFF492532)
+val TertiaryContainerDark = Color(0xFF633B48)
+val OnTertiaryContainerDark = Color(0xFFFFD8E4)
+
+// Error Colors
+val ErrorLight = Color(0xFFBA1A1A)
+val OnErrorLight = Color(0xFFFFFFFF)
+val ErrorContainerLight = Color(0xFFFFDAD6)
+val OnErrorContainerLight = Color(0xFF410002)
+
+val ErrorDark = Color(0xFFFFB4AB)
+val OnErrorDark = Color(0xFF690005)
+val ErrorContainerDark = Color(0xFF93000A)
+val OnErrorContainerDark = Color(0xFFFFDAD6)
+
+// Background Colors
+val BackgroundLight = Color(0xFFFFFBFF)
+val OnBackgroundLight = Color(0xFF1C1B1F)
+val SurfaceLight = Color(0xFFFFFBFF)
+val OnSurfaceLight = Color(0xFF1C1B1F)
+
+val BackgroundDark = Color(0xFF121212)
+val OnBackgroundDark = Color(0xFFE6E1E5)
+val SurfaceDark = Color(0xFF1E1E1E)
+val OnSurfaceDark = Color(0xFFE6E1E5)
+
+// Surface variants for notes cards
+val SurfaceVariantLight = Color(0xFFF4F0F7)
+val OnSurfaceVariantLight = Color(0xFF46464F)
+val SurfaceVariantDark = Color(0xFF2A2A2A)
+val OnSurfaceVariantDark = Color(0xFFC7C5D0)
+
+// Note specific colors
+val NoteCardLight = Color(0xFFFFFEFA)
+val NoteCardDark = Color(0xFF252525)
+val NoteDividerLight = Color(0xFFE8E8E8)
+val NoteDividerDark = Color(0xFF404040)
+
+
+val LightColorScheme = lightColorScheme(
+    primary = PrimaryLight,
+    onPrimary = OnPrimaryLight,
+    primaryContainer = PrimaryContainerLight,
+    onPrimaryContainer = OnPrimaryContainerLight,
+    secondary = SecondaryLight,
+    onSecondary = OnSecondaryLight,
+    secondaryContainer = SecondaryContainerLight,
+    onSecondaryContainer = OnSecondaryContainerLight,
+    tertiary = TertiaryLight,
+    onTertiary = OnTertiaryLight,
+    tertiaryContainer = TertiaryContainerLight,
+    onTertiaryContainer = OnTertiaryContainerLight,
+    error = ErrorLight,
+    onError = OnErrorLight,
+    errorContainer = ErrorContainerLight,
+    onErrorContainer = OnErrorContainerLight,
+    background = BackgroundLight,
+    onBackground = OnBackgroundLight,
+    surface = SurfaceLight,
+    onSurface = OnSurfaceLight,
+    surfaceVariant = SurfaceVariantLight,
+    onSurfaceVariant = OnSurfaceVariantLight,
+    outline = Color(0xFF777680),
+    outlineVariant = Color(0xFFC7C5D0)
+)
+
+val DarkColorScheme = darkColorScheme(
+    primary = PrimaryDark,
+    onPrimary = OnPrimaryDark,
+    primaryContainer = PrimaryContainerDark,
+    onPrimaryContainer = OnPrimaryContainerDark,
+    secondary = SecondaryDark,
+    onSecondary = OnSecondaryDark,
+    secondaryContainer = SecondaryContainerDark,
+    onSecondaryContainer = OnSecondaryContainerDark,
+    tertiary = TertiaryDark,
+    onTertiary = OnTertiaryDark,
+    tertiaryContainer = TertiaryContainerDark,
+    onTertiaryContainer = OnTertiaryContainerDark,
+    error = ErrorDark,
+    onError = OnErrorDark,
+    errorContainer = ErrorContainerDark,
+    onErrorContainer = OnErrorContainerDark,
+    background = BackgroundDark,
+    onBackground = OnBackgroundDark,
+    surface = SurfaceDark,
+    onSurface = OnSurfaceDark,
+    surfaceVariant = SurfaceVariantDark,
+    onSurfaceVariant = OnSurfaceVariantDark,
+    outline = Color(0xFF918F99),
+    outlineVariant = Color(0xFF46464F)
+)
