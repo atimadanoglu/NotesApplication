@@ -1,0 +1,27 @@
+buildSrc/src/main/java/com/atakanmadanoglu/buildSrc/Configs.kt
+  s_fce12d2ee2c5ae::t_397b39c5421747 8
+  s_fce12d2ee2c5ae::t_baec95edf08fd0 5
+  s_fce12d2ee2c5ae::t_0c5808af636929 9
+  s_fce12d2ee2c5ae::t_c05e0cfb9cb947 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "b4de5a28f9670901ce8e399cc6a5e00a305cabb7",
+  "prompts": {},
+  "humans": {
+    "h_fe6f0aaf147bec": {
+      "author": "atakanmadanoglu <atakan.madanoglu@kariyer.net>"
+    }
+  },
+  "sessions": {
+    "s_fce12d2ee2c5ae": {
+      "agent_id": {
+        "tool": "github-copilot-jetbrains",
+        "id": "1785399805064",
+        "model": "unknown"
+      },
+      "human_author": "atakanmadanoglu <atakan.madanoglu@kariyer.net>"
+    }
+  }
+}
