@@ -1,0 +1,14 @@
+buildSrc/src/main/java/com/atakanmadanoglu/buildSrc/Configs.kt
+  h_64aae8d51613ff 5,7-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "b2166a6b6c50b28c89a3eb96a391912970f94fb6",
+  "prompts": {},
+  "humans": {
+    "h_64aae8d51613ff": {
+      "author": "atakanmadanoglu <ati64.98.35@gmail.com>"
+    }
+  }
+}
