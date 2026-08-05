@@ -1,0 +1,16 @@
+app/src/main/java/com/atakanmadanoglu/notesapplication/presentation/add_note/AddNoteScreen.kt
+  h_64aae8d51613ff 3,45-49,54
+app/src/main/java/com/atakanmadanoglu/notesapplication/presentation/notes_list/NoteListScreen.kt
+  h_64aae8d51613ff 82,88-90,93
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "adcdea7fa7ed9f6472ee030ae428a3f29ee1d0f6",
+  "prompts": {},
+  "humans": {
+    "h_64aae8d51613ff": {
+      "author": "atakanmadanoglu <ati64.98.35@gmail.com>"
+    }
+  }
+}
