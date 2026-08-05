@@ -1,0 +1,30 @@
+app/src/main/java/com/atakanmadanoglu/notesapplication/presentation/notes_list/NoteListScreen.kt
+  s_fce12d2ee2c5ae::t_eb8a4934dfd955 492
+  h_fe6f0aaf147bec 4
+buildSrc/src/main/java/com/atakanmadanoglu/buildSrc/Configs.kt
+  s_fce12d2ee2c5ae::t_0c5808af636929 9
+  s_fce12d2ee2c5ae::t_397b39c5421747 8
+  s_fce12d2ee2c5ae::t_baec95edf08fd0 5
+  s_fce12d2ee2c5ae::t_c05e0cfb9cb947 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "cdea208e16b9db3611e7f6357af4984bbfb2ff35",
+  "prompts": {},
+  "humans": {
+    "h_fe6f0aaf147bec": {
+      "author": "atakanmadanoglu <atakan.madanoglu@kariyer.net>"
+    }
+  },
+  "sessions": {
+    "s_fce12d2ee2c5ae": {
+      "agent_id": {
+        "tool": "github-copilot-jetbrains",
+        "id": "1785399805064",
+        "model": "unknown"
+      },
+      "human_author": null
+    }
+  }
+}
