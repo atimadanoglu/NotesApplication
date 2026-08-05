@@ -1,0 +1,26 @@
+app/build.gradle.kts
+  s_fce12d2ee2c5ae::t_4167db1ed29880 99,103
+  h_fe6f0aaf147bec 39,98
+  s_fce12d2ee2c5ae::t_7597e1602a0d0e 100-102
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "7656d44ba9a7da891ca866576fe762bb9719bf75",
+  "prompts": {},
+  "humans": {
+    "h_fe6f0aaf147bec": {
+      "author": "atakanmadanoglu <atakan.madanoglu@kariyer.net>"
+    }
+  },
+  "sessions": {
+    "s_fce12d2ee2c5ae": {
+      "agent_id": {
+        "tool": "github-copilot-jetbrains",
+        "id": "1785399805064",
+        "model": "unknown"
+      },
+      "human_author": null
+    }
+  }
+}
