@@ -1,0 +1,37 @@
+app/src/main/java/com/atakanmadanoglu/notesapplication/presentation/add_note/AddNoteScreen.kt
+  h_fe6f0aaf147bec 3,45-48
+  s_fce12d2ee2c5ae::t_12c2f6af80d320 54
+  h_fe6f0aaf147bec 49
+  h_64aae8d51613ff 3,45-49,54
+app/src/main/java/com/atakanmadanoglu/notesapplication/presentation/notes_list/NoteListScreen.kt
+  s_fce12d2ee2c5ae::t_d7e93406b41500 89
+  s_fce12d2ee2c5ae::t_5a371868678d6e 88
+  s_fce12d2ee2c5ae::t_a0681b7701c153 93
+  s_fce12d2ee2c5ae::t_99b96a08a83787 90
+  h_fe6f0aaf147bec 82
+  h_64aae8d51613ff 82,88-90,93
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "b67bc70af6453b156ee93e9880ba7989261cec98",
+  "prompts": {},
+  "humans": {
+    "h_64aae8d51613ff": {
+      "author": "atakanmadanoglu <ati64.98.35@gmail.com>"
+    },
+    "h_fe6f0aaf147bec": {
+      "author": "atakanmadanoglu <atakan.madanoglu@kariyer.net>"
+    }
+  },
+  "sessions": {
+    "s_fce12d2ee2c5ae": {
+      "agent_id": {
+        "tool": "github-copilot-jetbrains",
+        "id": "1785399805064",
+        "model": "unknown"
+      },
+      "human_author": "atakanmadanoglu <atakan.madanoglu@kariyer.net>"
+    }
+  }
+}
