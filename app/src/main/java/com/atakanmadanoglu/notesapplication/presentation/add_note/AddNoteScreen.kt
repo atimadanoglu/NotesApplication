@@ -1,5 +1,6 @@
 package com.atakanmadanoglu.notesapplication.presentation.add_note
 
+import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,12 +42,16 @@ fun AddNoteRoute(
 ) {
     val addNoteState by viewModel.state.collectAsStateWithLifecycle()
 
+    BackHandler {
+        viewModel.addNote()
+        navController.navigateUp()
+    }
+
     AddNoteScreen(
         addNoteState = addNoteState,
         onAction = { action ->
             when (action) {
-                AddNoteAction.OnBackClicked -> navController.navigateUp()
-                AddNoteAction.OnDoneClicked -> {
+                AddNoteAction.OnBackClicked, AddNoteAction.OnDoneClicked -> {
                     viewModel.addNote()
                     navController.navigateUp()
                 }
