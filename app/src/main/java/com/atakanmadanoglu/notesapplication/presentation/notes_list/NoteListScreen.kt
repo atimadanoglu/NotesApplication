@@ -79,27 +79,18 @@ internal fun NoteListRoute(
     viewModel: NoteListScreenViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
+    val notes = viewModel.getNotes()
 
     LaunchedEffect(key1 = Unit) {
         viewModel.getAllNotes()
     }
 
-    val showCheckbox by remember(uiState.operationType) {
-        derivedStateOf {
-            uiState.operationType == NotesListUiOperation.SelectNotes
-        }
-    }
-
-    val isAllSelected by remember(uiState.selectedNotesCount) {
-        derivedStateOf { uiState.selectedNotesCount == uiState.totalNotesCount }
-    }
-
-    val isDeleteButtonEnabled by remember(uiState.selectedNotesCount) {
-        derivedStateOf { uiState.selectedNotesCount != 0 }
-    }
+    val showCheckbox = uiState.operationType == NotesListUiOperation.SelectNotes
+    val isAllSelected = uiState.selectedNotesCount == uiState.totalNotesCount
+    val isDeleteButtonEnabled = uiState.selectedNotesCount != 0
 
     NoteListScreen(
-        notes = viewModel.getNotes(),
+        notes = notes,
         uiState = uiState,
         showCheckbox = showCheckbox,
         isAllSelected = isAllSelected,
