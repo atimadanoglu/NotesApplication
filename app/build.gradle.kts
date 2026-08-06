@@ -36,6 +36,7 @@ import com.atakanmadanoglu.buildSrc.Dependencies.roomCompiler
 import com.atakanmadanoglu.buildSrc.Dependencies.roomKtx
 import com.atakanmadanoglu.buildSrc.Dependencies.roomRuntime
 import com.atakanmadanoglu.buildSrc.Dependencies.truth
+import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
 
 plugins {
     id("com.android.application")
@@ -93,6 +94,12 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+
+    composeCompiler {
+        featureFlags.add(
+            ComposeFeatureFlag.StrongSkipping
+        )
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.15"
